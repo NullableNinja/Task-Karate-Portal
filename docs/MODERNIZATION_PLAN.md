@@ -34,7 +34,7 @@ The portal uses a demo session only. Production authentication, authorization, s
 - [x] Add about and contact/trial pages with accessible forms and failure/success states.
 - [x] Restore the historical About content, instructor credentials, What We Teach copy, and exact TASK dojo code.
 
-### Phase 3 — portal foundation and community rebuild
+### Phase 3 — portal foundation, check-in, and community rebuild
 
 - [x] Add login/demo-login boundary and an explicit demo-data notice.
 - [x] Add dashboard, training, progression, achievements, messages, events, and profile views.
@@ -42,6 +42,10 @@ The portal uses a demo session only. Production authentication, authorization, s
 - [x] Add a moderated-community foundation: feed, instructor notes, private-looking message threads, Gold Stars, achievements, rank progression, assignments, and journey history.
 - [x] Add a family/guardian consent workflow with explicit demo-only and attorney-review boundaries.
 - [x] Add a local staff workspace for demo moderation, staff notes, Gold Stars, synthetic profile edits, consent status, and snapshot export.
+- [x] Restore the historical searchable roster check-in rather than a generic email/PIN login.
+- [x] Restore student profile fields for belt size, uniform size, rank history context, and attendance.
+- [x] Integrate student belt/age-group data with the shared schedule JSON.
+- [x] Add a desk persistence adapter using IndexedDB fallback and an optional localhost SQLite service.
 - [x] Keep the social layer training-focused instead of making a generic social feed the product's only purpose.
 - [x] Add logout behavior and direct static route files for nested portal views.
 
@@ -67,9 +71,11 @@ The portal uses a demo session only. Production authentication, authorization, s
 
 - `data/site.json` owns school identity, contact details, social links, and the optional canonical origin.
 - `data/schedules.json` remains the source of truth for public class times.
-- `data/portal-demo.json` is synthetic portal presentation data only.
+- `data/portal-demo.json` is synthetic community/presentation data only.
+- `data/portal-students.json` is a seed roster for the desk adapter; it contains no PINs or passwords. The SQLite desk database is local and ignored by Git.
 - News JSON remains an archive/demo format until staff supplies verified editorial content.
 - `admin/index.html` is a local workflow prototype; it is not a production content-management system. It cannot publish, authorize, or protect real student data.
+- `server/desk_server.py` is a localhost deployment adapter for a supervised desk computer. It is not an internet-facing authentication or privacy boundary.
 
 ## Deployment and domain
 

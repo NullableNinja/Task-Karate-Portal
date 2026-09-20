@@ -91,9 +91,9 @@ The schedule JSON and school contact details are the best available operational 
 
 ## Proposed architecture
 
-Use a static public site plus a separate static portal shell in the same deployable project, sharing one token layer, site configuration, navigation vocabulary, and data contracts. This is the least risky modernization for the current no-backend environment: it preserves SEO and fast public pages, avoids a framework migration before there is an authenticated data boundary, and keeps route files deployable on ordinary static hosting.
+Use a static public site plus a separate portal shell in the same deployable project, sharing one token layer, site configuration, navigation vocabulary, and data contracts. Restore the SvelteKit roster/check-in interaction as the portal entry point. For the studio desk, pair the static shell with the optional localhost SQLite adapter in `server/desk_server.py`; for GitHub/static hosting, keep the IndexedDB fallback and do not imply that it is a secure multi-device backend.
 
-The portal is a demo frontend boundary today. A future backend can replace `data/portal-demo.json` and the demo session adapter without changing the information hierarchy. If authenticated SSR, instructor tools, or real-time messaging become requirements, migrate the portal boundary to SvelteKit or a server-rendered application at that point—not before.
+The portal is a demo frontend boundary today. A future backend can replace `data/portal-demo.json`, `data/portal-students.json`, and the demo session adapter without changing the information hierarchy. If authenticated SSR, instructor tools, or real-time messaging become requirements, migrate the portal boundary to SvelteKit or a server-rendered application at that point—not before.
 
 ## Current visual correction
 

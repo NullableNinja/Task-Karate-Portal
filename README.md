@@ -25,7 +25,8 @@ Key paths:
 - `/about.html` — school and instructor story
 - `/contact.html` — trial/contact flow with a safe demo state
 - `/admin/index.html` — local staff workspace demo for moderation, notes, Gold Stars, and consent status
-- `/portal/login.html` — demo login
+- `/checkin.html` — supervised desk check-in / searchable student roster
+- `/portal/login.html` — same check-in surface from the portal route
 - `/portal/index.html` — Student Hub home/community feed
 - `/portal/training.html`, `/portal/progress.html`, `/portal/messages.html`, `/portal/events.html`, `/portal/profile.html`, `/portal/waivers.html` — direct portal routes
 
@@ -35,7 +36,9 @@ Edit `data/site.json` for school identity and contact details. Leave `siteUrl` e
 
 Public class times live in `data/schedules.json`; the historical Kids and Teens/Adults PDF exports are in `files/schedules/`. The admin demo can download the current JSON, but it does not publish changes to a server. News is managed from `news/posts-index.json` and the associated post JSON files. Do not add capacity/countdown values unless the school has an authoritative live source.
 
-The Student Hub is intentionally a management/product prototype, not a secure back office. It restores the strongest SvelteKit-era ideas—community feed, instructor notes, private-looking threads, Gold Stars, achievements, assignments, rank progression, and a journey timeline—while keeping synthetic data clearly labeled. The staff workspace can edit local notes, recognition, moderation state, consent status, and the demo student record, then download a snapshot for review. A production admin page still needs authenticated server-side roles, persistence, audit history, moderation, and validation before it can manage real students, schedules, or news.
+The Student Hub restores the strongest SvelteKit-era ideas—searchable roster check-in, profile facts, belt/stripe progression, community feed, instructor notes, private-looking threads, Gold Stars, achievements, assignments, rank progression, and a journey timeline—while keeping the seed data clearly labeled. The integrated class list is generated from `data/schedules.json` and the selected student's belt/age-group fields.
+
+For a persistent desk deployment, run `python server/desk_server.py`. It uses a local SQLite file and exposes roster/check-in endpoints. Without that service, the check-in UI falls back to browser IndexedDB. See `docs/LOCAL_DESK_HOSTING.md`. Neither mode is a secure internet-facing student backend.
 
 The exact student rules and belt requirements are public and do not require portal sign-in.
 

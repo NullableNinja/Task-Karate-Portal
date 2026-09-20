@@ -8,11 +8,25 @@
   <link rel="stylesheet" href="../css/site.css">
   <link rel="stylesheet" href="../css/portal.css">
   <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="../css/admin-lock.css">
 </head>
 <body class="admin-page" data-root="../" data-page="admin">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <div id="site-header" data-shell-status>Loading navigation…</div>
-  <main id="main-content" class="admin-main">
+  <section class="admin-lock" data-admin-lock hidden aria-labelledby="admin-lock-title">
+    <div class="admin-lock__card">
+      <span class="admin-kicker">Task Karate / staff workspace</span>
+      <h1 id="admin-lock-title">Staff tools are protected.</h1>
+      <p>Enter the local staff PIN to manage the roster, notes, Gold Stars, and moderation controls.</p>
+      <form id="admin-lock-form" class="admin-form">
+        <label for="admin-pin">Staff PIN<input id="admin-pin" name="pin" type="password" inputmode="numeric" autocomplete="off" required></label>
+        <p class="admin-lock__error" data-admin-lock-error hidden>That PIN did not match.</p>
+        <button class="admin-button admin-button--blue" type="submit">Unlock staff tools</button>
+      </form>
+      <p class="admin-lock__note">This protects the local prototype only. Production authorization must be enforced by a real backend.</p>
+    </div>
+  </section>
+  <main id="main-content" class="admin-main" hidden>
     <div class="admin-container">
       <header class="admin-header">
         <div><span class="admin-kicker">Staff workspace / local prototype</span><h1>Run the student hub.</h1><p>Moderation, recognition, notes, consent status, and the next production decisions in one place.</p></div>

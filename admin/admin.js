@@ -1,4 +1,27 @@
 (async () => {
+  const main = document.querySelector(".admin-main");
+  const lock = document.querySelector("[data-admin-lock]");
+  const lockForm = document.querySelector("#admin-lock-form");
+  const lockError = document.querySelector("[data-admin-lock-error]");
+  const staffSessionKey = "task-karate-staff-session";
+  if (sessionStorage.getItem(staffSessionKey) !== "active") {
+    main.hidden = true;
+    lock.hidden = false;
+    await new Promise((resolve) => lockForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (event.currentTarget.elements.pin.value !== "8675309") {
+        lockError.hidden = false;
+        event.currentTarget.elements.pin.select();
+        return;
+      }
+      sessionStorage.setItem(staffSessionKey, "active");
+      lock.hidden = true;
+      main.hidden = false;
+      resolve();
+    }));
+  }
+  main.hidden = false;
+  lock.hidden = true;
   const keys = { note: "task-karate-admin-note", stars: "task-karate-portal-gold-stars", hidden: "task-karate-hidden-posts" };
   const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
   const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));

@@ -29,6 +29,12 @@ The service currently persists:
 
 The front-end still labels the service as a desk adapter, not a secure internet backend. Do not expose this server to the public network. Before handling sensitive student data, add authentication, encrypted backups, access logging, role checks, retention/deletion rules, and a school-approved privacy policy.
 
+## Desk workflow and local gates
+
+The check-in screen follows the historical SvelteKit roster flow: search for a student, select the student, optionally choose a class, and check in. Opening the private student portal is a separate action. It requires the student's local demo PIN and a fresh profile-access acknowledgment each time. Seed records use `1234` only as a frontend demonstration value; this is not suitable for production authentication.
+
+Staff management is available at `/admin/index.html`. The local prototype gate uses `8675309`, matching the historical instructor-demo PIN. This is only a convenience boundary for a supervised local prototype. It is not a secure staff login and must be replaced with server-side authentication and authorization before real student records are used.
+
 ## Managing roster records
 
 The local API supports:
@@ -40,4 +46,4 @@ The local API supports:
 - `GET /api/checkins?date=YYYY-MM-DD` — attendance for a date;
 - `POST /api/checkins` — record a class check-in.
 
-The next admin pass should put these operations behind a staff-only screen instead of exposing raw API calls. The current repository's `/admin/` page remains a browser demo and is not permission enforcement.
+The `/admin/` page provides the browser workflow for these operations, including adding records, editing belt/uniform sizes, and deactivating records. When the SQLite service is running, the page writes through to the desk API; otherwise changes remain in that browser's IndexedDB. The page's PIN is not permission enforcement.

@@ -1,0 +1,119 @@
+/* ============================================
+   PAPER-FU FOOTER STYLES
+   Version: 1.0.0 - TaskKarate v4
+   
+   ╔════════════════════════════════════════════╗
+   ║  SITE FOOTER STYLING                       ║
+   ╠════════════════════════════════════════════╣
+   ║  Simple, clean footer with copyright       ║
+   ║  on the left and social icons on right.    ║
+   ╚════════════════════════════════════════════╝
+   
+   📁 HTML: partials/footer.html
+   ============================================ */
+
+
+/* ============================================
+   FOOTER CONTAINER
+   ============================================ */
+
+.site-footer {
+  background: var(--pf-bg-secondary);
+  border-top: 1px solid var(--pf-border-subtle);
+  padding: var(--pf-space-xl) 0;
+  margin-top: var(--pf-space-4xl);
+}
+
+/* Two-column layout: left (copyright), right (social) */
+.footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--pf-space-lg);
+}
+
+
+/* ============================================
+   COPYRIGHT TEXT
+   ============================================ */
+
+.footer-copyright {
+  font-size: var(--pf-font-size-sm);
+  color: var(--pf-text-secondary);
+}
+
+
+/* ============================================
+   SOCIAL ICONS LIST
+   ============================================ */
+
+.socials {
+  display: flex;
+  align-items: center;
+  gap: var(--pf-space-md);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.socials li {
+  margin: 0;
+  padding: 0;
+}
+
+.socials li::before {
+  display: none; /* Remove default list marker from core.css */
+}
+
+.socials a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 40px;
+  height: 40px;
+  
+  color: var(--pf-text-secondary);
+  background: var(--pf-surface-1);
+  border: 1px solid var(--pf-border-subtle);
+  border-radius: var(--pf-radius-md);
+  
+  transition: 
+    color var(--pf-transition-fast),
+    background var(--pf-transition-fast),
+    transform var(--pf-transition-fast);
+}
+
+.socials a:hover {
+  color: var(--pf-text-inverse);
+  background: var(--pf-accent-primary);
+  transform: translateY(-2px);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+
+/* ============================================
+   RESPONSIVE: MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .footer-row {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .socials {
+    justify-content: center;
+  }
+}
+
+
+/* ============================================
+   END OF FOOTER STYLES
+   ============================================ */

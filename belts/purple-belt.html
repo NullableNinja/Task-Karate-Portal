@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="belt-purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purple Belt Testing Requirements | Task Karate School La Crosse, WI</title>
+    <meta name="description" content="Purple belt testing requirements for Task Karate School. Progress to advanced belt levels with refined techniques and complex kata sequences.">
+    <link rel="canonical" href="https://taskkarate.com/belts/purple-belt.html">
+    
+    <!-- 
+    Belt-Specific Theming Instructions:
+    To change belt colors, update the class on the <html> tag above:
+    - class="belt-white"  -> Light gray accents
+    - class="belt-gold"   -> Gold accents (#fbbf24)
+    - class="belt-orange" -> Orange accents (#f97316)
+    - class="belt-green"  -> Green accents (#10b981)
+    - class="belt-blue"   -> Blue accents (#3b82f6)
+    - class="belt-purple" -> Purple accents (#a855f7)
+    - class="belt-brown"  -> Brown accents (#92400e)
+    - class="belt-red"    -> Red accents (#ef4444)
+    - class="belt-black"  -> Gray accents (#9ca3af)
+    -->
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Belt Color Theme Variables */
+        .belt-white {
+            --belt-color: #e5e7eb;
+            --belt-color-rgb: 229, 231, 235;
+        }
+        
+        .belt-gold {
+            --belt-color: #fbbf24;
+            --belt-color-rgb: 251, 191, 36;
+        }
+        
+        .belt-orange {
+            --belt-color: #f97316;
+            --belt-color-rgb: 249, 115, 22;
+        }
+        
+        .belt-green {
+            --belt-color: #10b981;
+            --belt-color-rgb: 16, 185, 129;
+        }
+        
+        .belt-blue {
+            --belt-color: #3b82f6;
+            --belt-color-rgb: 59, 130, 246;
+        }
+        
+        .belt-purple {
+            --belt-color: #a855f7;
+            --belt-color-rgb: 168, 85, 247;
+        }
+        
+        .belt-brown {
+            --belt-color: #92400e;
+            --belt-color-rgb: 146, 64, 14;
+        }
+        
+        .belt-red {
+            --belt-color: #ef4444;
+            --belt-color-rgb: 239, 68, 68;
+        }
+        
+        .belt-black {
+            --belt-color: #9ca3af;
+            --belt-color-rgb: 156, 163, 175;
+        }
+        
+        /* Screen Styles - Match site aesthetic */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(26, 26, 46, 0.9);
+            border: 2px solid rgba(var(--belt-color-rgb), 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid rgba(var(--belt-color-rgb), 0.4);
+        }
+        
+        .logo {
+            width: 100px;
+            margin-bottom: 0.75rem;
+            filter: drop-shadow(0 2px 6px rgba(var(--belt-color-rgb), 0.4));
+        }
+        
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--belt-color);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(var(--belt-color-rgb), 0.5);
+            margin: 0;
+        }
+        
+        .section {
+            margin-bottom: 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .section-header {
+            font-family: 'Bebas Neue', sans-serif;
+            background: linear-gradient(135deg, rgba(var(--belt-color-rgb), 0.2), rgba(var(--belt-color-rgb), 0.1));
+            border-left: 4px solid var(--belt-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 1.2rem;
+            font-weight: normal;
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            letter-spacing: 1.5px;
+        }
+        
+        .technique-item {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .technique-item::before {
+            content: "•";
+            position: absolute;
+            left: 0.5rem;
+            color: var(--belt-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .rules-box {
+            background: rgba(239, 68, 68, 0.08);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.25rem 0;
+        }
+        
+        .rules-box h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 0.75rem;
+            color: #ef4444;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        
+        .rule-item {
+            margin: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+        }
+        
+        .rule-item::before {
+            content: attr(data-number);
+            position: absolute;
+            left: 0.5rem;
+            color: #ef4444;
+            font-weight: 700;
+        }
+        
+        .schedule-box {
+            background: rgba(var(--belt-color-rgb), 0.08);
+            border: 2px solid rgba(var(--belt-color-rgb), 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.25rem 0;
+        }
+        
+        .schedule-box h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 0.75rem;
+            color: var(--belt-color);
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        
+        .schedule-box p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        strong {
+            color: var(--belt-color);
+            font-weight: 700;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* Print Styles - Clean, Professional, Single Page */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            body {
+                background: white;
+                color: #000;
+                padding: 0;
+                font-size: 8pt;
+                line-height: 1.2;
+            }
+            
+            .container {
+                max-width: 100%;
+                background: white;
+                border: none;
+                border-radius: 0;
+                padding: 0.3in;
+                box-shadow: none;
+            }
+            
+            .header {
+                border-bottom: 1px solid #000;
+                margin-bottom: 0.08in;
+                padding-bottom: 0.05in;
+            }
+            
+            .logo {
+                width: 60px;
+                filter: none;
+                margin-bottom: 0.03in;
+            }
+            
+            h1 {
+                color: #000;
+                text-shadow: none;
+                font-size: 14pt;
+                margin: 0;
+            }
+            
+            .section {
+                background: none;
+                border: none;
+                padding: 0;
+                margin-bottom: 0.08in;
+                page-break-inside: avoid;
+            }
+            
+            .section-header {
+                background: #333;
+                color: white;
+                padding: 3pt 6pt;
+                border-radius: 2pt;
+                margin-bottom: 0.04in;
+                box-shadow: none;
+                font-size: 9pt;
+                border-left: none;
+            }
+            
+            .technique-item {
+                font-size: 7.5pt;
+                margin: 0.02in 0;
+                padding-left: 0.12in;
+                line-height: 1.2;
+                color: #000;
+            }
+            
+            .technique-item::before {
+                color: #000;
+                font-size: 9pt;
+                left: 0.03in;
+            }
+            
+            .rules-box {
+                background: #ffe6e6;
+                border: 1px solid #ef4444;
+                padding: 0.06in;
+                margin: 0.08in 0;
+            }
+            
+            .rules-box h3 {
+                color: #991b1b;
+                font-size: 9pt;
+                margin-bottom: 0.03in;
+            }
+            
+            .rule-item {
+                font-size: 7.5pt;
+                margin: 0.02in 0;
+                padding-left: 0.15in;
+                color: #000;
+            }
+            
+            .rule-item::before {
+                color: #991b1b;
+                left: 0.03in;
+            }
+            
+            .schedule-box {
+                background: #f5f5f5;
+                border: 1px solid #666;
+                padding: 0.06in;
+                margin: 0.08in 0;
+            }
+            
+            .schedule-box h3 {
+                color: #000;
+                font-size: 9pt;
+                margin-bottom: 0.03in;
+            }
+            
+            .schedule-box p {
+                color: #333;
+                font-size: 7.5pt;
+                line-height: 1.2;
+            }
+            
+            strong {
+                color: #000;
+            }
+            
+            @page {
+                margin: 0.35in;
+                size: letter;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-container" style="position: absolute; top: -40px; left: 0; background: #0f4c81; color: white; padding: 8px 16px; text-decoration: none; font-weight: 600; z-index: 100; border-radius: 0 0 4px 0;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to main content</a>
+    
+    <div id="main-container" class="container">
+        <div class="header">
+            <img src="../images/logo/Logo.png" alt="Task Karate Logo" class="logo">
+            <h1>Purple Belt Testing Sheet</h1>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Stances</div>
+            <div class="technique-item">Fighting Stance</div>
+            <div class="technique-item">Chun Bi</div>
+            <div class="technique-item">Front Stance</div>
+            <div class="technique-item">Back Stance</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Punching</div>
+            <div class="technique-item">Rear Hand Punch</div>
+            <div class="technique-item">Double Punch</div>
+            <div class="technique-item">Rear Hand Ridge Hand</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Kicking</div>
+            <div class="technique-item">Front Leg Snap Front Kick</div>
+            <div class="technique-item">Rear Leg Crescent Kick</div>
+            <div class="technique-item">Front Leg Round Kick</div>
+            <div class="technique-item">Front Leg Side Kick</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Combination Kicking</div>
+            <div class="technique-item">Double Round Kick (Scooting in)</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Self Defense (Emergency and Release)</div>
+            <div class="technique-item">Front Choke *Rear Choke (Two Hands) *Rear Forearm Choke</div>
+            <div class="technique-item">Double Lapel Grab</div>
+            <div class="technique-item">Same, Cross, and Two Hand Wrist Grabs (6)</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">One-Step Sparring</div>
+            <div class="technique-item">Front Kick Defense</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Traditional Form Movements</div>
+            <div class="technique-item">Double Knife Hand Block (Advancing)</div>
+            <div class="technique-item">Stepping Punch (Advancing)</div>
+            <div class="technique-item">Under Middle Block, Shift-Punch, Rising Block (Once)</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Form</div>
+            <div class="technique-item">Palgue 7</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">Kick-Punch Combination</div>
+            <div class="technique-item">Double Round Kick, Double Punch</div>
+        </div>
+        
+        <div class="rules-box">
+            <h3>Remember the Rules!</h3>
+            <div class="rule-item" data-number="1.">Don't use it the wrong way.</div>
+            <div class="rule-item" data-number="2.">Be respectful.</div>
+            <div class="rule-item" data-number="3.">Do your best!</div>
+        </div>
+        
+        <div class="schedule-box">
+            <h3>Projected Promotion Schedule</h3>
+            <p><strong>32 to 56 lessons</strong> and <strong>4 to 7 months</strong> of attendance, as well as an understanding of the techniques, are required for promotion!</p>
+        </div>
+        
+    </div>
+    
+</body>
+</html>

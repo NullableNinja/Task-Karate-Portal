@@ -1,0 +1,684 @@
+/* ============================================
+   SCHEDULE PAGE STYLES
+   Version: 1.0.0 - TaskKarate v4
+   
+   ╔════════════════════════════════════════════╗
+   ║  SCHEDULE PAGE STYLESHEET                  ║
+   ╠════════════════════════════════════════════╣
+   ║  Contains:                                 ║
+   ║  • Schedule selector dropdown              ║
+   ║  • Schedule table styles                   ║
+   ║  • Belt pip indicators                     ║
+   ║  • Collapsible info section                ║
+   ║  • Info panel cards                        ║
+   ║  • Responsive adjustments                  ║
+   ╚════════════════════════════════════════════╝
+   
+   📁 Depends on: paper-fu-core.css, paper-fu-theme-hi-yah.css
+   ============================================ */
+
+
+/* ═══════════════════════════════════════════════
+   TABLE OF CONTENTS
+   ═══════════════════════════════════════════════
+   1. Schedule Controls
+   2. Schedule Selector Dropdown
+   3. Collapsible Info Section
+   4. Info Panels
+   5. Schedule Tables
+   6. Belt Pip Indicators
+   7. Schedule Notes
+   8. Responsive Styles
+   ═══════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════
+   1. SCHEDULE CONTROLS
+   ───────────────────────────────────────────────
+   Container for the schedule selector and
+   download button.
+   ═══════════════════════════════════════════════ */
+
+.schedule-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pf-space-4);
+  align-items: flex-end;
+}
+
+.schedule-selector {
+  flex: 1 1 300px;
+  min-width: 200px;
+}
+
+
+/* ═══════════════════════════════════════════════
+   2. SCHEDULE SELECTOR DROPDOWN - Paper-Fu Style
+   ───────────────────────────────────────────────
+   Stacked paper effect with solid colors.
+   ═══════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════
+   PAPER-FU SELECT & DOWNLOAD - Card Style
+   ───────────────────────────────────────────────
+   Styled as paper cards with subtle layering.
+   ═══════════════════════════════════════════════ */
+
+/* Wrapper for stacked paper effect */
+.pf-select-wrapper {
+  position: relative;
+  display: block;
+}
+
+/* Stacked paper layer behind select */
+.pf-select-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--pf-surface-3, #343f4d);
+  border-radius: var(--pf-radius-md);
+  transform: translate(3px, 3px) rotate(0.3deg);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  z-index: 0;
+}
+
+.pf-select {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  padding-right: 3rem;
+  font-family: var(--pf-font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--pf-text-primary);
+  background: var(--pf-surface-1, #2a3441);
+  border: 2px solid var(--pf-surface-3, #343f4d);
+  border-radius: var(--pf-radius-md);
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  
+  /* Paper shadow */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  
+  transition: 
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  
+  /* Custom dropdown arrow */
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+}
+
+.pf-select:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  border-color: rgba(59, 130, 180, 0.5);
+}
+
+.pf-select:focus {
+  outline: none;
+  border-color: rgba(59, 130, 180, 0.6);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.25),
+    0 0 0 3px rgba(59, 130, 180, 0.15);
+}
+
+/* Option styles */
+.pf-select option {
+  background-color: var(--pf-surface-1, #2a3441);
+  color: var(--pf-text-primary);
+  padding: 0.75rem;
+  font-weight: 500;
+}
+
+
+/* Download Button - Paper card style */
+.pf-btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  
+  font-family: var(--pf-font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  
+  /* Muted paper card look */
+  background: var(--pf-surface-2, #1f2732);
+  color: var(--pf-text-primary);
+  
+  border: 2px solid var(--pf-surface-3, #343f4d);
+  border-left: 4px solid rgba(59, 130, 180, 0.7);
+  border-radius: var(--pf-radius-md);
+  
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  
+  /* Paper shadow */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  
+  transition: 
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* Stacked paper layer behind button */
+.pf-btn-download::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pf-surface-3, #343f4d);
+  border-radius: var(--pf-radius-md);
+  transform: translate(3px, 3px) rotate(0.3deg);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  z-index: -1;
+  transition: transform 0.2s ease;
+}
+
+.pf-btn-download:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 180, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.pf-btn-download:hover::before {
+  transform: translate(4px, 4px) rotate(0.5deg);
+}
+
+.pf-btn-download:active {
+  transform: translateY(-1px);
+}
+
+.pf-btn-download svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+
+/* Duration note styling */
+.schedule-duration-note {
+  background: rgba(15, 76, 129, 0.1);
+  border-left: 3px solid var(--pf-accent-primary, #0f4c81);
+  padding: var(--pf-space-3) var(--pf-space-4);
+  border-radius: 0 var(--pf-radius-sm) var(--pf-radius-sm) 0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   3. INFO PANELS (kept for potential future use)
+   ───────────────────────────────────────────────
+   Small informational cards styling.
+   ═══════════════════════════════════════════════ */
+
+/* Page-specific info panel tweaks if needed */
+
+
+/* ═══════════════════════════════════════════════
+   4. INFO PANELS
+   ───────────────────────────────────────────────
+   Small informational cards in a grid.
+   Main styling handled by paper-fu-origami.css
+   ═══════════════════════════════════════════════ */
+
+/* Page-specific info panel tweaks only */
+/* Base styling inherited from paper-fu-origami.css */
+
+
+/* ═══════════════════════════════════════════════
+   5. SCHEDULE TABLES
+   ───────────────────────────────────────────────
+   Responsive table layouts for class schedules.
+   Enhanced with origami depth and polish.
+   ═══════════════════════════════════════════════ */
+
+/* Wrapper for horizontal scrolling on mobile */
+.schedule-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 calc(var(--pf-space-4) * -1);
+  padding: 0 var(--pf-space-4);
+}
+
+/* Table base styles */
+.schedule-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  min-width: 600px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--pf-radius-lg);
+  overflow: hidden;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Header styles - bubble header effect */
+.schedule-table thead th {
+  font-family: var(--pf-font-heading);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, 
+    rgba(15, 76, 129, 0.8) 0%, 
+    rgba(15, 76, 129, 0.95) 100%);
+  padding: var(--pf-space-3) var(--pf-space-3);
+  text-align: center;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  position: relative;
+}
+
+/* First header cell (Belts) */
+.schedule-table thead th:first-child {
+  text-align: left;
+  padding-left: var(--pf-space-4);
+  border-radius: var(--pf-radius-md) 0 0 0;
+}
+
+/* Last header cell */
+.schedule-table thead th:last-child {
+  border-radius: 0 var(--pf-radius-md) 0 0;
+}
+
+/* Group header cell */
+.schedule-table thead th:nth-child(2) {
+  text-align: left;
+}
+
+/* Body cell styles - TALLER ROWS with breathing room */
+.schedule-table tbody td {
+  padding: 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--pf-text-primary);
+  vertical-align: middle;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+/* First column (Belts) */
+.schedule-table tbody td:first-child {
+  text-align: left;
+  padding-left: var(--pf-space-4);
+}
+
+/* Second column (Group name) */
+.schedule-table tbody td:nth-child(2) {
+  text-align: left;
+  font-weight: 600;
+  color: var(--pf-text-primary);
+}
+
+/* Row hover effect */
+.schedule-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Alternate row striping */
+.schedule-table tbody tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.schedule-table tbody tr:nth-child(even):hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Last row rounded corners */
+.schedule-table tbody tr:last-child td:first-child {
+  border-radius: 0 0 0 var(--pf-radius-md);
+}
+.schedule-table tbody tr:last-child td:last-child {
+  border-radius: 0 0 var(--pf-radius-md) 0;
+}
+
+/* Belt column (narrower) */
+.schedule-table .col-belts {
+  width: 100px;
+}
+
+
+/* ═══════════════════════════════════════════════
+   5b. TIME PILLS
+   ───────────────────────────────────────────────
+   Clickable time bubbles for schedule cells.
+   ═══════════════════════════════════════════════ */
+
+.time-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  
+  /* Muted, subtle blue - not screaming */
+  background: rgba(59, 130, 180, 0.5);
+  color: rgba(255, 255, 255, 0.95);
+  
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: pointer;
+  
+  border: 1px solid rgba(59, 130, 180, 0.3);
+  
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  
+  transition: 
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.time-pill:hover {
+  transform: translateY(-2px);
+  background: rgba(59, 130, 180, 0.7);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 1-hour class indicator - slightly more visible */
+.time-pill--hour {
+  background: rgba(34, 160, 84, 0.6);
+  border-color: rgba(34, 160, 84, 0.4);
+}
+
+.time-pill--hour:hover {
+  background: rgba(34, 160, 84, 0.8);
+}
+
+/* Empty cell styling */
+.schedule-table tbody td.empty-cell {
+  color: var(--pf-text-muted);
+  opacity: 0.4;
+}
+
+
+/* ═══════════════════════════════════════════════
+   6. BELT PIP INDICATORS
+   ───────────────────────────────────────────────
+   Smaller, solid belt rank indicators like v2.
+   Clean and simple appearance.
+   ═══════════════════════════════════════════════ */
+
+.belt-pip {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 4px;
+  border: 1.5px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  vertical-align: middle;
+}
+
+/* Belt colors - solid, clean */
+.belt-pip.belt-white { 
+  background: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+.belt-pip.belt-gold { 
+  background: #eab308;
+}
+.belt-pip.belt-orange { 
+  background: #f97316;
+}
+.belt-pip.belt-green { 
+  background: #22c55e;
+}
+.belt-pip.belt-purple { 
+  background: #a855f7;
+}
+.belt-pip.belt-blue { 
+  background: #3b82f6;
+}
+.belt-pip.belt-red { 
+  background: #ef4444;
+}
+.belt-pip.belt-brown { 
+  background: #92400e;
+}
+.belt-pip.belt-black { 
+  background: #171717;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+
+/* ═══════════════════════════════════════════════
+   7. SCHEDULE NOTES
+   ───────────────────────────────────────────────
+   Important notes and warnings below tables.
+   ═══════════════════════════════════════════════ */
+
+.schedule-note {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--pf-radius-md);
+  padding: var(--pf-space-4);
+}
+
+.schedule-note p {
+  margin: 0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   8. RESPONSIVE STYLES
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Stack controls vertically */
+  .schedule-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .schedule-selector {
+    flex: none;
+    width: 100%;
+  }
+  
+  /* Info panels stack on mobile */
+  .pf-grid--3 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Smaller table font */
+  .schedule-table {
+    font-size: 0.8rem;
+  }
+  
+  .schedule-table thead th,
+  .schedule-table tbody td {
+    padding: var(--pf-space-2) var(--pf-space-3);
+  }
+  
+  /* Smaller belt pips on mobile */
+  .belt-pip {
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+  }
+}
+
+
+/* ============================================
+   MODAL - Paper-Fu Style Class Details Popup
+   ============================================
+   Stacked paper layers with solid colors.
+   ============================================ */
+
+.pf-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 9999999;
+}
+
+.pf-modal.is-open {
+  display: flex;
+}
+
+/* Dark backdrop */
+.pf-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  animation: modalFade 0.25s ease-out forwards;
+}
+
+/* Stack container for paper layers */
+.pf-modal-stack {
+  position: relative;
+  max-width: 560px;
+  width: 100%;
+  animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Back paper layer */
+.pf-modal-layer--back {
+  position: absolute;
+  inset: 0;
+  background: var(--pf-surface-2, #1f2732);
+  border-radius: var(--pf-radius-xl, 16px);
+  transform: translate(8px, 8px) rotate(-1deg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Middle paper layer */
+.pf-modal-layer--mid {
+  position: absolute;
+  inset: 0;
+  background: var(--pf-surface-3, #343f4d);
+  border-radius: var(--pf-radius-xl, 16px);
+  transform: translate(4px, 4px) rotate(0.5deg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Main modal content - top layer */
+.pf-modal-content {
+  position: relative;
+  background: var(--pf-surface-1, #2a3441);
+  border-radius: var(--pf-radius-xl, 16px);
+  border: 3px solid var(--pf-surface-3, #343f4d);
+  padding: 2rem;
+  
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  
+  color: var(--pf-text-primary);
+  overflow: hidden;
+}
+
+/* Belt color bar at top */
+.pf-modal-belt-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--belt-blue, #3b82f6);
+  border-radius: 13px 13px 0 0;
+}
+
+/* Close button - Paper-Fu style */
+.pf-modal-close {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  width: 40px;
+  height: 40px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  background: var(--pf-surface-2, #1f2732);
+  border: 2px solid var(--pf-surface-3, #343f4d);
+  border-radius: var(--pf-radius-md, 8px);
+  
+  color: var(--pf-text-secondary);
+  cursor: pointer;
+  
+  transition: 
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.pf-modal-close:hover {
+  transform: scale(1.1) rotate(90deg);
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
+}
+
+/* Modal title */
+.pf-modal-title {
+  margin: 0.5rem 0 1rem;
+  padding-right: 3rem; /* Space for close button */
+  font-family: var(--pf-font-headline, 'Bebas Neue', sans-serif);
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  color: var(--pf-text-primary);
+}
+
+/* Modal body */
+.pf-modal-body {
+  color: var(--pf-text-secondary);
+  line-height: 1.6;
+}
+
+.pf-modal-body p {
+  margin: 0.5rem 0;
+}
+
+.pf-modal-body strong {
+  color: var(--pf-text-primary);
+}
+
+/* Animations */
+@keyframes modalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from {
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+
+/* ============================================
+   END OF SCHEDULE PAGE STYLES
+   ============================================ */

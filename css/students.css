@@ -1,0 +1,1021 @@
+/* ============================================
+   STUDENTS PAGE STYLES
+   Version: 2.0.0 - TaskKarate v4 Paper-Fu
+   
+   ╔════════════════════════════════════════════╗
+   ║  STUDENTS PAGE STYLESHEET                  ║
+   ╠════════════════════════════════════════════╣
+   ║  Contains:                                 ║
+   ║  • Hero layout with callout card           ║
+   ║  • Paper-Fu callout card                   ║
+   ║  • Dojo Code rules                         ║
+   ║  • Belt cards (Paper-Fu style)             ║
+   ║  • Journal-style FAQ                       ║
+   ║  • Belt Modal                              ║
+   ╚════════════════════════════════════════════╝
+   
+   📁 Depends on: paper-fu-core.css, paper-fu-theme-hi-yah.css
+   ============================================ */
+
+
+/* ═══════════════════════════════════════════════
+   TABLE OF CONTENTS
+   ═══════════════════════════════════════════════
+   1. Students Hero Layout
+   2. Paper-Fu Callout Card
+   3. Dojo Rules
+   4. Belt Grid & Cards
+   5. Journal FAQ
+   6. Belt Modal
+   7. Responsive Styles
+   ═══════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════
+   1. STUDENTS HERO LAYOUT
+   ───────────────────────────────────────────────
+   Two-column layout with header and callout.
+   ═══════════════════════════════════════════════ */
+
+.students-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pf-space-8);
+  align-items: start;
+}
+
+.students-hero__header {
+  /* Left column - standard content flow */
+  display: block;
+}
+
+.students-hero__callout {
+  /* Right column - contains callout card */
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-space-4);
+}
+
+.microcopy {
+  font-size: 0.875rem;
+  color: var(--pf-text-muted);
+  text-align: center;
+}
+
+
+/* ═══════════════════════════════════════════════
+   2. PAPER-FU CALLOUT CARD
+   ───────────────────────────────────────────────
+   Clean paper card with stacked layers.
+   No tape - just pure Paper-Fu aesthetic.
+   ═══════════════════════════════════════════════ */
+
+.pf-callout-card {
+  position: relative;
+  background: var(--pf-surface-2);
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-md);
+  padding: var(--pf-space-6);
+  
+  /* Slight rotation for organic feel */
+  transform: rotate(-0.5deg);
+  
+  /* Paper shadow */
+  box-shadow: 
+    4px 4px 0 var(--pf-surface-3),
+    0 4px 16px rgba(0, 0, 0, 0.15);
+  
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pf-callout-card:hover {
+  transform: rotate(-0.5deg) translateY(-4px);
+  box-shadow: 
+    4px 6px 0 var(--pf-surface-3),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.pf-callout-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-space-4);
+  text-align: center;
+}
+
+/* Eyebrow badge */
+.eyebrow-badge {
+  display: inline-block;
+  background: var(--pf-color-accent);
+  color: white;
+  padding: var(--pf-space-1) var(--pf-space-3);
+  border-radius: var(--pf-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--pf-space-2);
+}
+
+
+/* ═══════════════════════════════════════════════
+   3. DOJO RULES - ACCORDION CARDS
+   ───────────────────────────────────────────────
+   Paper-Fu styled expandable rule cards.
+   No more tacky buttons with arrows!
+   ═══════════════════════════════════════════════ */
+
+.dojo-rules-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: var(--pf-space-5);
+}
+
+/* Add extra space before bonus rule */
+.dojo-rule-card--bonus {
+  margin-top: 8px;
+}
+
+/* Individual Rule Card - Using <details> for native accordion */
+.dojo-rule-card {
+  position: relative;
+  background: var(--pf-surface-2);
+  border-radius: var(--pf-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--pf-border-color);
+  box-shadow: var(--pf-shadow-1, 0 2px 8px rgba(0, 0, 0, 0.15));
+  transition: box-shadow 0.2s ease;
+}
+
+.dojo-rule-card:hover {
+  box-shadow: var(--pf-shadow-2, 0 4px 16px rgba(0, 0, 0, 0.2));
+}
+
+/* Remove default details marker */
+.dojo-rule-card summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.dojo-rule-card summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Rule Card Header (summary element) */
+.dojo-rule-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--pf-space-4);
+  padding: var(--pf-space-4) var(--pf-space-5);
+  background: var(--pf-surface-2);
+  transition: background 0.2s ease;
+}
+
+.dojo-rule-card__header:hover {
+  background: var(--pf-surface-3);
+}
+
+/* Number Badge */
+.dojo-rule-card__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--pf-color-accent);
+  color: white;
+  font-family: var(--pf-font-heading);
+  font-size: 1.25rem;
+  border-radius: var(--pf-radius-sm);
+  flex-shrink: 0;
+  
+  /* Realistic paper depth */
+  box-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.25);
+  
+  transition: transform 0.2s ease;
+}
+
+.dojo-rule-card:hover .dojo-rule-card__badge {
+  transform: scale(1.05);
+}
+
+.dojo-rule-card__badge--star {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1a1a1a;
+}
+
+/* Rule Title */
+.dojo-rule-card__title {
+  flex: 1;
+  font-family: var(--pf-font-heading);
+  font-size: 1.125rem;
+  color: var(--pf-text-primary);
+  letter-spacing: 0.02em;
+}
+
+/* Chevron Icon */
+.dojo-rule-card__chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--pf-text-muted);
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+
+.dojo-rule-card[open] .dojo-rule-card__chevron {
+  transform: rotate(180deg);
+  color: var(--pf-color-accent);
+}
+
+/* Expanded Content Area */
+.dojo-rule-card__content {
+  padding: 24px 28px 28px;
+  margin-left: 0;
+  margin-top: 0;
+  background: rgba(0, 0, 0, 0.25);
+  border-top: 2px solid var(--pf-color-accent);
+  line-height: 1.7;
+}
+
+/* Intro paragraph - the hook */
+.dojo-rule-card__content > p:first-child {
+  margin: 0 0 20px 0;
+  padding: 16px 20px;
+  font-size: 1rem;
+  color: var(--pf-text-primary);
+  background: rgba(59, 130, 180, 0.12);
+  border-left: 4px solid var(--pf-color-accent);
+  border-radius: 0 var(--pf-radius-sm) var(--pf-radius-sm) 0;
+  line-height: 1.6;
+}
+
+.dojo-rule-card__content > p:first-child strong {
+  color: #fff;
+  font-size: 1.0625rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Rule List - Clean and Readable */
+.dojo-rule-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dojo-rule-list li {
+  position: relative;
+  padding: 12px 16px 12px 44px;
+  font-size: 0.9375rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.15s ease;
+}
+
+.dojo-rule-list li:first-child {
+  border-radius: var(--pf-radius-sm) var(--pf-radius-sm) 0 0;
+}
+
+.dojo-rule-list li:last-child {
+  border-radius: 0 0 var(--pf-radius-sm) var(--pf-radius-sm);
+  border-bottom: none;
+}
+
+.dojo-rule-list li:hover {
+  background: rgba(59, 130, 180, 0.08);
+}
+
+.dojo-rule-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pf-color-accent);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+/* Quote Block - Distinct Callout */
+.dojo-rule-quote {
+  position: relative;
+  margin: 0;
+  padding: 20px 24px 20px 60px;
+  font-style: italic;
+  font-size: 0.9375rem;
+  color: #cbd5e1;
+  background: linear-gradient(135deg, rgba(59, 130, 180, 0.15) 0%, rgba(59, 130, 180, 0.08) 100%);
+  border: 1px solid rgba(59, 130, 180, 0.25);
+  border-radius: var(--pf-radius-md);
+  line-height: 1.6;
+}
+
+.dojo-rule-quote::before {
+  content: '"';
+  position: absolute;
+  left: 18px;
+  top: 12px;
+  font-size: 2.5rem;
+  font-family: Georgia, serif;
+  color: var(--pf-color-accent);
+  line-height: 1;
+  opacity: 0.7;
+}
+
+/* Bonus Rule - Special golden styling */
+.dojo-rule-card--bonus {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.1) 0%,
+    rgba(251, 191, 36, 0.05) 100%
+  );
+  border-color: rgba(251, 191, 36, 0.3);
+  border-left: 4px solid #fbbf24;
+}
+
+.dojo-rule-card--bonus .dojo-rule-card__header:hover {
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.dojo-rule-card--bonus .dojo-rule-list li::before {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1a1a1a;
+}
+
+.dojo-rule-card--bonus .dojo-rule-quote {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(251, 191, 36, 0.08) 100%);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.dojo-rule-card--bonus .dojo-rule-quote::before {
+  color: #fbbf24;
+}
+
+/* Bonus rule intro paragraph */
+.dojo-rule-card--bonus .dojo-rule-card__content > p:first-child {
+  background: rgba(251, 191, 36, 0.12);
+  border-left-color: #fbbf24;
+}
+
+
+/* ═══════════════════════════════════════════════
+   4. BELT GRID & CARDS
+   ───────────────────────────────────────────────
+   Belt buttons with 3D layered effect.
+   ═══════════════════════════════════════════════ */
+
+.belt-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+
+/* Belt card with stacked paper effect */
+.belt-card {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  transition: transform 0.15s ease;
+}
+
+.belt-card:hover {
+  transform: translateY(-3px) translateX(-2px);
+}
+
+/* Back layer - dark paper shadow */
+.belt-card::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: -4px;
+  bottom: -4px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--pf-radius-md);
+  z-index: 0;
+}
+
+/* Front layer - the colored belt button */
+.belt-card__name {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 16px;
+  background: var(--belt-bg);
+  border-radius: var(--pf-radius-md);
+  border: none;
+  
+  font-family: var(--pf-font-heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--belt-text, white);
+  text-transform: uppercase;
+  
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.belt-card:hover .belt-card__name {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Belt color variants with gradients */
+.belt-card--white {
+  --belt-bg: linear-gradient(135deg, #f5f5f5, #d1d5db);
+  --belt-text: #1a1a1a;
+}
+
+/* White belt needs a visible border since it's so light */
+.belt-card--white .belt-card__name {
+  border: 2px solid rgba(60, 60, 60, 0.4);
+}
+
+.belt-card--gold {
+  --belt-bg: linear-gradient(135deg, #facc15, #fbbf24);
+  --belt-text: #1a1a1a;
+}
+
+.belt-card--orange {
+  --belt-bg: linear-gradient(135deg, #f97316, #fb923c);
+}
+
+.belt-card--green {
+  --belt-bg: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.belt-card--purple {
+  --belt-bg: linear-gradient(135deg, #a855f7, #8b5cf6);
+}
+
+.belt-card--blue {
+  --belt-bg: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.belt-card--red {
+  --belt-bg: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.belt-card--brown {
+  --belt-bg: linear-gradient(135deg, #92400e, #b45309);
+}
+
+.belt-card--black {
+  --belt-bg: linear-gradient(135deg, #1f2937, #111827);
+}
+
+/* ═══════════════════════════════════════════════
+   5. FAQ / STUDENT HANDBOOK
+   ───────────────────────────────────────────────
+   Paper-Fu styled handbook with proper layers.
+   ═══════════════════════════════════════════════ */
+
+.journal {
+  display: block;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Hide the old journal spine */
+.journal__spine {
+  display: none;
+}
+
+/* Hide page stack decoration */
+.journal__page-stack {
+  display: none;
+}
+
+/* Journal book with Paper-Fu stacked layers */
+.journal__book {
+  position: relative;
+  padding: 6px;
+}
+
+/* Back layer - dark paper shadow */
+.journal__book::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--pf-surface-3);
+  border-radius: var(--pf-radius-lg);
+  z-index: 0;
+}
+
+/* Main content area */
+.journal__pages {
+  position: relative;
+  z-index: 1;
+  background: var(--pf-surface-2);
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-lg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  min-height: 300px;
+  overflow: hidden;
+}
+
+/* Navigation buttons - positioned properly inside */
+.journal__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pf-surface-3);
+  border: 1px solid var(--pf-border-color);
+  border-radius: 50%;
+  color: var(--pf-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.journal__nav:hover:not(:disabled) {
+  background: var(--pf-color-accent);
+  color: white;
+  border-color: var(--pf-color-accent);
+}
+
+.journal__nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.journal__nav--prev {
+  left: 16px;
+}
+
+.journal__nav--next {
+  right: 16px;
+}
+
+/* Individual page */
+.journal__page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 64px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.journal__page--active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Page header */
+.journal__header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--pf-border-color);
+}
+
+.journal__tab {
+  display: inline-block;
+  padding: 3px 10px;
+  background: var(--pf-color-accent);
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+
+.journal__title {
+  font-family: var(--pf-font-heading);
+  font-size: 1.75rem;
+  color: var(--pf-text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.journal__subtitle {
+  font-size: 1rem;
+  color: var(--pf-text-muted);
+  margin: 4px 0 0;
+}
+
+.journal__question {
+  font-family: var(--pf-font-heading);
+  font-size: 1.375rem;
+  color: var(--pf-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Page content */
+.journal__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journal__text {
+  font-size: 1.0625rem;
+  color: var(--pf-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.journal__text strong {
+  color: var(--pf-text-primary);
+  font-weight: 600;
+}
+
+.journal__note {
+  font-size: 1rem;
+  color: var(--pf-color-accent);
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.journal__doodle {
+  font-size: 2.5rem;
+  text-align: center;
+  opacity: 0.3;
+  margin-top: auto;
+}
+
+/* Page footer */
+.journal__footer {
+  padding-top: 16px;
+  border-top: 1px solid var(--pf-border-color);
+  text-align: right;
+  margin-top: auto;
+}
+
+.journal__page-num {
+  font-size: 0.8125rem;
+  color: var(--pf-text-muted);
+}
+
+
+/* ═══════════════════════════════════════════════
+   6. BELT MODAL
+   ───────────────────────────────────────────────
+   Paper-Fu styled modal for viewing testing
+   requirements in an iframe.
+   ═══════════════════════════════════════════════ */
+
+.belt-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pf-space-6);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.belt-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.belt-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.belt-modal__container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  z-index: 1;
+}
+
+/* Stacked paper effect */
+.belt-modal__stack {
+  position: relative;
+}
+
+.belt-modal__layer--bottom {
+  position: absolute;
+  inset: 6px -6px -6px 6px;
+  background: var(--pf-surface-3);
+  border-radius: var(--pf-radius-lg);
+}
+
+.belt-modal__layer--top {
+  position: relative;
+  background: var(--pf-surface-1);
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  
+  /* Entry animation */
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.belt-modal[aria-hidden="false"] .belt-modal__layer--top {
+  transform: translateY(0);
+}
+
+/* Colored belt bar at top */
+.belt-modal__bar {
+  height: 6px;
+  background: var(--belt-color, var(--pf-color-accent));
+}
+
+/* Modal header */
+.belt-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--pf-space-4) var(--pf-space-5);
+  border-bottom: 1px solid var(--pf-border-color);
+}
+
+.belt-modal__title {
+  font-family: var(--pf-font-heading);
+  font-size: 1.25rem;
+  color: var(--pf-text-primary);
+  margin: 0;
+}
+
+.belt-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-sm);
+  color: var(--pf-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.belt-modal__close:hover {
+  background: var(--pf-surface-2);
+  color: var(--pf-text-primary);
+  border-color: var(--pf-text-muted);
+}
+
+/* Modal content / iframe */
+.belt-modal__content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.belt-modal__frame {
+  width: 100%;
+  height: 70vh;
+  border: none;
+  background: white;
+}
+
+
+/* ═══════════════════════════════════════════════
+   7. DOWNLOAD BUTTON (EMPHASIZED)
+   ───────────────────────────────────────────────
+   Big, attention-grabbing download button for
+   the new student form.
+   ═══════════════════════════════════════════════ */
+
+.pf-btn-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pf-space-3);
+  padding: var(--pf-space-4) var(--pf-space-6);
+  background: var(--pf-color-accent);
+  color: white;
+  font-family: var(--pf-font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--pf-radius-md);
+  cursor: pointer;
+  
+  /* Strong Paper-Fu shadow */
+  box-shadow: 
+    4px 4px 0 #1a5fa3,
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  
+  transition: all 0.2s ease;
+  
+  /* Pulse animation for attention */
+  animation: download-pulse 2s ease-in-out infinite;
+}
+
+@keyframes download-pulse {
+  0%, 100% {
+    box-shadow: 
+      4px 4px 0 #1a5fa3,
+      0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 
+      4px 4px 0 #1a5fa3,
+      0 4px 20px rgba(59, 130, 180, 0.4);
+  }
+}
+
+.pf-btn-download:hover {
+  transform: translateY(-2px) translateX(-1px);
+  box-shadow: 
+    6px 6px 0 #1a5fa3,
+    0 8px 24px rgba(59, 130, 180, 0.4);
+  animation: none;
+}
+
+.pf-btn-download:active {
+  transform: translateY(0);
+  box-shadow: 
+    2px 2px 0 #1a5fa3,
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pf-btn-download svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   9. RESPONSIVE STYLES
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Hero stacks vertically */
+  .students-hero {
+    grid-template-columns: 1fr;
+    gap: var(--pf-space-6);
+  }
+  
+  /* Callout card straightens on mobile */
+  .pf-callout-card {
+    transform: none;
+  }
+  
+  /* Belt grid: 2 columns on mobile */
+  .belt-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .belt-card__name {
+    font-size: 0.75rem;
+    min-height: 40px;
+    padding: 10px 12px;
+  }
+  
+  /* Journal adjustments */
+  .journal__page {
+    padding: 24px 48px;
+  }
+  
+  .journal__nav--prev {
+    left: 8px;
+  }
+  
+  .journal__nav--next {
+    right: 8px;
+  }
+  
+  /* Belt modal on mobile */
+  .belt-modal {
+    padding: var(--pf-space-3);
+  }
+  
+  .belt-modal__frame {
+    height: 60vh;
+  }
+  
+  /* Journal adjustments */
+  .journal {
+    max-width: 100%;
+  }
+  
+  .journal__spine {
+    width: 12px;
+  }
+  
+  .journal__book {
+    min-height: 350px;
+  }
+  
+  .journal__pages {
+    min-height: 350px;
+  }
+  
+  .journal__page {
+    padding: var(--pf-space-4);
+  }
+  
+  .journal__title {
+    font-size: 1.75rem;
+  }
+  
+  .journal__text {
+    font-size: 1.125rem;
+  }
+  
+  .journal__nav {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .journal__nav--prev {
+    left: -18px;
+  }
+  
+  .journal__nav--next {
+    right: -18px;
+  }
+  
+  /* Dojo Rule Cards - Mobile Adjustments */
+  .dojo-rule-card__header {
+    padding: var(--pf-space-4);
+    gap: var(--pf-space-3);
+  }
+  
+  .dojo-rule-card__badge {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+  
+  .dojo-rule-card__title {
+    font-size: 1.125rem;
+  }
+  
+  .dojo-rule-card__content {
+    padding: 0 var(--pf-space-4) var(--pf-space-4);
+    padding-left: calc(44px + var(--pf-space-3) + var(--pf-space-4));
+  }
+  
+  .dojo-rule-card__chevron {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .dojo-rule-card__chevron svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Download button smaller */
+  .pf-btn-download {
+    padding: var(--pf-space-3) var(--pf-space-5);
+    font-size: 1rem;
+  }
+}
+
+
+/* ============================================
+   END OF STUDENTS PAGE STYLES
+   ============================================ */

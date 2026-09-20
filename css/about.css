@@ -1,0 +1,748 @@
+/* ============================================
+   ABOUT PAGE STYLES
+   Version: 1.0.0 - TaskKarate v4
+   
+   ╔════════════════════════════════════════════╗
+   ║  ABOUT PAGE STYLESHEET                     ║
+   ╠════════════════════════════════════════════╣
+   ║  Contains:                                 ║
+   ║  • Hero intro styles                       ║
+   ║  • Bio card with photo                     ║
+   ║  • Paperclip decoration                    ║
+   ║  • Ranks list                              ║
+   ║  • What We Teach grid                      ║
+   ╚════════════════════════════════════════════╝
+   
+   📁 Depends on: paper-fu-core.css, paper-fu-theme-hi-yah.css
+   ============================================ */
+
+
+/* ═══════════════════════════════════════════════
+   TABLE OF CONTENTS
+   ═══════════════════════════════════════════════
+   1. About Hero
+   2. Bio Card Layout
+   3. Bio Avatar & Paperclip
+   4. Bio Content
+   5. Ranks List
+   6. What We Teach Grid
+   7. Teach Cards
+   8. Responsive Styles
+   ═══════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════
+   1. ABOUT HERO
+   ───────────────────────────────────────────────
+   Hero introduction section.
+   ═══════════════════════════════════════════════ */
+
+.about-hero {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+
+/* ═══════════════════════════════════════════════
+   2. BIO CARD LAYOUT
+   ───────────────────────────────────────────────
+   Two-column grid with avatar and content.
+   ═══════════════════════════════════════════════ */
+
+.bio-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--pf-space-8);
+  align-items: start;
+}
+
+
+/* ═══════════════════════════════════════════════
+   3. BIO AVATAR & PAPERCLIP
+   ───────────────────────────────────────────────
+   Photo with realistic metal paperclip.
+   ═══════════════════════════════════════════════ */
+
+.bio-avatar {
+  position: relative;
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.bio-avatar__img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--pf-radius-md);
+  
+  /* Origami paper frame */
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  
+  /* Slight rotation for organic Paper-Fu feel */
+  transform: rotate(-2deg);
+  
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bio-avatar:hover .bio-avatar__img {
+  transform: rotate(-2deg) translateY(-4px);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 16px 48px rgba(0, 0, 0, 0.2);
+}
+
+/* Realistic Paperclip - positioned at top-right, clipping the photo */
+.bio-paperclip {
+  position: absolute;
+  top: -25px;
+  right: 15px;
+  width: 40px;
+  height: 80px;
+  transform: rotate(15deg);
+  z-index: 10;
+  
+  /* Metallic sheen effect */
+  filter: drop-shadow(2px 3px 4px rgba(0, 0, 0, 0.4));
+  
+  transition: transform 0.2s ease;
+}
+
+.bio-avatar:hover .bio-paperclip {
+  transform: rotate(15deg) scale(1.05);
+}
+
+
+/* ═══════════════════════════════════════════════
+   4. BIO CONTENT - DOSSIER STYLE
+   ───────────────────────────────────────────────
+   Text content next to avatar, formatted like a file.
+   ═══════════════════════════════════════════════ */
+
+.bio-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.bio-content .heading-3 {
+  margin-bottom: 4px;
+}
+
+.bio-content p {
+  margin-bottom: 12px;
+}
+
+.bio-content p:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Dossier field rows */
+.dossier-field {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dossier-field:last-child {
+  border-bottom: none;
+}
+
+.dossier-field__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pf-text-muted);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.dossier-field__value {
+  font-size: 0.9375rem;
+  color: var(--pf-text-primary);
+  line-height: 1.5;
+}
+
+.dossier-field__value strong {
+  color: var(--pf-color-accent);
+}
+
+/* Dossier section groups */
+.dossier-section {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-md);
+}
+
+.dossier-section__title {
+  font-family: var(--pf-font-heading);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--pf-color-accent);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--pf-color-accent);
+}
+
+/* Personal info highlight */
+.dossier-personal {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(59, 130, 180, 0.08);
+  border-left: 3px solid var(--pf-color-accent);
+  border-radius: 0 var(--pf-radius-sm) var(--pf-radius-sm) 0;
+  font-size: 0.875rem;
+  color: var(--pf-text-secondary);
+  line-height: 1.6;
+}
+
+
+/* ═══════════════════════════════════════════════
+   5. RANKS LIST
+   ───────────────────────────────────────────────
+   Credentials and ranks styling with origami depth.
+   ═══════════════════════════════════════════════ */
+
+.bio-ranks {
+  position: relative;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--pf-border-color);
+  border-left: 4px solid var(--pf-color-accent);
+  border-radius: 0 var(--pf-radius-md) var(--pf-radius-md) 0;
+  padding: 20px 24px;
+  
+  /* Paper shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bio-ranks h3 {
+  color: var(--pf-text-primary);
+  margin-bottom: 16px;
+}
+
+.ranks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ranks-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #e2e8f0;
+  font-size: 0.9375rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.ranks-list li:first-child {
+  border-radius: var(--pf-radius-sm) var(--pf-radius-sm) 0 0;
+}
+
+.ranks-list li:last-child {
+  border-radius: 0 0 var(--pf-radius-sm) var(--pf-radius-sm);
+  border-bottom: none;
+}
+
+.ranks-list li:hover {
+  background: rgba(59, 130, 180, 0.1);
+  transform: translateX(4px);
+}
+
+/* Bullet point - gradient badge */
+.ranks-list li::before {
+  content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--pf-color-accent);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   6. INSTRUCTOR TABS - FILE DRAWER STYLE
+   ───────────────────────────────────────────────
+   Tabbed navigation for switching between instructors.
+   ═══════════════════════════════════════════════ */
+
+.instructor-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 3px solid var(--pf-border-color);
+}
+
+.instructor-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 12px 20px 14px;
+  background: var(--pf-surface-3);
+  border: 1px solid var(--pf-border-color);
+  border-bottom: none;
+  border-radius: var(--pf-radius-md) var(--pf-radius-md) 0 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  /* File tab notch effect */
+  margin-bottom: -3px;
+}
+
+.instructor-tab:hover:not(.active) {
+  background: var(--pf-surface-2);
+  transform: translateY(-2px);
+}
+
+.instructor-tab.active {
+  background: var(--pf-surface-2);
+  border-color: var(--pf-color-accent);
+  border-bottom: 3px solid var(--pf-surface-2);
+  z-index: 2;
+}
+
+.instructor-tab.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--pf-color-accent);
+  border-radius: var(--pf-radius-md) var(--pf-radius-md) 0 0;
+}
+
+.instructor-tab__name {
+  font-family: var(--pf-font-heading);
+  font-size: 0.875rem;
+  color: var(--pf-text-primary);
+  letter-spacing: 0.02em;
+}
+
+.instructor-tab__role {
+  font-size: 0.7rem;
+  color: var(--pf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.instructor-tab.active .instructor-tab__name {
+  color: var(--pf-color-accent);
+}
+
+/* Instructor Panels */
+.instructor-panels {
+  background: var(--pf-surface-2);
+  border: 1px solid var(--pf-border-color);
+  border-top: none;
+  border-radius: 0 0 var(--pf-radius-md) var(--pf-radius-md);
+  padding: 32px;
+  min-height: 350px;
+}
+
+.instructor-panel {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.instructor-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Instructor role badge */
+.instructor-role {
+  display: inline-block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--pf-color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+
+/* ═══════════════════════════════════════════════
+   7. WHAT WE TEACH GRID
+   ───────────────────────────────────────────────
+   2x2 grid of training areas with proper spacing.
+   ═══════════════════════════════════════════════ */
+
+.teach-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  padding: 8px;
+}
+
+
+/* ═══════════════════════════════════════════════
+   8. TEACH CARDS
+   ───────────────────────────────────────────────
+   Individual training area cards with origami depth.
+   ═══════════════════════════════════════════════ */
+
+.teach-card {
+  position: relative;
+  background: var(--pf-surface-2);
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-md);
+  padding: 28px 24px;
+  
+  transition: 
+    border-color 0.2s ease, 
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease;
+}
+
+/* Paper-Fu back layer */
+.teach-card::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: -6px;
+  bottom: -6px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: var(--pf-radius-md);
+  z-index: -1;
+  transition: all 0.25s ease;
+}
+
+.teach-card:hover {
+  border-color: var(--pf-color-accent);
+  transform: translateY(-6px) translateX(-3px);
+}
+
+.teach-card:hover::before {
+  top: 10px;
+  left: 10px;
+}
+
+.teach-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--icon-gradient, linear-gradient(135deg, var(--pf-color-accent) 0%, #1a6db3 100%));
+  border-radius: var(--pf-radius-md);
+  color: white;
+  margin-bottom: 16px;
+  
+  /* Glossy icon */
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Unique colors for each card icon */
+.teach-card:nth-child(1) .teach-card__icon {
+  --icon-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.teach-card:nth-child(2) .teach-card__icon {
+  --icon-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.teach-card:nth-child(3) .teach-card__icon {
+  --icon-gradient: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.teach-card:nth-child(4) .teach-card__icon {
+  --icon-gradient: linear-gradient(135deg, #a855f7, #8b5cf6);
+}
+
+.teach-card:hover .teach-card__icon {
+  transform: scale(1.1) rotate(-3deg);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.teach-card__icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.teach-card__title {
+  font-family: var(--pf-font-heading);
+  font-size: 1.25rem;
+  letter-spacing: var(--pf-heading-tracking);
+  color: var(--pf-text-primary);
+  margin-bottom: var(--pf-space-2);
+}
+
+.teach-card__text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   10. RESPONSIVE STYLES
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Bio grid stacks vertically */
+  .bio-grid {
+    grid-template-columns: 1fr;
+    gap: var(--pf-space-6);
+  }
+  
+  /* Center avatar on mobile */
+  .bio-avatar {
+    width: 180px;
+    margin: 0 auto;
+  }
+  
+  .bio-avatar__img {
+    transform: none;
+  }
+  
+  /* Instructor tabs scroll horizontally */
+  .instructor-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 3px;
+  }
+  
+  .instructor-tab {
+    flex-shrink: 0;
+    padding: 10px 14px 12px;
+  }
+  
+  .instructor-tab__name {
+    font-size: 0.75rem;
+  }
+  
+  .instructor-panels {
+    padding: 20px;
+  }
+  
+  /* What We Teach: single column */
+  .teach-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════
+   9. TESTIMONIALS CAROUSEL
+   ───────────────────────────────────────────────
+   Rotating testimonials slider with navigation.
+   ═══════════════════════════════════════════════ */
+
+.testimonials-carousel {
+  position: relative;
+  overflow: hidden;
+  margin-top: var(--pf-space-2xl);
+  padding: var(--pf-space-xl) 0;
+}
+
+.testimonials-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Testimonial Card */
+.testimonial-card {
+  flex: 0 0 100%;
+  padding: 0 var(--pf-space-lg);
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.testimonial-card__stars {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: var(--pf-space-lg);
+}
+
+.testimonial-card__quote {
+  font-size: var(--pf-font-size-lg);
+  line-height: var(--pf-line-height-relaxed);
+  color: var(--pf-text-primary);
+  margin-bottom: var(--pf-space-xl);
+  font-style: italic;
+  position: relative;
+}
+
+.testimonial-card__quote::before {
+  content: '"';
+  font-size: 4rem;
+  font-family: Georgia, serif;
+  color: var(--pf-accent-primary);
+  opacity: 0.3;
+  position: absolute;
+  top: -20px;
+  left: -10px;
+}
+
+.testimonial-card__author {
+  margin-top: var(--pf-space-lg);
+}
+
+.testimonial-card__name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: var(--pf-font-size-xl);
+  letter-spacing: 0.05em;
+  color: var(--pf-text-primary);
+  margin-bottom: 4px;
+}
+
+.testimonial-card__role {
+  font-size: var(--pf-font-size-sm);
+  color: var(--pf-text-secondary);
+}
+
+/* Navigation Dots */
+.testimonials-dots {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: var(--pf-space-xl);
+}
+
+.testimonials-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--pf-border-medium);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.testimonials-dot.active {
+  background: var(--pf-accent-primary);
+  border-color: var(--pf-accent-primary);
+  transform: scale(1.2);
+}
+
+.testimonials-dot:hover:not(.active) {
+  border-color: var(--pf-accent-primary);
+  transform: scale(1.1);
+}
+
+/* Navigation Arrows */
+.testimonials-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.testimonials-arrow svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--pf-text-primary);
+}
+
+.testimonials-arrow:hover:not(:disabled) {
+  background: var(--pf-accent-primary);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.testimonials-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.testimonials-arrow--prev {
+  left: 0;
+}
+
+.testimonials-arrow--next {
+  right: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .testimonials-carousel {
+    margin-top: var(--pf-space-xl);
+    padding: var(--pf-space-lg) 0;
+  }
+  
+  .testimonial-card {
+    padding: 0 var(--pf-space-md);
+  }
+  
+  .testimonial-card__quote {
+    font-size: var(--pf-font-size-base);
+  }
+  
+  .testimonial-card__quote::before {
+    font-size: 3rem;
+    top: -15px;
+    left: -5px;
+  }
+  
+  .testimonials-arrow {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .testimonials-arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .testimonials-arrow--prev {
+    left: -8px;
+  }
+  
+  .testimonials-arrow--next {
+    right: -8px;
+  }
+}
+
+
+/* ============================================
+   END OF ABOUT PAGE STYLES
+   ============================================ */

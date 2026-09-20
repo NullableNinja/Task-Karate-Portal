@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- ============================================
+     TASK KARATE v4 - HOME PAGE
+     Version: 4.0.0
+     
+     ╔════════════════════════════════════════════╗
+     ║  BUILT WITH PAPER-FU METHODOLOGY           ║
+     ╠════════════════════════════════════════════╣
+     ║  A layered, tactile design system          ║
+     ║  inspired by scrapbooking and Paper Mario. ║
+     ╚════════════════════════════════════════════╝
+     
+     FILE STRUCTURE:
+     ───────────────────────────────────────────
+     css/
+       paper-fu-core.css      ← Structural foundation
+       paper-fu-theme-hi-yah.css ← Hi-Yah! colors/fonts
+       paper-fu-navigation.css ← Navigation styles
+       paper-fu-footer.css     ← Footer styles
+       index.css               ← This page's styles
+     
+     js/
+       partials.js       ← Loads nav/footer HTML
+       navigation.js     ← Hamburger menu toggle
+       scroll-progress.js ← Scroll progress bar
+       tabs.js           ← Program tab switching
+     
+     SECTIONS ON THIS PAGE:
+     ───────────────────────────────────────────
+     1. HERO - Big cover image
+     2. INTRO - Welcome message
+     3. PROGRAMS - Kids, Teens/Adults, Eskrima, Weapons
+     4. PHOTOS - Life on the mats gallery
+     5. CONTACT - Email, phone, address
+     6. MAP - Google Maps embed
+     ============================================ -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- SEO Meta Tags -->
+  <title>Task Karate School | Martial Arts for Kids, Teens & Adults in La Crosse, WI</title>
+  <meta name="description" content="Premier karate school in La Crosse, WI offering martial arts training for all ages. Build confidence, learn self-defense, and develop discipline. Family-friendly classes with experienced instructors.">
+  <meta name="keywords" content="karate La Crosse, martial arts Wisconsin, kids karate, teen karate, adult karate, self defense La Crosse, Task Karate">
+  <meta name="theme-color" content="#0f4c81">
+  <link rel="canonical" href="https://taskkarate.com/">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://taskkarate.com/">
+  <meta property="og:title" content="Task Karate School | Martial Arts in La Crosse, WI">
+  <meta property="og:description" content="Premier karate school in La Crosse, WI offering martial arts training for all ages. Build confidence, learn self-defense, and develop discipline.">
+  <meta property="og:image" content="https://taskkarate.com/images/hero/Hero-Index.jpg">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://taskkarate.com/">
+  <meta property="twitter:title" content="Task Karate School | Martial Arts in La Crosse, WI">
+  <meta property="twitter:description" content="Premier karate school in La Crosse, WI offering martial arts training for all ages. Build confidence, learn self-defense, and develop discipline.">
+  <meta property="twitter:image" content="https://taskkarate.com/images/hero/Hero-Index.jpg">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="images/logo/Logo.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Structured Data - LocalBusiness Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    "@id": "https://taskkarate.com",
+    "name": "Task Karate School",
+    "description": "Premier karate school in La Crosse, WI offering martial arts training for kids, teens, and adults. Family-friendly classes with experienced instructors.",
+    "url": "https://taskkarate.com",
+    "logo": "https://taskkarate.com/images/logo/Logo.png",
+    "image": "https://taskkarate.com/images/hero/Hero-Index.jpg",
+    "telephone": "+1-608-788-3126",
+    "email": "taskkarate@gmail.com",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "2433 Losey Blvd S",
+      "addressLocality": "La Crosse",
+      "addressRegion": "WI",
+      "postalCode": "54601",
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "43.7844",
+      "longitude": "-91.2382"
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"],
+        "opens": "17:00",
+        "closes": "20:30"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": "Saturday",
+        "opens": "09:00",
+        "closes": "12:00"
+      }
+    ],
+    "sameAs": [
+      "https://www.facebook.com/TaskKarate"
+    ],
+    "areaServed": {
+      "@type": "City",
+      "name": "La Crosse",
+      "@id": "https://en.wikipedia.org/wiki/La_Crosse,_Wisconsin"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Martial Arts Programs",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Kids Karate",
+            "description": "Martial arts classes for children ages 4-12"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Teen & Adult Karate",
+            "description": "Martial arts training for teens and adults"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Weapons Program",
+            "description": "Traditional martial arts weapons training"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Sparring Program",
+            "description": "Competitive sparring and tournament training"
+          }
+        }
+      ]
+    }
+  }
+  </script>
+  
+  <!-- ==========================================
+       CSS FILES - Load Order Matters!
+       ==========================================
+       1. Core framework (structure, variables)
+       2. Theme (colors, fonts)
+       3. Origami enhancements (depth, shadows)
+       4. Components (nav, footer)
+       5. Page-specific styles
+       ========================================== -->
+  <link rel="stylesheet" href="css/paper-fu-core.css">
+  <link rel="stylesheet" href="css/paper-fu-theme-hi-yah.css">
+  <link rel="stylesheet" href="css/paper-fu-origami.css">
+  <link rel="stylesheet" href="css/paper-fu-navigation.css">
+  <link rel="stylesheet" href="css/paper-fu-footer.css">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- ==========================================
+       GEOMETRIC BACKGROUND
+       ==========================================
+       Decorative animated gradient background.
+       Styled in paper-fu-theme-hi-yah.css
+       ========================================== -->
+  <div class="bg-geo" aria-hidden="true"></div>
+  
+  <!-- ==========================================
+       HEADER (Navigation Bar)
+       ==========================================
+       Loaded dynamically from partials/navigation.html
+       by js/partials.js
+       ========================================== -->
+  <div id="site-header"></div>
+  
+  <!-- ==========================================
+       SCROLL PROGRESS INDICATOR
+       ==========================================
+       Colored bar showing page scroll position.
+       Uses belt colors (white to black).
+       Controlled by js/scroll-progress.js
+       ========================================== -->
+  <div class="navbar-progress" id="scrollProgress"></div>
+  
+  
+  <!-- ==========================================
+       MAIN CONTENT AREA
+       ========================================== -->
+  <main id="main-content">
+    
+    
+    <!-- ============================================
+         SECTION 1: HERO
+         ============================================
+         Paper-Fu stacked hero with layered effect.
+         
+         TO CHANGE THE IMAGE:
+         Update the src="" in the <img> tag below.
+         ============================================ -->
+    <section id="hero">
+      <div class="container">
+        
+        <!-- Paper-Fu Hero Stack -->
+        <div class="pf-stack hero-stack">
+          <!-- Back paper layers (decorative) -->
+          <div class="pf-layer bottom hero-layer"></div>
+          <div class="pf-layer middle hero-layer"></div>
+          
+          <!-- Main hero image on top layer -->
+          <div class="pf-layer top hero-wrapper">
+            <img
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Crect fill='%230f172a' width='1200' height='800'/%3E%3C/svg%3E"
+              data-progressive="images/hero/Cover_Image.jpg"
+              alt="Task Karate students celebrating on the mats"
+              class="hero-image"
+              loading="eager"
+              decoding="async"
+            >
+          </div>
+        </div>
+        
+        <!-- Title as separate paper element (below the image) -->
+        <div class="hero-title-card pf-stack">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top">
+            <h1 class="hero-text">
+              <span class="hero-main">Task Karate School</span>
+              <span class="hero-divider">•</span>
+              <span class="hero-sub">La Crosse</span>
+            </h1>
+          </div>
+        </div>
+        
+      </div>
+    </section>
+    
+    
+    <!-- ============================================
+         SECTION 2: INTRO
+         ============================================
+         Welcome message with stacked paper effect.
+         
+         PAPER-FU STRUCTURE:
+         ┌─────────────────────────────────────────┐
+         │ .pf-stack                               │
+         │   .pf-layer.bottom ← Back paper (tilted)│
+         │   .pf-layer.top.pf-panel ← Front paper  │
+         │     ...content...                       │
+         └─────────────────────────────────────────┘
+         ============================================ -->
+    <section id="intro" class="pf-section">
+      <div class="container">
+        <div class="pf-stack">
+          <!-- Back paper layer (decorative) -->
+          <div class="pf-layer bottom"></div>
+          
+          <!-- Front paper layer (content) -->
+          <div class="pf-layer top pf-panel">
+            
+            <!-- Eyebrow text (small label above heading) -->
+            <span class="eyebrow">La Crosse • Friendly • Practical</span>
+            
+            <!-- Main heading -->
+            <h1 class="heading-1 mt-3">One Dojo. One Teacher. A Lifetime of Martial Arts.</h1>
+            
+            <!-- Description paragraph -->
+            <p class="mt-4">
+              At Task Karate School, you don't get lost in the crowd — you train directly with
+              <strong>Mr. Randy Thomson</strong>, a martial artist with over 30 years of experience.
+              With help from dedicated assistants, he personally guides every class in karate, sparring,
+              weapons, and Eskrima. Kids, teens, and adults alike build confidence, discipline,
+              and real-world skills in a positive, family-style dojo.
+            </p>
+            
+            <!-- Call-to-action buttons -->
+            <div class="flex gap-4 mt-5 flex-wrap">
+              <a class="btn" href="#programs">
+                <!-- Calendar icon -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                Explore Programs
+              </a>
+              <a class="btn btn-orange" href="#contact">
+                <!-- Gift icon -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                </svg>
+                Start Free Trial
+              </a>
+              <a class="btn btn-purple" href="#photos">
+                <!-- Camera icon -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                See the Vibes
+              </a>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- ============================================
+         SECTION 3: PROGRAMS
+         ============================================
+         Tabbed interface showing different programs:
+         - Kids Karate
+         - Teens & Adults
+         - IS3 Eskrima
+         - Weapons
+         
+         JavaScript (js/tabs.js) handles tab switching.
+         ============================================ -->
+    <section id="programs" class="pf-section">
+      <div class="container">
+        <div class="pf-stack" data-animate="fade-up">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top pf-panel">
+            
+            <span class="eyebrow">Programs</span>
+            <h2 class="heading-2">Something for every age and energy level</h2>
+            <p class="muted">Choose a program to learn more.</p>
+            
+            <!-- Programs Layout: Tabs on left, content on right -->
+            <div class="programs-layout mt-6">
+              
+              <!-- TAB BUTTONS -->
+              <div class="programs-tabs">
+                <div class="tabs-list" role="tablist" aria-label="Programs">
+                  
+                  <!-- Kids Tab (default active) -->
+                  <button 
+                    class="tab btn is-active"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="panel-kids"
+                    id="btn-kids"
+                  >Kids Karate</button>
+                  
+                  <!-- Teens & Adults Tab -->
+                  <button 
+                    class="tab btn btn-purple"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="panel-teens"
+                    id="btn-teens"
+                  >Teens &amp; Adults</button>
+                  
+                  <!-- Eskrima Tab -->
+                  <button 
+                    class="tab btn btn-orange"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="panel-eskrima"
+                    id="btn-eskrima"
+                  >IS3 • Eskrima</button>
+                  
+                  <!-- Weapons Tab -->
+                  <button 
+                    class="tab btn btn-red"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="panel-weapons"
+                    id="btn-weapons"
+                  >Weapons</button>
+                  
+                </div>
+              </div>
+              
+              <!-- TAB CONTENT PANELS -->
+              <div class="programs-content">
+                
+                <!-- Kids Panel (default visible) -->
+                <div class="tab-panel" id="panel-kids" role="tabpanel" aria-labelledby="btn-kids">
+                  <h3 class="program-title">Kids Karate</h3>
+                  <p class="program-desc">
+                    Ages 5–12. Classes blend fun drills with serious life skills—focus, listening,
+                    confidence, responsibility, and respect. Kids learn discipline through positive structure,
+                    develop coordination, and earn stripes and belts the traditional way: with effort,
+                    attitude, and consistency.
+                  </p>
+                  <div class="program-img-wrapper">
+                    <img 
+                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect fill='%230f4c81' width='600' height='400'/%3E%3C/svg%3E"
+                      data-progressive="images/programs/Kids_Program.png"
+                      alt="Kids Karate program"
+                      class="program-img"
+                      loading="lazy"
+                    >
+                  </div>
+                </div>
+                
+                <!-- Teens & Adults Panel (hidden by default) -->
+                <div class="tab-panel hidden" id="panel-teens" role="tabpanel" aria-labelledby="btn-teens">
+                  <h3 class="program-title">Teens &amp; Adults</h3>
+                  <p class="program-desc">
+                    A practical blend of striking, self-defense, pad work, conditioning, and controlled 
+                    partner drills. Teens and adults get a full-body workout, build confidence, reduce stress,
+                    and develop real-world skills without the ego or intensity of a full-contact school.
+                  </p>
+                  <div class="program-img-wrapper">
+                    <img 
+                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect fill='%23a855f7' width='600' height='400'/%3E%3C/svg%3E"
+                      data-progressive="images/programs/Teen_Adult_Program.png"
+                      alt="Teens and adults karate program"
+                      class="program-img"
+                      loading="lazy"
+                    >
+                  </div>
+                </div>
+                
+                <!-- Eskrima Panel (hidden by default) -->
+                <div class="tab-panel hidden" id="panel-eskrima" role="tabpanel" aria-labelledby="btn-eskrima">
+                  <h3 class="program-title">IS3 • Eskrima</h3>
+                  <p class="program-desc">
+                    Inayan System III (IS3) is a Filipino martial art rooted in the seven styles passed down 
+                    from Mangisursuro Mike Inay and refined by Suro Emanuel Hart. Students learn timing, 
+                    footwork, weapon handling, flow, and transitions between long, mid, and close range.
+                  </p>
+                  <div class="program-img-wrapper">
+                    <img 
+                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect fill='%23f97316' width='600' height='400'/%3E%3C/svg%3E"
+                      data-progressive="images/programs/IS3_Program.png"
+                      alt="IS3 Eskrima program"
+                      class="program-img"
+                      loading="lazy"
+                    >
+                  </div>
+                </div>
+                
+                <!-- Weapons Panel (hidden by default) -->
+                <div class="tab-panel hidden" id="panel-weapons" role="tabpanel" aria-labelledby="btn-weapons">
+                  <h3 class="program-title">Weapons</h3>
+                  <p class="program-desc">
+                    Structured practice with bo staff, nunchaku, escrima sticks, and traditional 
+                    training tools. Students build coordination, control, and distance awareness using safe
+                    padded or wooden trainers before progressing to more advanced techniques.
+                  </p>
+                  <div class="program-img-wrapper">
+                    <img 
+                      src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect fill='%23ef4444' width='600' height='400'/%3E%3C/svg%3E"
+                      data-progressive="images/programs/Weapons_Program.png"
+                      alt="Weapons training program"
+                      class="program-img"
+                      loading="lazy"
+                    >
+                  </div>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- ============================================
+         SECTION 4: PHOTOS
+         ============================================
+         Photo gallery showing life at the dojo.
+         
+         TO ADD MORE PHOTOS:
+         Copy a <figure class="photo-tile">...</figure>
+         block and update the src="" and text.
+         ============================================ -->
+    <section id="photos" class="pf-section">
+      <div class="container">
+        <div class="pf-stack" data-animate="fade-up">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top pf-panel">
+            
+            <span class="eyebrow">Photos</span>
+            <h2 class="heading-2">Life on the Mats</h2>
+            <p class="muted">
+              Smiles, sweat, high-fives, and bowing in—peek at a typical week at Task Karate.
+            </p>
+            
+            <!-- Photo Grid -->
+            <div class="photo-grid mt-6">
+              
+              <figure class="photo-tile">
+                <img
+                  src="https://placehold.co/600x400/1e3a5f/94a3b8?text=Belt+Promotions"
+                  alt="Big group celebrating on the mats"
+                  class="photo-img"
+                  loading="lazy"
+                >
+                <figcaption class="photo-caption">Belt promotions &amp; celebration days</figcaption>
+              </figure>
+              
+              <figure class="photo-tile">
+                <img
+                  src="https://placehold.co/600x400/1e3a5f/94a3b8?text=Kids+Classes"
+                  alt="Kids lined up in stance"
+                  class="photo-img"
+                  loading="lazy"
+                >
+                <figcaption class="photo-caption">Kids classes learning focus and basics</figcaption>
+              </figure>
+              
+              <figure class="photo-tile">
+                <img
+                  src="https://placehold.co/600x400/1e3a5f/94a3b8?text=Teens+%26+Adults"
+                  alt="Teens and adults drilling techniques"
+                  class="photo-img"
+                  loading="lazy"
+                >
+                <figcaption class="photo-caption">Teens &amp; adults working drills and pad work</figcaption>
+              </figure>
+              
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- ============================================
+         SECTION 5: CONTACT
+         ============================================
+         Contact information tiles.
+         ============================================ -->
+    <section id="contact" class="pf-section">
+      <div class="container">
+        <div class="pf-stack" data-animate="fade-up">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top pf-panel">
+            
+            <span class="eyebrow">Contact</span>
+            <h2 class="heading-2">Say Hello (We're Nice)</h2>
+            <p class="muted">
+              Got questions about classes, belts, or whether a black gi really makes you invisible at night?
+              <em>(Spoiler: kinda.)</em> Shoot us an email or give us a ring—we're fast, friendly, and only
+              shout "HI-YAH!" at the right times.
+            </p>
+            
+            <!-- Contact Tiles -->
+            <div class="contact-tiles mt-5">
+              
+              <!-- Email Tile -->
+              <a class="contact-tile email" href="mailto:taskkarate@gmail.com" aria-label="Send an email">
+                <div class="tile-icon">
+                  <svg viewBox="0 0 32 32" fill="none">
+                    <rect x="2" y="6" width="28" height="20" rx="2" fill="white" fill-opacity="0.15"/>
+                    <path d="M2 8.5L15.3 17.3a1.5 1.5 0 0 0 1.4 0L30 8.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="2" y="6" width="28" height="20" rx="2" stroke="white" stroke-width="2.5"/>
+                  </svg>
+                </div>
+                <div class="tile-text">
+                  <div class="tile-title">Drop us a line</div>
+                  <div class="tile-sub">taskkarate@gmail.com</div>
+                </div>
+              </a>
+              
+              <!-- Phone Tile -->
+              <a class="contact-tile phone" href="tel:+16087818275" aria-label="Call Task Karate">
+                <div class="tile-icon">
+                  <svg viewBox="0 0 32 32" fill="none">
+                    <path d="M6.5 3A1.5 1.5 0 0 0 5 4.5v5a1 1 0 0 0 .59.91l4 1.8a1 1 0 0 0 1.2-.28l2.5-3A12 12 0 0 1 19 14.5l-3 2.5a1 1 0 0 0-.28 1.2l1.8 4a1 1 0 0 0 .91.59h5A1.5 1.5 0 0 0 25 21.3C25 11 17 3 6.5 3Z" fill="white" fill-opacity="0.15"/>
+                    <path d="M6.5 3A1.5 1.5 0 0 0 5 4.5v5a1 1 0 0 0 .59.91l4 1.8a1 1 0 0 0 1.2-.28l2.5-3A12 12 0 0 1 19 14.5l-3 2.5a1 1 0 0 0-.28 1.2l1.8 4a1 1 0 0 0 .91.59h5A1.5 1.5 0 0 0 25 21.3C25 11 17 3 6.5 3Z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="tile-text">
+                  <div class="tile-title">Give us a ring</div>
+                  <div class="tile-sub">1-608-781-TASK (8275)</div>
+                </div>
+              </a>
+              
+              <!-- Location Tile -->
+              <a 
+                class="contact-tile location"
+                href="https://www.google.com/maps/place/1501+St+Andrew+St+Suite+212,+La+Crosse,+WI+54603/"
+                target="_blank" 
+                rel="noopener"
+                aria-label="Open in Google Maps"
+              >
+                <div class="tile-icon">
+                  <svg viewBox="0 0 32 32" fill="none">
+                    <path d="M16 3C11 3 7 7 7 12c0 6.5 9 17 9 17s9-10.5 9-17c0-5-4-9-9-9Z" fill="white" fill-opacity="0.15"/>
+                    <path d="M16 3C11 3 7 7 7 12c0 6.5 9 17 9 17s9-10.5 9-17c0-5-4-9-9-9Z" stroke="white" stroke-width="2.5"/>
+                    <circle cx="16" cy="12" r="4" stroke="white" stroke-width="2.5"/>
+                  </svg>
+                </div>
+                <div class="tile-text">
+                  <div class="tile-title">Visit the dojo</div>
+                  <div class="tile-sub">1501 St Andrew St Suite 212, La Crosse, WI 54603</div>
+                </div>
+              </a>
+              
+            </div>
+            
+            <p class="muted text-sm mt-4">
+              * Please don't actually try to be invisible.<br>
+              ** Disclaimer: Except for Mr. Bryant, sometimes he just shouts. A little eccentric for a ninja.
+            </p>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- ============================================
+         SECTION 6: MAP
+         ============================================
+         Embedded map showing dojo location.
+         ============================================ -->
+    <section id="map" class="pf-section">
+      <div class="container">
+        <div class="pf-stack" data-animate="fade-up">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top pf-panel">
+            
+            <span class="eyebrow">Visit</span>
+            <h2 class="heading-2">Find Us in La Crosse</h2>
+            <p class="muted">1501 St Andrew St Suite 212, La Crosse, WI 54603</p>
+            
+            <!-- Map Wrapper -->
+            <div class="map-wrapper mt-5">
+              <iframe
+                title="Task Karate Map"
+                width="100%"
+                height="380"
+                frameborder="0"
+                scrolling="no"
+                loading="lazy"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=-91.283%2C43.83%2C-91.20%2C43.89&layer=mapnik&marker=43.856%2C-91.230"
+              ></iframe>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+  </main>
+  
+  
+  <!-- ==========================================
+       FOOTER
+       ==========================================
+       Loaded dynamically from partials/footer.html
+       by js/partials.js
+       ========================================== -->
+  <div id="site-footer"></div>
+  
+  
+  <!-- ==========================================
+       BACK TO TOP BUTTON
+       ==========================================
+       Appears when scrolled down, scrolls to top.
+       Controlled by js/back-to-top.js
+       ========================================== -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 19V5M12 5l-7 7M12 5l7 7"/>
+    </svg>
+  </button>
+  
+  
+  <!-- ==========================================
+       FREE TRIAL POPUP MODAL
+       ==========================================
+       Displays on page load with 2-week free
+       trial offer. Hi-Yah! themed design.
+       Controlled by js/trial-popup.js
+       ========================================== -->
+  <div class="trial-popup" id="trial-popup" aria-hidden="true" role="dialog" aria-label="2-Week Free Trial Offer">
+    <div class="trial-popup__backdrop"></div>
+    <div class="trial-popup__container">
+      <div class="trial-popup__stack">
+        <div class="trial-popup__layer trial-popup__layer--bottom"></div>
+        <div class="trial-popup__layer trial-popup__layer--top">
+          <button class="trial-popup__close" id="trial-popup-close" aria-label="Close offer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <div class="trial-popup__content">
+            <div class="trial-popup__badge">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              <span>Free Trial</span>
+            </div>
+            
+            <h2 class="trial-popup__title">Train Free for 2 Weeks</h2>
+            <p class="trial-popup__subtitle">No payment info needed. Just pure karate.</p>
+            
+            <div class="trial-popup__features">
+              <div class="trial-popup__feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <div>
+                  <strong>Unlimited Classes</strong>
+                  <span>Train as much as you want</span>
+                </div>
+              </div>
+              
+              <div class="trial-popup__feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <div>
+                  <strong>All Programs</strong>
+                  <span>Kids, teens, and adults</span>
+                </div>
+              </div>
+              
+              <div class="trial-popup__feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <div>
+                  <strong>Zero Commitment</strong>
+                  <span>Cancel anytime, no questions</span>
+                </div>
+              </div>
+            </div>
+            
+            <a href="#contact" class="trial-popup__cta">
+              <span>Start Your Free Trial</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+            
+            <p class="trial-popup__note">New students only • Offer expires soon</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- ==========================================
+       FLOATING ACTION BUTTON MENU
+       ==========================================
+       Expandable menu with quick actions.
+       Controlled by js/fab-menu.js
+       ========================================== -->
+  <div class="fab-menu" id="fab-menu">
+    <!-- Main FAB Button -->
+    <button class="fab-menu__main" id="fab-main" aria-label="Quick actions menu" aria-expanded="false">
+      <svg class="fab-menu__icon fab-menu__icon--default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="12" cy="5" r="1"></circle>
+        <circle cx="12" cy="19" r="1"></circle>
+      </svg>
+      <svg class="fab-menu__icon fab-menu__icon--close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    
+    <!-- FAB Actions (hidden by default) -->
+    <div class="fab-menu__actions" id="fab-actions">
+      <!-- Contact -->
+      <button class="fab-menu__action" data-action="contact" aria-label="Contact us">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span class="fab-menu__label">Contact</span>
+      </button>
+      
+      <!-- Free Trial -->
+      <button class="fab-menu__action" data-action="trial" aria-label="Start free trial">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+        </svg>
+        <span class="fab-menu__label">Free Trial</span>
+      </button>
+      
+      <!-- Schedule -->
+      <a href="schedule.html" class="fab-menu__action" aria-label="View schedule">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span class="fab-menu__label">Schedule</span>
+      </a>
+      
+      <!-- Call -->
+      <a href="tel:+16087819520" class="fab-menu__action" aria-label="Call us">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        <span class="fab-menu__label">Call</span>
+      </a>
+    </div>
+  </div>
+  
+  
+  <!-- ==========================================
+       CONTACT FORM MODAL
+       ==========================================
+       Popup form for contacting the school.
+       Sends email to taskkarateschool@gmail.com
+       Controlled by js/contact-modal.js
+       ========================================== -->
+  <div class="contact-modal" id="contact-modal" aria-hidden="true" role="dialog" aria-label="Contact Form">
+    <div class="contact-modal__backdrop"></div>
+    <div class="contact-modal__container">
+      <div class="contact-modal__stack">
+        <div class="contact-modal__layer contact-modal__layer--bottom"></div>
+        <div class="contact-modal__layer contact-modal__layer--top">
+          <button class="contact-modal__close" id="contact-modal-close" aria-label="Close contact form">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <div class="contact-modal__content">
+            <h3 class="contact-modal__title">Get in Touch</h3>
+            <p class="contact-modal__subtitle">We'll get back to you within 24 hours</p>
+            
+            <form class="contact-modal__form" id="contact-form">
+              <div class="contact-modal__field">
+                <label for="contact-name">Your Name</label>
+                <input 
+                  type="text" 
+                  id="contact-name" 
+                  name="name" 
+                  placeholder="John Doe" 
+                  required
+                >
+              </div>
+              
+              <div class="contact-modal__field">
+                <label for="contact-email">Email Address</label>
+                <input 
+                  type="email" 
+                  id="contact-email" 
+                  name="email" 
+                  placeholder="john@example.com" 
+                  required
+                >
+              </div>
+              
+              <div class="contact-modal__field">
+                <label for="contact-message">Your Message</label>
+                <textarea 
+                  id="contact-message" 
+                  name="message" 
+                  placeholder="Tell us how we can help..." 
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+              
+              <button type="submit" class="contact-modal__submit">
+                <span>Send Message</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+              
+              <p class="contact-modal__status" id="contact-status"></p>
+            </form>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- ==========================================
+       JAVASCRIPT FILES
+       ==========================================
+       Load order:
+       1. partials.js - Loads nav and footer HTML
+       2. navigation.js - Hamburger menu
+       3. scroll-progress.js - Progress bar
+       4. scroll-animations.js - Scroll-triggered animations
+       5. hero-parallax.js - Hero parallax effect
+       6. progressive-images.js - Progressive image loading
+       7. page-transitions.js - Page navigation transitions
+       8. tabs.js - Program tabs
+       9. photo-lightbox.js - Photo gallery viewer
+       10. fab-menu.js - Floating action button menu
+       11. back-to-top.js - Back to top button
+       12. trial-popup.js - Free trial popup
+       ========================================== -->
+  <script src="js/partials.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/scroll-progress.js"></script>
+  <script src="js/scroll-animations.js"></script>
+  <script src="js/hero-parallax.js"></script>
+  <script src="js/progressive-images.js"></script>
+  <script src="js/page-transitions.js"></script>
+  <script src="js/tabs.js"></script>
+  <script src="js/photo-lightbox.js"></script>
+  <script src="js/fab-menu.js"></script>
+  <script src="js/back-to-top.js"></script>
+  <script src="js/trial-popup.js"></script>
+  
+</body>
+</html>

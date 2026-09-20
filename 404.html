@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- SEO Meta Tags -->
+  <title>Page Not Found | Task Karate School – La Crosse, WI</title>
+  <meta name="description" content="The page you're looking for doesn't exist. Return to Task Karate School homepage.">
+  <meta name="robots" content="noindex, follow">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="images/logo/Logo.png">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/paper-fu-core.css">
+  <link rel="stylesheet" href="css/paper-fu-theme-hi-yah.css">
+  <link rel="stylesheet" href="css/paper-fu-origami.css">
+  <link rel="stylesheet" href="css/paper-fu-navigation.css">
+  <link rel="stylesheet" href="css/paper-fu-footer.css">
+  <link rel="stylesheet" href="css/index.css">
+  
+  <style>
+    /* 404 Page Specific Styles */
+    .error-page {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      padding: var(--pf-space-8) 0;
+    }
+    
+    .error-stack {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .error-content {
+      text-align: center;
+      padding: var(--pf-space-8);
+    }
+    
+    .error-code {
+      font-size: clamp(5rem, 15vw, 10rem);
+      font-family: var(--pf-font-heading);
+      color: var(--pf-accent-primary);
+      line-height: 1;
+      margin-bottom: var(--pf-space-2);
+      text-shadow: 4px 4px 0 rgba(15, 76, 129, 0.2);
+    }
+    
+    .error-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-family: var(--pf-font-heading);
+      margin-bottom: var(--pf-space-3);
+      color: var(--pf-text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .error-message {
+      font-size: 1.125rem;
+      color: var(--pf-text-secondary);
+      line-height: 1.8;
+      max-width: 600px;
+      margin: 0 auto var(--pf-space-6);
+    }
+    
+    .error-actions {
+      display: flex;
+      gap: var(--pf-space-3);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: var(--pf-space-6);
+    }
+    
+    .error-search {
+      margin-top: var(--pf-space-6);
+      padding-top: var(--pf-space-6);
+      border-top: 1px solid var(--pf-border-color);
+    }
+    
+    .error-search p {
+      color: var(--pf-text-muted);
+      margin-bottom: var(--pf-space-3);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .quick-links {
+      list-style: none;
+      display: flex;
+      gap: var(--pf-space-4);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .quick-links a {
+      color: var(--pf-accent-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    
+    .quick-links a:hover {
+      color: var(--pf-accent-hover);
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+      .error-content {
+        padding: var(--pf-space-6) var(--pf-space-4);
+      }
+      
+      .error-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .quick-links {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Geometric Background -->
+  <div class="bg-geo" aria-hidden="true"></div>
+  
+  <!-- Header (Navigation) -->
+  <div id="site-header"></div>
+  
+  <!-- Scroll Progress Indicator -->
+  <div class="navbar-progress" id="scrollProgress"></div>
+  
+  <!-- Main Content -->
+  <main id="main-content" class="error-page">
+    <div class="container">
+      <div class="pf-stack error-stack">
+        <div class="pf-layer bottom"></div>
+        <div class="pf-layer middle"></div>
+        <div class="pf-layer top pf-panel">
+          <div class="error-content">
+            
+            <!-- Error Code -->
+            <div class="error-code" aria-label="Error 404">404</div>
+            
+            <!-- Title -->
+            <h1 class="error-title">Page Not Found</h1>
+            
+            <!-- Message -->
+            <p class="error-message">
+              Looks like this page took a wrong turn and got lost in the dojo!
+              The page you're looking for doesn't exist or has been moved.
+              No worries though—we'll help you get back on track.
+            </p>
+            
+            <!-- Action Buttons -->
+            <div class="error-actions">
+              <a href="index.html" class="btn btn-blue btn-lg">
+                <span>Return to Home</span>
+              </a>
+              <a href="schedule.html" class="btn btn-purple btn-lg">
+                <span>View Class Schedule</span>
+              </a>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="error-search">
+              <p>Looking for something specific?</p>
+              <ul class="quick-links">
+                <li><a href="about.html">About Our Instructors</a></li>
+                <li><a href="students.html">Student Resources</a></li>
+                <li><a href="belts/white-belt.html">Belt Requirements</a></li>
+                <li><a href="news.html">News &amp; Events</a></li>
+                <li><a href="index.html#contact">Contact Us</a></li>
+              </ul>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <div id="site-footer"></div>
+  
+  <!-- JavaScript -->
+  <script src="js/partials.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/scroll-progress.js"></script>
+  <script src="js/back-to-top.js"></script>
+  
+</body>
+</html>

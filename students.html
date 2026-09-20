@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<!-- ============================================
+     TASK KARATE - STUDENTS PAGE
+     Version: 4.0.0
+     
+     ╔════════════════════════════════════════════╗
+     ║  STUDENT RESOURCES                         ║
+     ╠════════════════════════════════════════════╣
+     ║  Contains:                                 ║
+     ║  • New student form download               ║
+     ║  • Dojo rules                              ║
+     ║  • Belt requirements grid                  ║
+     ║  • FAQ accordion                           ║
+     ║  • Address & contact info                  ║
+     ╚════════════════════════════════════════════╝
+     
+     📁 Styles: css/students.css
+     📁 Core: css/paper-fu-core.css
+     📁 Theme: css/paper-fu-theme-hi-yah.css
+     ============================================ -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Resources | Belt Requirements & Forms - Task Karate School</title>
+  <meta
+    name="description"
+    content="Essential resources for Task Karate students. Download new student forms, view belt testing requirements from white to black belt, learn dojo rules, and find answers to common questions."
+  />
+  <meta name="keywords" content="karate belt requirements, student forms, dojo rules, belt testing, karate FAQ, Task Karate resources">
+  <meta name="theme-color" content="#0f4c81">
+  <link rel="canonical" href="https://taskkarate.com/students.html">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://taskkarate.com/students.html">
+  <meta property="og:title" content="Student Resources | Task Karate School">
+  <meta property="og:description" content="Essential resources for Task Karate students. Belt testing requirements, forms, dojo rules, and FAQs.">
+  <meta property="og:image" content="https://taskkarate.com/images/hero/Hero-Index.jpg">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://taskkarate.com/students.html">
+  <meta property="twitter:title" content="Student Resources | Task Karate School">
+  <meta property="twitter:description" content="Essential resources for Task Karate students. Belt testing requirements, forms, dojo rules, and FAQs.">
+  <meta property="twitter:image" content="https://taskkarate.com/images/hero/Hero-Index.jpg">
+  
+  <!-- ═══════════════════════════════════════════
+       FAVICON
+       ═══════════════════════════════════════════ -->
+  <link rel="icon" href="images/logo/Logo.png" />
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- ═══════════════════════════════════════════
+       GOOGLE FONTS
+       ───────────────────────────────────────────
+       Bebas Neue - Headlines & display text
+       Inter     - Body text & UI elements
+       Caveat    - Handwritten accents
+       ═══════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;700&family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+  
+  <!-- ═══════════════════════════════════════════
+       STYLESHEETS
+       ───────────────────────────────────────────
+       Load order matters! Core → Theme → Components → Page
+       ═══════════════════════════════════════════ -->
+  <!-- Paper-Fu Core (structural foundation) -->
+  <link rel="stylesheet" href="css/paper-fu-core.css" />
+  
+  <!-- Hi-Yah! Theme (colors & fonts) -->
+  <link rel="stylesheet" href="css/paper-fu-theme-hi-yah.css" />
+  
+  <!-- Origami Enhancements (depth, shadows, polish) -->
+  <link rel="stylesheet" href="css/paper-fu-origami.css" />
+  
+  <!-- Component Styles -->
+  <link rel="stylesheet" href="css/paper-fu-navigation.css" />
+  <link rel="stylesheet" href="css/paper-fu-footer.css" />
+  
+  <!-- Page-Specific Styles -->
+  <link rel="stylesheet" href="css/students.css" />
+</head>
+
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Geometric Background -->
+  <div class="bg-geo" aria-hidden="true"></div>
+  
+  <!-- ═══════════════════════════════════════════
+       NAVIGATION
+       ───────────────────────────────────────────
+       Loaded dynamically from partials/navigation.html
+       via js/partials.js
+       ═══════════════════════════════════════════ -->
+  <div id="site-header"></div>
+  
+  
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════ -->
+  <main id="main-content">
+    
+    
+    <!-- ═══════════════════════════════════════════
+         SECTION: PAGE HEADER + NEW STUDENT FORM
+         ───────────────────────────────────────────
+         Hero section with new student form callout
+         ═══════════════════════════════════════════ -->
+    <section class="pf-section pf-section--students" id="students-header">
+      <div class="container">
+        <div class="pf-stack">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top pf-panel pf-card students-hero">
+            
+            <!-- Left: Header Content -->
+            <div class="students-hero__header">
+              <span class="eyebrow">Resources</span>
+              <h1 class="heading-1">Students</h1>
+              <p class="muted">
+                Quick downloads for testing requirements and a new student form.
+                If you're unsure where to start, ask—we're happy to help.
+              </p>
+            </div>
+            
+            <!-- Right: New Student Form Callout -->
+            <div class="students-hero__callout">
+              <div class="pf-callout-card">
+                <div class="pf-callout-card__content">
+                  <span class="eyebrow-badge">Start Here</span>
+                  <h3 class="heading-3">New Student Form</h3>
+                  <p class="muted">
+                    Print and bring to your first class, or email it ahead of time.
+                  </p>
+                  <a class="pf-btn-download" href="files/new-student-form.pdf" download>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download PDF
+                  </a>
+                </div>
+              </div>
+              <p class="microcopy">
+                <strong>Need help?</strong> Call the dojo and we'll walk you through the first visit.
+              </p>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- ═══════════════════════════════════════════
+         SECTION: DOJO RULES
+         ───────────────────────────────────────────
+         The three simple rules of TASK Karate
+         Inline accordion-style expansion (no modal)
+         ═══════════════════════════════════════════ -->
+    <section class="pf-section pf-section--students" id="rules">
+      <div class="container">
+        <div class="pf-stack">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top pf-panel pf-card">
+            
+            <span class="eyebrow">Dojo Code</span>
+            <h2 class="heading-2">Rules of TASK Karate</h2>
+            <p class="muted">The foundations of our dojo. Click to learn more.</p>
+            
+            <div class="dojo-rules-grid">
+              
+              <!-- Rule 1: Don't use it the wrong way -->
+              <details class="dojo-rule-card dojo-rule-card--accent">
+                <summary class="dojo-rule-card__header">
+                  <div class="dojo-rule-card__badge">1</div>
+                  <div class="dojo-rule-card__title">Don't use it the wrong way!</div>
+                  <div class="dojo-rule-card__chevron">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="dojo-rule-card__content">
+                  <p><strong>This is Rule #1 for a reason.</strong> Martial arts gives you power—the power to defend yourself and others. But with great power comes great responsibility!</p>
+                  <ul class="dojo-rule-list">
+                    <li>Never use karate to bully or intimidate</li>
+                    <li>Only use skills for self-defense as a last resort</li>
+                    <li>Protect those who cannot protect themselves</li>
+                    <li>Walk away from fights—real strength is self-control</li>
+                  </ul>
+                  <blockquote class="dojo-rule-quote">"The ultimate aim of karate lies not in victory or defeat, but in the perfection of character." — Gichin Funakoshi</blockquote>
+                </div>
+              </details>
+              
+              <!-- Rule 2: Be respectful -->
+              <details class="dojo-rule-card dojo-rule-card--accent">
+                <summary class="dojo-rule-card__header">
+                  <div class="dojo-rule-card__badge">2</div>
+                  <div class="dojo-rule-card__title">Be respectful!</div>
+                  <div class="dojo-rule-card__chevron">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="dojo-rule-card__content">
+                  <p><strong>Respect is the foundation of martial arts.</strong> We bow when entering and leaving the dojo. We address instructors properly. We treat our training partners with care.</p>
+                  <ul class="dojo-rule-list">
+                    <li>Listen when others are speaking</li>
+                    <li>Follow instructions the first time</li>
+                    <li>Take care of your uniform and equipment</li>
+                    <li>Encourage your fellow students</li>
+                    <li>Respect yourself—you're worth the effort!</li>
+                  </ul>
+                  <blockquote class="dojo-rule-quote">"Respect is earned, honor is given, and loyalty is demonstrated."</blockquote>
+                </div>
+              </details>
+              
+              <!-- Rule 3: Do your best -->
+              <details class="dojo-rule-card dojo-rule-card--accent">
+                <summary class="dojo-rule-card__header">
+                  <div class="dojo-rule-card__badge">3</div>
+                  <div class="dojo-rule-card__title">Do your best!</div>
+                  <div class="dojo-rule-card__chevron">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="dojo-rule-card__content">
+                  <p><strong>Your best is always good enough.</strong> We don't compare ourselves to others—only to who we were yesterday. Progress over perfection!</p>
+                  <ul class="dojo-rule-list">
+                    <li>Give 100% effort in every class</li>
+                    <li>Practice at home (even just 5 minutes helps!)</li>
+                    <li>Ask questions when you don't understand</li>
+                    <li>Get back up when you fall</li>
+                    <li>Celebrate small victories</li>
+                  </ul>
+                  <blockquote class="dojo-rule-quote">"A black belt is just a white belt who never gave up."</blockquote>
+                </div>
+              </details>
+              
+              <!-- Bonus: Have fun! -->
+              <details class="dojo-rule-card dojo-rule-card--bonus">
+                <summary class="dojo-rule-card__header">
+                  <div class="dojo-rule-card__badge dojo-rule-card__badge--star">★</div>
+                  <div class="dojo-rule-card__title">Have fun! 🎉</div>
+                  <div class="dojo-rule-card__chevron">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="dojo-rule-card__content">
+                  <p><strong>This is the secret sauce!</strong> If you're not having fun, you're doing it wrong. Karate should make you smile, laugh, and feel amazing!</p>
+                  <ul class="dojo-rule-list">
+                    <li>Make friends with your training partners</li>
+                    <li>Laugh when you mess up (everyone does!)</li>
+                    <li>Get excited about new techniques</li>
+                    <li>Play karate games and challenges</li>
+                    <li>Look forward to the next class</li>
+                  </ul>
+                  <blockquote class="dojo-rule-quote">"The more you sweat in training, the less you bleed in combat... but also, have a blast while you're sweating!" — TASK Philosophy</blockquote>
+                </div>
+              </details>
+              
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- ═══════════════════════════════════════════
+         SECTION: BELT REQUIREMENTS
+         ───────────────────────────────────────────
+         Grid of belt buttons linking to testing sheets
+         Uses anchor links instead of buttons for direct navigation
+         ═══════════════════════════════════════════ -->
+    <section class="pf-section pf-section--students" id="belts">
+      <div class="container">
+        <div class="pf-stack">
+          <div class="pf-layer bottom"></div>
+          <div class="pf-layer top pf-panel pf-card">
+            
+            <span class="eyebrow">Testing Requirements</span>
+            <h2 class="heading-2">Belt Ranks</h2>
+            <p class="muted">
+              Click on your belt below to view the testing requirements—level up 
+              your skills and earn your next rank!
+            </p>
+            
+            <!-- Belt Grid - Paper-Fu Belt Cards -->
+            <div class="belt-grid mt-6">
+              <button class="belt-card belt-card--white" data-belt="white" data-src="belts/white-belt.html">
+                <span class="belt-card__name">White Belt</span>
+              </button>
+              <button class="belt-card belt-card--gold" data-belt="gold" data-src="belts/gold-belt.html">
+                <span class="belt-card__name">Gold Belt</span>
+              </button>
+              <button class="belt-card belt-card--orange" data-belt="orange" data-src="belts/orange-belt.html">
+                <span class="belt-card__name">Orange Belt</span>
+              </button>
+              <button class="belt-card belt-card--green" data-belt="green" data-src="belts/green-belt.html">
+                <span class="belt-card__name">Green Belt</span>
+              </button>
+              <button class="belt-card belt-card--purple" data-belt="purple" data-src="belts/purple-belt.html">
+                <span class="belt-card__name">Purple Belt</span>
+              </button>
+              <button class="belt-card belt-card--blue" data-belt="blue" data-src="belts/blue-belt.html">
+                <span class="belt-card__name">Blue Belt</span>
+              </button>
+              <button class="belt-card belt-card--red" data-belt="red" data-src="belts/red-belt.html">
+                <span class="belt-card__name">Red Belt</span>
+              </button>
+              <button class="belt-card belt-card--brown" data-belt="brown" data-src="belts/brown-belt.html">
+                <span class="belt-card__name">Brown Belt</span>
+              </button>
+              <button class="belt-card belt-card--black" data-belt="black" data-src="belts/black-belt.html">
+                <span class="belt-card__name">Black Belt</span>
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- ═══════════════════════════════════════════
+         SECTION: FAQ - STUDENT HANDBOOK (Journal Style)
+         ───────────────────────────────────────────
+         Flip-through journal with handwritten feel
+         ═══════════════════════════════════════════ -->
+    <section class="pf-section pf-section--students" id="faq">
+      <div class="container">
+        
+        <div class="journal">
+          <!-- Journal Spine -->
+          <div class="journal__spine"></div>
+          
+          <!-- Journal Book -->
+          <div class="journal__book">
+            <!-- Stacked pages behind -->
+            <div class="journal__page-stack"></div>
+            
+            <!-- Page Navigation -->
+            <button class="journal__nav journal__nav--prev" aria-label="Previous page" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button class="journal__nav journal__nav--next" aria-label="Next page">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+            
+            <!-- Pages -->
+            <div class="journal__pages">
+              
+              <!-- Page 1: Welcome -->
+              <article class="journal__page journal__page--active" data-page="1">
+                <header class="journal__header">
+                  <span class="journal__tab">Handbook</span>
+                  <h2 class="journal__title">Student Handbook</h2>
+                  <p class="journal__subtitle">Everything you need to know</p>
+                </header>
+                <div class="journal__content">
+                  <p class="journal__text">
+                    Welcome to TASK Karate! This handbook contains answers to 
+                    common questions about classes, training, and your journey 
+                    to Black Belt.
+                  </p>
+                  <p class="journal__text">
+                    Use the arrows to flip through the pages →
+                  </p>
+                  <div class="journal__doodle">🥋</div>
+                </div>
+                <footer class="journal__footer">
+                  <span class="journal__page-num">1 / 6</span>
+                </footer>
+              </article>
+              
+              <!-- Page 2: Class Ages -->
+              <article class="journal__page" data-page="2">
+                <header class="journal__header">
+                  <span class="journal__tab">FAQ</span>
+                  <h3 class="journal__question">What age are the classes?</h3>
+                </header>
+                <div class="journal__content">
+                  <p class="journal__text">
+                    <strong>Kids class</strong> is typically ages 6–11
+                  </p>
+                  <p class="journal__text">
+                    <strong>Teen/Adult class</strong> is 12+
+                  </p>
+                  <p class="journal__note">
+                    ✨ You're never too old to start!
+                  </p>
+                </div>
+                <footer class="journal__footer">
+                  <span class="journal__page-num">2 / 6</span>
+                </footer>
+              </article>
+              
+              <!-- Page 3: Attendance -->
+              <article class="journal__page" data-page="3">
+                <header class="journal__header">
+                  <span class="journal__tab">FAQ</span>
+                  <h3 class="journal__question">How often should I attend?</h3>
+                </header>
+                <div class="journal__content">
+                  <p class="journal__text">
+                    Plan on at least <strong>2–3 times per week</strong> for 
+                    steady progress.
+                  </p>
+                  <p class="journal__note">
+                    💪 Consistency is the secret!
+                  </p>
+                </div>
+                <footer class="journal__footer">
+                  <span class="journal__page-num">3 / 6</span>
+                </footer>
+              </article>
+              
+              <!-- Page 4: Using Karate -->
+              <article class="journal__page" data-page="4">
+                <header class="journal__header">
+                  <span class="journal__tab">FAQ</span>
+                  <h3 class="journal__question">Do kids use karate the wrong way?</h3>
+                </header>
+                <div class="journal__content">
+                  <p class="journal__text">
+                    We emphasize <strong>respect, self-control</strong>, and 
+                    never abusing martial arts skills.
+                  </p>
+                  <p class="journal__text">
+                    Rule #1 is "Don't use it the wrong way!" and we take it 
+                    seriously.
+                  </p>
+                  <p class="journal__note">
+                    🙏 Martial arts = self-discipline
+                  </p>
+                </div>
+                <footer class="journal__footer">
+                  <span class="journal__page-num">4 / 6</span>
+                </footer>
+              </article>
+              
+              <!-- Page 5: Black Belt Timeline -->
+              <article class="journal__page" data-page="5">
+                <header class="journal__header">
+                  <span class="journal__tab">FAQ</span>
+                  <h3 class="journal__question">How long to achieve Black Belt?</h3>
+                </header>
+                <div class="journal__content">
+                  <p class="journal__text">
+                    Minimum is about <strong>3½ years</strong>, often longer—
+                    consistent training is key.
+                  </p>
+                  <p class="journal__note">
+                    🎯 It's not a race; it's a journey.
+                  </p>
+                </div>
+                <footer class="journal__footer">
+                  <span class="journal__page-num">5 / 6</span>
+                </footer>
+              </article>
+              
+              <!-- Page 6: What to Wear -->
+              <article class="journal__page" data-page="6">
+                <header class="journal__header">
+                  <span class="journal__tab">FAQ</span>
+                  <h3 class="journal__question">What should I wear to class?</h3>
+                </header>
+                <div class="journal__content">
+                  <p class="journal__text">
+                    Wear <strong>comfortable workout clothes</strong> for your 
+                    first class.
+                  </p>
+                  <p class="journal__text">
+                    Once enrolled, you'll receive a uniform (dobok).
+                  </p>
+                  <p class="journal__note">
+                    👟 Shoes are NOT worn on the mat!
+                  </p>
+                </div>
+                <footer class="journal__footer">
+                  <span class="journal__page-num">6 / 6</span>
+                </footer>
+              </article>
+              
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </section>
+    
+    
+    <!-- ═══════════════════════════════════════════
+         MODAL: Belt Testing Requirements
+         ───────────────────────────────────────────
+         Displays individual testing sheet in iframe
+         ═══════════════════════════════════════════ -->
+    <div class="belt-modal" id="belt-modal" aria-hidden="true">
+      <div class="belt-modal__backdrop"></div>
+      <div class="belt-modal__container">
+        <div class="belt-modal__stack">
+          <div class="belt-modal__layer belt-modal__layer--bottom"></div>
+          <div class="belt-modal__layer belt-modal__layer--top">
+            <div class="belt-modal__bar" id="belt-modal-bar"></div>
+            <header class="belt-modal__header">
+              <h3 class="belt-modal__title" id="belt-modal-title">Testing Requirements</h3>
+              <button class="belt-modal__close" id="belt-modal-close" aria-label="Close modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </header>
+            <div class="belt-modal__content">
+              <iframe class="belt-modal__frame" id="belt-modal-frame" title="Belt Testing Requirements"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </main>
+  
+  
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+       ───────────────────────────────────────────
+       Loaded dynamically from partials/footer.html
+       via js/partials.js
+       ═══════════════════════════════════════════ -->
+  <div id="site-footer"></div>
+  
+  
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+       ───────────────────────────────────────────
+       Load order: partials → navigation → scroll → page-specific
+       ═══════════════════════════════════════════ -->
+  <!-- Core Scripts -->
+  <script src="js/partials.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/scroll-progress.js"></script>
+  <script src="js/page-transitions.js"></script>
+  <script src="js/back-to-top.js"></script>
+  
+  <!-- Page-Specific Scripts -->
+  <script src="js/journal.js"></script>
+  <script src="js/belt-modal.js"></script>
+  
+</body>
+</html>

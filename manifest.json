@@ -1,0 +1,57 @@
+{
+  "name": "Task Karate School",
+  "short_name": "Task Karate",
+  "description": "Karate for kids, teens, and adults in La Crosse, WI. Build confidence, learn self-defense, and train with expert instructors.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#050814",
+  "theme_color": "#0f4c81",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "images/logo/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "education", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Class Schedule",
+      "short_name": "Schedule",
+      "description": "View class times and register",
+      "url": "/schedule.html",
+      "icons": [
+        {
+          "src": "images/logo/Logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Student Resources",
+      "short_name": "Students",
+      "description": "Belt requirements and student handbook",
+      "url": "/students.html",
+      "icons": [
+        {
+          "src": "images/logo/Logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Contact Us",
+      "short_name": "Contact",
+      "description": "Get in touch with Task Karate",
+      "url": "/index.html#contact",
+      "icons": [
+        {
+          "src": "images/logo/Logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

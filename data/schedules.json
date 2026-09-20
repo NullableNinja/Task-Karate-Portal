@@ -1,0 +1,227 @@
+{
+  "kids": {
+    "title": "Kids",
+    "eyebrow": "Core Karate • Kids",
+    "note": "* denotes a 1-hour class. All other kids sessions are 45 minutes.",
+    "groups": [
+      {
+        "belts": ["white", "gold"],
+        "name": "White • Gold",
+        "schedule": {
+          "Tuesday": [{ "time": "06:00 PM", "isHour": false }],
+          "Thursday": [{ "time": "05:00 PM", "isHour": false }],
+          "Saturday": [{ "time": "11:30 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["orange"],
+        "name": "Orange",
+        "schedule": {
+          "Monday": [{ "time": "04:00 PM", "isHour": false }],
+          "Thursday": [{ "time": "06:00 PM", "isHour": false }],
+          "Saturday": [{ "time": "11:30 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["green", "purple"],
+        "name": "Green • Purple",
+        "schedule": {
+          "Wednesday": [{ "time": "05:00 PM", "isHour": false }],
+          "Thursday": [{ "time": "04:00 PM", "isHour": false }],
+          "Saturday": [{ "time": "10:30 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["blue", "red"],
+        "name": "Blue • Red",
+        "schedule": {
+          "Tuesday": [{ "time": "05:00 PM", "isHour": false }],
+          "Wednesday": [{ "time": "04:00 PM", "isHour": false }],
+          "Saturday": [{ "time": "10:30 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["brown"],
+        "name": "Brown",
+        "schedule": {
+          "Monday": [{ "time": "05:00 PM", "isHour": true }],
+          "Tuesday": [{ "time": "05:00 PM", "isHour": false }],
+          "Wednesday": [{ "time": "04:00 PM", "isHour": false }],
+          "Saturday": [{ "time": "10:30 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["black"],
+        "name": "Black",
+        "schedule": {
+          "Monday": [{ "time": "06:00 PM", "isHour": true }],
+          "Tuesday": [{ "time": "05:00 PM", "isHour": false }],
+          "Wednesday": [{ "time": "04:00 PM", "isHour": false }],
+          "Saturday": [{ "time": "10:30 AM", "isHour": false }]
+        }
+      }
+    ]
+  },
+  "teensAdults": {
+    "title": "Teens & Adults",
+    "eyebrow": "Core Karate • Teens & Adults",
+    "note": "All Teen & Adult classes above are 1 hour except Saturday morning sessions at 9:00 AM, which are 45 minutes.",
+    "groups": [
+      {
+        "belts": ["white", "gold", "orange"],
+        "name": "White • Gold • Orange",
+        "schedule": {
+          "Tuesday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Thursday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Friday": [{ "time": "06:00 PM", "isHour": true }],
+          "Saturday": [{ "time": "09:00 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["green"],
+        "name": "Green Belt & Up",
+        "schedule": {
+          "Tuesday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Thursday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Friday": [{ "time": "06:00 PM", "isHour": true }],
+          "Saturday": [{ "time": "09:00 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["brown"],
+        "name": "Brown",
+        "schedule": {
+          "Monday": [{ "time": "05:00 PM", "isHour": true }],
+          "Tuesday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Thursday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Friday": [{ "time": "06:00 PM", "isHour": true }],
+          "Saturday": [{ "time": "09:00 AM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["black"],
+        "name": "Black",
+        "schedule": {
+          "Monday": [{ "time": "06:00 PM", "isHour": true }],
+          "Tuesday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Thursday": [
+            { "time": "09:30 AM", "isHour": true },
+            { "time": "07:00 PM", "isHour": true }
+          ],
+          "Friday": [{ "time": "06:00 PM", "isHour": true }],
+          "Saturday": [{ "time": "09:00 AM", "isHour": false }]
+        }
+      }
+    ]
+  },
+  "sparring": {
+    "title": "Sparring Program",
+    "eyebrow": "Sparring • All Ranks",
+    "description": "Kids and Teens/Adults sparring are listed together so it's easy to see when gear is needed.",
+    "note": "Sparring sessions are 45 minutes. Kids Brown belts join the Teen/Adult sparring at 9:45 AM on Saturdays. Full protective gear is required.",
+    "groups": [
+      {
+        "belts": ["white"],
+        "name": "Kids Sparring",
+        "schedule": {
+          "Tuesday": [{ "time": "04:00 PM", "isHour": false }],
+          "Saturday": [{ "time": "09:45 AM", "isHour": false, "note": "Brown Belts" }]
+        }
+      },
+      {
+        "belts": ["white"],
+        "name": "Teens & Adults Sparring",
+        "schedule": {
+          "Saturday": [{ "time": "09:45 AM", "isHour": false }]
+        }
+      }
+    ]
+  },
+  "weapons": {
+    "title": "Weapons Program",
+    "eyebrow": "Weapons • Green & Up",
+    "description": "Kids Weapons (Green & up) and Teens/Adults Weapons are listed together here. Ask if you're unsure when to add weapons training.",
+    "note": "Kids Weapons classes are 45 minutes. Teens & Adults Weapons are 1 hour. Kids Brown belts also meet at 9:45 AM on Saturdays (shared time with sparring).",
+    "groups": [
+      {
+        "belts": ["green"],
+        "name": "Kids Weapons (Green & up)",
+        "schedule": {
+          "Friday": [{ "time": "04:00 PM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["green"],
+        "name": "Weapons (Green & up — Teens & Adults)",
+        "schedule": {
+          "Wednesday": [{ "time": "06:00 PM", "isHour": true }]
+        }
+      }
+    ]
+  },
+  "special": {
+    "title": "Special Schedules",
+    "eyebrow": "Extra Training & Testing",
+    "description": "These sessions apply across programs and often mix kids and adults.",
+    "note": "* denotes a 1-hour testing block. Testing is usually the <strong>last Saturday of the month</strong> and is <strong>by invitation only</strong>. Kids testing times vary — please check with your instructor.",
+    "groups": [
+      {
+        "belts": ["white"],
+        "name": "Mat Class (Mixed Kids & Adults)",
+        "schedule": {
+          "Friday": [{ "time": "05:00 PM", "isHour": false }]
+        }
+      },
+      {
+        "belts": ["white"],
+        "name": "Promotion Testing (Teens & Adults)",
+        "schedule": {
+          "Saturday": [{ "time": "02:00 PM", "isHour": true }]
+        }
+      }
+    ]
+  },
+  "eskrima": {
+    "title": "IS3 • Eskrima",
+    "eyebrow": "Filipino Martial Arts",
+    "note": "IS3 Eskrima sessions for Teens & Adults are 1 hour. Kids Eskrima offerings may rotate or run as special sessions.",
+    "groups": [
+      {
+        "belts": ["white"],
+        "name": "Kids Eskrima",
+        "schedule": {},
+        "specialNote": "Schedule currently not on the regular rotation — please ask at the front desk for Kids Eskrima times."
+      },
+      {
+        "belts": ["white"],
+        "name": "IS3 Eskrima Program (Teens & Adults)",
+        "schedule": {
+          "Monday": [{ "time": "07:00 PM", "isHour": true }],
+          "Wednesday": [{ "time": "07:00 PM", "isHour": true }],
+          "Friday": [{ "time": "07:00 PM", "isHour": true }]
+        }
+      }
+    ]
+  }
+}

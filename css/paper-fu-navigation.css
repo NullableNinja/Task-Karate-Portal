@@ -1,0 +1,496 @@
+/* ============================================
+   PAPER-FU NAVIGATION - REAL FOLDER TABS
+   Version: 2.0.0 - TaskKarate v4
+   
+   ╔════════════════════════════════════════════╗
+   ║  REAL FILE FOLDER TAB NAVIGATION          ║
+   ╠════════════════════════════════════════════╣
+   ║  Navigation styled like ACTUAL physical   ║
+   ║  manila file folder tabs.                 ║
+   ║                                            ║
+   ║  PAPER-FU PRINCIPLES:                      ║
+   ║  • Solid matte colors (no gradients)       ║
+   ║  • Realistic directional shadows           ║
+   ║  • Clean, crisp paper edges                ║
+   ║  • Flat, layered appearance                ║
+   ╚════════════════════════════════════════════╝
+   ============================================ */
+
+
+/* ============================================
+   SECTION 1: PAPER COLOR PALETTE
+   ============================================
+   Real paper colors - solid, matte, no gradients
+   ============================================ */
+
+:root {
+  /* Manila folder colors - solid paper */
+  --paper-manila: #e8dcc4;
+  --paper-manila-light: #f0e6d2;
+  --paper-manila-dark: #d4c4a8;
+  
+  /* White paper tones */
+  --paper-white: #f5f3ef;
+  --paper-cream: #faf8f4;
+  --paper-ivory: #fffef8;
+  
+  /* Dark paper / cardstock */
+  --paper-slate: #3d4654;
+  --paper-charcoal: #2a3140;
+  --paper-dark: #1e242e;
+  
+  /* Realistic paper shadow */
+  --shadow-paper: rgba(0, 0, 0, 0.25);
+  --shadow-paper-soft: rgba(0, 0, 0, 0.12);
+  
+  /* Tab accent colors - muted, paper-appropriate */
+  --tab-home: #b8d4e8;
+  --tab-schedule: #c9b8e8;
+  --tab-students: #e8b8d4;
+  --tab-news: #e8d4b8;
+  --tab-about: #b8e8c4;
+}
+
+
+/* ============================================
+   SECTION 2: FLOATING LOGO
+   ============================================ */
+
+.tk-logo-floating {
+  position: fixed;
+  top: 8px;
+  left: 20px;
+  z-index: calc(var(--pf-z-sticky) + 10);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.tk-logo-floating img {
+  height: 68px;
+  width: auto;
+  /* Real shadow like object on desk */
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.4));
+  transition: transform 0.1s ease;
+}
+
+.tk-logo-floating img.spinning {
+  animation: logo-spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes logo-spin {
+  0% { transform: scale(1) rotate(0deg); }
+  15% { transform: scale(1.4) rotate(0deg); }
+  85% { transform: scale(1.4) rotate(1080deg); }
+  100% { transform: scale(1) rotate(1080deg); }
+}
+
+
+/* ============================================
+   SECTION 3: NAVBAR - THE FOLDER RAIL
+   ============================================
+   The navbar is like a file cabinet rail that
+   the folder tabs hang from.
+   ============================================ */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 24px 0;
+  
+  z-index: var(--pf-z-sticky);
+  
+  /* Solid dark surface - like a file cabinet */
+  background: var(--paper-dark);
+}
+
+/* Bottom edge - the rail that tabs sit on */
+.navbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--paper-charcoal);
+  /* Sharp shadow below like real edge */
+  box-shadow: 0 2px 4px var(--shadow-paper);
+  z-index: 1;
+}
+
+
+/* ============================================
+   SECTION 4: NAV LINKS CONTAINER
+   ============================================ */
+
+.nav-links {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px; /* Small gap like real folder tabs */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+  position: relative;
+  z-index: 10;
+}
+
+
+/* ============================================
+   SECTION 5: FOLDER TABS - THE STAR
+   ============================================
+   Each tab is styled like a REAL manila folder tab.
+   
+   Key properties of real folder tabs:
+   - Solid color (no gradients)
+   - Slightly rounded top corners only
+   - Clean crisp edges
+   - Shadow falls to the right and below
+   - Active tab extends DOWN into content area
+   ============================================ */
+
+.nav-link {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  
+  position: relative;
+  z-index: 10;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+  padding: 10px 20px;
+  min-width: 100px;
+  
+  /* REAL folder tab shape - slight round on top only */
+  border-radius: 6px 6px 0 0;
+  
+  /* Solid paper color - no gradients */
+  background: var(--paper-slate);
+  color: var(--pf-text-secondary);
+  
+  /* Clean edge with subtle border */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: none;
+  
+  cursor: pointer;
+  outline: none;
+  
+  /* Real paper shadow - falls to bottom-right */
+  box-shadow: 
+    2px 0 4px var(--shadow-paper-soft),
+    0 -1px 2px var(--shadow-paper-soft);
+  
+  transition: 
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.15s ease,
+    color 0.15s ease,
+    z-index 0s;
+}
+
+.nav-link svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+/* Hover - tab lifts slightly like being pulled with paper curl */
+.nav-link:hover {
+  color: var(--pf-text-primary);
+  background: var(--paper-charcoal);
+  transform: translateY(-3px);
+  z-index: 15;
+  box-shadow: 
+    2px 3px 8px var(--shadow-paper),
+    0 -1px 2px var(--shadow-paper-soft);
+}
+
+/* Paper curl effect on corner */
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 12px 12px 0;
+  border-color: transparent rgba(0, 0, 0, 0.15) transparent transparent;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.nav-link:hover::before {
+  opacity: 1;
+}
+
+.nav-link:hover svg {
+  opacity: 1;
+}
+
+/* ACTIVE TAB - extends DOWN into content below */
+.nav-link.active {
+  color: var(--paper-cream);
+  z-index: 25;
+  
+  /* Extends down to connect with content */
+  padding-bottom: 16px;
+  margin-bottom: -4px;
+  
+  /* Stronger shadow - this tab is "on top" */
+  box-shadow: 
+    3px 0 8px var(--shadow-paper),
+    -3px 0 8px var(--shadow-paper),
+    0 4px 8px var(--shadow-paper-soft);
+}
+
+
+/* ============================================
+   SECTION 6: PAGE-SPECIFIC TAB COLORS
+   ============================================
+   Each page gets its own SOLID paper color.
+   No gradients - real paper is solid.
+   ============================================ */
+
+/* HOME - Soft Blue Paper */
+.nav-link[data-nav="home"] { background: var(--paper-slate); }
+.nav-link[data-nav="home"]:hover { background: #4a5568; }
+.nav-link[data-nav="home"].active { 
+  background: #3d5a7a;
+  border-top: 3px solid var(--tab-home);
+}
+
+/* SCHEDULE - Soft Purple Paper */
+.nav-link[data-nav="schedule"] { background: var(--paper-slate); }
+.nav-link[data-nav="schedule"]:hover { background: #4a5568; }
+.nav-link[data-nav="schedule"].active { 
+  background: #4a3d6a;
+  border-top: 3px solid var(--tab-schedule);
+}
+
+/* STUDENTS - Soft Pink Paper */
+.nav-link[data-nav="students"] { background: var(--paper-slate); }
+.nav-link[data-nav="students"]:hover { background: #4a5568; }
+.nav-link[data-nav="students"].active { 
+  background: #5a3d4a;
+  border-top: 3px solid var(--tab-students);
+}
+
+/* NEWS - Soft Orange Paper */
+.nav-link[data-nav="news"] { background: var(--paper-slate); }
+.nav-link[data-nav="news"]:hover { background: #4a5568; }
+.nav-link[data-nav="news"].active { 
+  background: #5a4a3d;
+  border-top: 3px solid var(--tab-news);
+}
+
+/* ABOUT - Soft Green Paper */
+.nav-link[data-nav="about"] { background: var(--paper-slate); }
+.nav-link[data-nav="about"]:hover { background: #4a5568; }
+.nav-link[data-nav="about"].active { 
+  background: #3d5a4a;
+  border-top: 3px solid var(--tab-about);
+}
+
+
+/* ============================================
+   SECTION 7: HAMBURGER MENU (Mobile)
+   ============================================
+   
+   Three-line hamburger button for mobile nav.
+   
+   STRUCTURE:
+   <button class="hamburger">
+     <span></span>
+     <span></span>
+     <span></span>
+   </button>
+   ============================================ */
+
+.hamburger {
+  display: none; /* Hidden on desktop */
+  flex-direction: column;
+  justify-content: space-around;
+  
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  
+  z-index: 100;
+}
+
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background: var(--pf-text-primary);
+  border-radius: 2px;
+  transition: 
+    transform var(--pf-transition-base),
+    opacity var(--pf-transition-base);
+}
+
+/* Hamburger open state - X shape */
+.hamburger.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+
+/* ============================================
+   SECTION 8: SCROLL PROGRESS INDICATOR
+   ============================================
+   
+   Colored bar that shows scroll position.
+   Uses belt colors for a unique look.
+   
+   STRUCTURE:
+   <div class="navbar-progress" id="scrollProgress"></div>
+   ============================================ */
+
+.navbar-progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 6px;
+  width: 0%;
+  z-index: calc(var(--pf-z-sticky) + 5);
+  
+  /* Belt color - set dynamically by JS */
+  background: #f8fafc; /* Default white belt */
+  
+  /* Belt-like appearance */
+  box-shadow: 
+    0 -2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: width 50ms linear, background 300ms ease;
+}
+
+
+/* ============================================
+   SECTION 9: RESPONSIVE - MOBILE NAVIGATION
+   ============================================
+   
+   On mobile, navigation becomes a dropdown.
+   ============================================ */
+
+@media (max-width: 768px) {
+  
+  /* Show hamburger */
+  .hamburger {
+    display: flex;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  /* Navbar adjustments */
+  .navbar {
+    padding: 12px 24px;
+    align-items: center;
+  }
+  
+  /* Hide baseline on mobile */
+  .navbar::after {
+    display: none;
+  }
+  
+  /* Nav links become dropdown */
+  .nav-links {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    
+    background: var(--pf-bg-secondary);
+    border-bottom: 1px solid var(--pf-border-medium);
+    box-shadow: var(--pf-shadow-lg);
+    
+    /* Hidden by default */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    
+    transition: 
+      max-height var(--pf-transition-slow),
+      opacity var(--pf-transition-base);
+  }
+  
+  /* Open state */
+  .nav-links.open {
+    max-height: 400px;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  /* Mobile nav links - full width, not tabs */
+  .nav-links .nav-link {
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--pf-border-subtle);
+    padding: 16px 24px;
+    min-width: 100%;
+    justify-content: flex-start;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+  
+  .nav-links .nav-link:hover {
+    background: var(--pf-surface-1);
+    transform: none;
+  }
+  
+  .nav-links .nav-link.active {
+    background: var(--pf-accent-primary-alpha);
+    transform: none;
+    border-left: 4px solid var(--pf-accent-primary);
+  }
+  
+  /* Floating logo smaller on mobile */
+  .tk-logo-floating img {
+    height: 48px;
+  }
+}
+
+
+/* ============================================
+   END OF NAVIGATION STYLES
+   ============================================
+   
+   The navigation is controlled by:
+   - partials.js (loads the nav HTML)
+   - mobile-navigation.js (hamburger toggle)
+   - scroll-progress.js (progress bar)
+   - logo-spin.js (logo click animation)
+   ============================================ */

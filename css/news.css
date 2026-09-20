@@ -1,0 +1,418 @@
+/* ============================================
+   NEWS PAGE STYLES
+   Version: 1.0.0 - TaskKarate v4
+   
+   ╔════════════════════════════════════════════╗
+   ║  NEWS PAGE STYLESHEET                      ║
+   ╠════════════════════════════════════════════╣
+   ║  Contains:                                 ║
+   ║  • Newsletter signup form                  ║
+   ║  • Archive controls                        ║
+   ║  • Info panels                             ║
+   ║  • Form message feedback                   ║
+   ╚════════════════════════════════════════════╝
+   
+   📁 Depends on: paper-fu-core.css, paper-fu-theme-hi-yah.css
+   ============================================ */
+
+
+/* ═══════════════════════════════════════════════
+   TABLE OF CONTENTS
+   ═══════════════════════════════════════════════
+   1. Newsletter Form
+   2. Form Grid
+   3. Archive Controls
+   4. Info Panels
+   5. Form Messages
+   6. Responsive Styles
+   ═══════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════
+   1. NEWSLETTER FORM
+   ───────────────────────────────────────────────
+   Signup form layout and styling.
+   ═══════════════════════════════════════════════ */
+
+.newsletter-form {
+  max-width: 600px;
+}
+
+/* Signup Benefits - What you'll get */
+.signup-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px 20px 28px;
+  background: rgba(59, 130, 180, 0.08);
+  border: 1px solid rgba(59, 130, 180, 0.2);
+  border-radius: var(--pf-radius-md);
+  max-width: 500px;
+  position: relative;
+}
+
+/* Accent bar on the left - properly contained */
+.signup-benefits::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  background: var(--pf-color-accent);
+  border-radius: 2px;
+}
+
+.signup-benefit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9375rem;
+  color: #e2e8f0;
+}
+
+.signup-benefit svg {
+  flex-shrink: 0;
+  color: var(--pf-color-accent);
+}
+
+.signup-benefit span {
+  line-height: 1.4;
+}
+
+
+/* ═══════════════════════════════════════════════
+   2. FORM GRID
+   ───────────────────────────────────────────────
+   Inline form layout for a cleaner look.
+   ═══════════════════════════════════════════════ */
+
+.form-grid {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.form-grid .pf-form-group {
+  flex: 1;
+}
+
+/* 3D Layered Subscribe Button */
+.newsletter-form .btn-3d-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.newsletter-form .btn-3d-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: -4px;
+  bottom: -4px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--pf-radius-md);
+  z-index: 0;
+}
+
+.newsletter-form .btn-3d-wrapper .pf-btn {
+  position: relative;
+  z-index: 1;
+}
+
+.newsletter-form .btn-3d-wrapper:hover {
+  transform: translateY(-2px) translateX(-1px);
+}
+
+.newsletter-form .btn-3d-wrapper:active {
+  transform: translateY(0) translateX(0);
+}
+
+
+/* ═══════════════════════════════════════════════
+   3. ARCHIVE CONTROLS
+   ───────────────────────────────────────────────
+   Year/month selector and download button.
+   ═══════════════════════════════════════════════ */
+
+.archive-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-md);
+  margin-top: 24px;
+}
+
+.archive-controls .pf-form-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Enhanced select boxes */
+.archive-controls .pf-select {
+  background: var(--pf-surface-2);
+  border: 2px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-md);
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+  color: var(--pf-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.archive-controls .pf-select:hover {
+  border-color: var(--pf-color-accent);
+  background: var(--pf-surface-3);
+}
+
+.archive-controls .pf-select:focus {
+  border-color: var(--pf-color-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 180, 0.2);
+}
+
+.archive-controls .pf-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--pf-text-secondary);
+}
+
+/* 3D Download Button Wrapper */
+.archive-controls .btn-3d-wrapper {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.archive-controls .btn-3d-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: -4px;
+  bottom: -4px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--pf-radius-md);
+  z-index: 0;
+}
+
+.archive-controls .btn-3d-wrapper .pf-btn {
+  position: relative;
+  z-index: 1;
+}
+
+.archive-controls .btn-3d-wrapper:hover {
+  transform: translateY(-2px) translateX(-1px);
+}
+
+.archive-controls .btn-3d-wrapper:active {
+  transform: translateY(0) translateX(0);
+}
+
+/* Spacer label for alignment */
+.pf-label--spacer {
+  display: none;
+  height: 1.5rem;
+  visibility: hidden;
+}
+
+
+/* ═══════════════════════════════════════════════
+   4. INFO PANELS
+   ───────────────────────────────────────────────
+   Small informational cards.
+   Main styling handled by paper-fu-origami.css
+   ═══════════════════════════════════════════════ */
+
+/* Page-specific info panel tweaks only */
+/* Base styling inherited from paper-fu-origami.css */
+
+
+/* ═══════════════════════════════════════════════
+   4B. ARCHIVE INFO CARDS
+   ───────────────────────────────────────────────
+   Horizontal info cards for the archive section.
+   Much cleaner than the stacked vertical panels.
+   ═══════════════════════════════════════════════ */
+
+.archive-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.archive-info-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 28px 24px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--pf-border-color);
+  border-radius: var(--pf-radius-md);
+  transition: all 0.2s ease;
+}
+
+.archive-info-card:hover {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(59, 130, 180, 0.3);
+  transform: translateY(-3px);
+}
+
+/* Icon container */
+.archive-info-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon color variants */
+.archive-info-card__icon--pdf {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.archive-info-card__icon--history {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.archive-info-card__icon--monthly {
+  background: linear-gradient(135deg, #a855f7, #8b5cf6);
+}
+
+/* Content */
+.archive-info-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.archive-info-card__title {
+  font-family: var(--pf-font-heading);
+  font-size: 1.125rem;
+  color: var(--pf-text-primary);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.archive-info-card__text {
+  font-size: 0.875rem;
+  color: var(--pf-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   5. FORM MESSAGES
+   ───────────────────────────────────────────────
+   Success/error feedback messages.
+   ═══════════════════════════════════════════════ */
+
+.form-message {
+  margin-top: var(--pf-space-4);
+  padding: var(--pf-space-3) var(--pf-space-4);
+  border-radius: var(--pf-radius-md);
+  font-size: 0.875rem;
+}
+
+.form-message--success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.form-message--error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+
+/* ═══════════════════════════════════════════════
+   6. RESPONSIVE STYLES
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Form grid stacks */
+  .form-grid {
+    flex-direction: column;
+  }
+  
+  /* Archive controls stack */
+  .archive-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .archive-controls .pf-form-group {
+    min-width: 100%;
+  }
+  
+  .archive-controls .btn-3d-wrapper {
+    width: 100%;
+  }
+  
+  .archive-controls .btn-3d-wrapper .pf-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Info panels stack */
+  .pf-grid--3 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Archive info cards stack on mobile */
+  .archive-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .archive-info-card {
+    flex-direction: row;
+    text-align: left;
+    padding: 20px;
+    gap: 16px;
+  }
+  
+  .archive-info-card__icon {
+    margin-bottom: 0;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+  
+  .archive-info-card__content {
+    gap: 4px;
+  }
+  
+  /* Newsletter form button full width */
+  .newsletter-form .btn-3d-wrapper {
+    width: 100%;
+  }
+  
+  .newsletter-form .btn-3d-wrapper .pf-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+/* ============================================
+   END OF NEWS PAGE STYLES
+   ============================================ */

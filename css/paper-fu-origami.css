@@ -1,0 +1,460 @@
+/* ============================================
+   PAPER-FU ORIGAMI ENHANCEMENTS
+   Version: 2.0.0 - TaskKarate v4
+   
+   ╔════════════════════════════════════════════╗
+   ║  REAL PAPER EFFECTS                        ║
+   ╠════════════════════════════════════════════╣
+   ║  PAPER-FU DESIGN PRINCIPLES:               ║
+   ║  • LITERALLY looks like stacked paper      ║
+   ║  • Solid matte colors (no gradients)       ║
+   ║  • Realistic directional shadows           ║
+   ║  • Clean, crisp paper edges                ║
+   ║  • Flat, layered appearance                ║
+   ║  • Minimalistic but realistic              ║
+   ╚════════════════════════════════════════════╝
+   ============================================ */
+
+
+/* ═══════════════════════════════════════════════
+   1. PAPER COLOR SYSTEM
+   ───────────────────────────────────────────────
+   Real paper colors - solid, matte, flat.
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* Paper surface colors - SOLID, no transparency */
+  --paper-surface: #2a3441;
+  --paper-surface-light: #343f4d;
+  --paper-surface-dark: #1f2732;
+  
+  /* Paper shadows - realistic directional */
+  --paper-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --paper-shadow-lifted: 0 4px 8px rgba(0, 0, 0, 0.35);
+  --paper-shadow-stack: 0 1px 2px rgba(0, 0, 0, 0.25);
+  
+  /* Paper edge - subtle lighter edge like real paper */
+  --paper-edge: rgba(255, 255, 255, 0.08);
+}
+
+
+/* ═══════════════════════════════════════════════
+   2. EYEBROW LABELS - PAPER TAGS
+   ───────────────────────────────────────────────
+   Like a small paper label or sticky note.
+   ═══════════════════════════════════════════════ */
+
+.eyebrow,
+.eyebrow-badge {
+  display: inline-block;
+  
+  /* Solid paper color - like a sticky note */
+  background: #dde4ed;
+  color: #1a365d;
+  
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  
+  padding: 4px 12px;
+  
+  /* Paper has slightly rounded corners, not too round */
+  border-radius: 3px;
+  
+  margin-bottom: 12px;
+  
+  /* Real shadow - falls below and to right */
+  box-shadow: 
+    1px 2px 3px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  
+  /* No animation - paper doesn't animate */
+  opacity: 1;
+}
+
+
+/* ═══════════════════════════════════════════════
+   3. STACKED PAPER EFFECT - THE CORE
+   ───────────────────────────────────────────────
+   This is the signature Paper-Fu look.
+   Multiple sheets of paper stacked with offsets.
+   ═══════════════════════════════════════════════ */
+
+.pf-stack {
+  position: relative;
+  /* Ensure stacked layers are visible */
+  padding-bottom: 8px;
+  padding-right: 8px;
+}
+
+/* Bottom layer - the "paper underneath" */
+.pf-layer.bottom {
+  position: absolute;
+  inset: 0;
+  
+  /* SOLID color - real paper is opaque */
+  background: var(--paper-surface-dark);
+  
+  /* Slightly rounded corners like real paper */
+  border-radius: 4px;
+  
+  /* Offset to show stacked effect - papers are slightly askew */
+  transform: translate(6px, 6px);
+  
+  /* Real paper shadow - directional, underneath */
+  box-shadow: var(--paper-shadow-stack);
+  
+  /* Paper edge highlight */
+  border: 1px solid var(--paper-edge);
+}
+
+/* Optional: Second bottom layer for 3-paper stack */
+.pf-stack--deep .pf-layer.bottom::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--paper-surface-dark);
+  border-radius: 4px;
+  transform: translate(5px, 5px);
+  box-shadow: var(--paper-shadow-stack);
+  z-index: -1;
+}
+
+/* Top layer - the main content paper */
+.pf-layer.top {
+  position: relative;
+  z-index: 2;
+  
+  /* Solid paper color */
+  background: var(--paper-surface);
+  
+  /* Paper edges */
+  border-radius: 4px;
+  border: 1px solid var(--paper-edge);
+  
+  /* Main paper shadow */
+  box-shadow: var(--paper-shadow);
+}
+
+
+/* ═══════════════════════════════════════════════
+   4. PAPER CARDS - SINGLE SHEETS
+   ───────────────────────────────────────────────
+   Cards that look like individual paper sheets.
+   ═══════════════════════════════════════════════ */
+
+.pf-card {
+  position: relative;
+  
+  /* Solid paper surface */
+  background: var(--paper-surface);
+  
+  /* Paper corners - slightly rounded */
+  border-radius: 4px;
+  
+  /* Paper edge */
+  border: 1px solid var(--paper-edge);
+  
+  /* Real shadow - like paper on a desk */
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.1);
+  
+  /* Padding like margins on paper */
+  padding: 1.5rem;
+}
+
+/* Remove the fake corner fold - real paper doesn't do that */
+.pf-card::after {
+  display: none;
+}
+
+/* Card hover - paper lifts slightly */
+.pf-card:hover {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+
+/* ═══════════════════════════════════════════════
+   5. PAPER PANELS
+   ───────────────────────────────────────────────
+   Larger content areas - like pages in a binder.
+   ═══════════════════════════════════════════════ */
+
+.pf-panel {
+  /* Solid color */
+  background: var(--paper-surface);
+  
+  /* Slightly rounded corners */
+  border-radius: 4px;
+  
+  /* Paper edge */
+  border: 1px solid var(--paper-edge);
+  
+  /* Content padding */
+  padding: 2rem;
+  
+  /* Real shadow */
+  box-shadow: var(--paper-shadow);
+}
+
+
+/* ═══════════════════════════════════════════════
+   6. PAPER BUTTONS
+   ───────────────────────────────────────────────
+   Buttons that look like paper tabs or labels.
+   ═══════════════════════════════════════════════ */
+
+.pf-btn {
+  position: relative;
+  
+  /* Solid color - no gradient */
+  background: var(--pf-color-accent, #0f4c81);
+  color: white;
+  
+  /* Paper-like padding */
+  padding: 0.75rem 1.5rem;
+  
+  /* Slight rounding like paper corners */
+  border-radius: 4px;
+  
+  /* Clean edge */
+  border: none;
+  
+  /* Paper shadow */
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.15);
+  
+  cursor: pointer;
+  
+  transition: 
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+.pf-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 3px 6px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pf-btn:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+
+/* ═══════════════════════════════════════════════
+   7. SCHEDULE TABLE - PAPER STYLING
+   ───────────────────────────────────────────────
+   Tables that look like paper with clean edges.
+   ═══════════════════════════════════════════════ */
+
+/* Table header - solid color, no gradient */
+.schedule-table thead th {
+  background: var(--pf-color-accent, #0f4c81);
+  color: white;
+  font-family: var(--pf-font-heading);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 1rem 0.9rem;
+  border-bottom: none;
+  text-align: center;
+  font-weight: 700;
+}
+
+.schedule-table thead th:first-child {
+  border-radius: 4px 0 0 0;
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.schedule-table thead th:last-child {
+  border-radius: 0 4px 0 0;
+}
+
+/* Table body - clean paper rows */
+.schedule-table tbody tr {
+  background: var(--paper-surface);
+  transition: background 0.1s ease;
+}
+
+.schedule-table tbody tr:nth-child(even) {
+  background: var(--paper-surface-light);
+}
+
+.schedule-table tbody tr:hover {
+  background: var(--paper-surface-light);
+}
+
+/* Belt dots - simple solid circles */
+.belt-pip {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+  
+  /* Simple shadow - paper dot */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Time pills - paper label style */
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  padding: 0.35rem 0.8rem;
+  min-width: 85px;
+  
+  /* Solid color - no gradient */
+  background: var(--pf-color-accent, #0f4c81);
+  color: white;
+  
+  font-weight: 600;
+  font-size: 0.8rem;
+  
+  border: none;
+  border-radius: 3px;
+  
+  /* Paper shadow */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.time-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Hour variant - slightly different shade */
+.time-pill--hour {
+  background: #1a5fa3;
+}
+
+/* Empty cells */
+.schedule-table td:empty::before,
+.schedule-table td.empty::before {
+  content: '—';
+  color: var(--pf-text-muted);
+  opacity: 0.4;
+}
+
+
+/* ═══════════════════════════════════════════════
+   8. INFO PANELS - PAPER CARDS
+   ───────────────────────────────────────────────
+   Simple paper cards with shadows.
+   ═══════════════════════════════════════════════ */
+
+.info-panel {
+  /* Solid paper background */
+  background: var(--paper-surface);
+  
+  border: 1px solid var(--paper-edge);
+  border-radius: 4px;
+  
+  padding: 1.5rem;
+  
+  /* Real paper shadow */
+  box-shadow: var(--paper-shadow);
+  
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.info-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--paper-shadow-lifted);
+}
+
+.info-panel-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  
+  /* Solid color icon background */
+  background: var(--pf-color-accent, #0f4c81);
+  
+  /* Simple shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  margin: 0 auto 1rem;
+}
+
+
+/* ═══════════════════════════════════════════════
+   9. FAQ ACCORDION - PAPER SECTIONS
+   ═══════════════════════════════════════════════ */
+
+.faq-item {
+  /* Solid paper background */
+  background: var(--paper-surface);
+  
+  border: 1px solid var(--paper-edge);
+  border-radius: 4px;
+  
+  overflow: hidden;
+  
+  /* Paper shadow */
+  box-shadow: var(--paper-shadow-stack);
+  
+  transition: box-shadow 0.15s ease;
+}
+
+.faq-item:hover {
+  box-shadow: var(--paper-shadow);
+}
+
+.faq-item[open] {
+  border-color: var(--pf-color-accent);
+}
+
+
+/* ═══════════════════════════════════════════════
+   10. RESPONSIVE - MOBILE
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .eyebrow {
+    font-size: 0.65rem;
+    padding: 3px 10px;
+  }
+  
+  .pf-layer.bottom {
+    transform: translate(4px, 4px);
+  }
+  
+  .belt-pip {
+    width: 12px;
+    height: 12px;
+    margin-right: 3px;
+  }
+  
+  .time-pill {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 75px;
+  }
+}
+
+
+/* ============================================
+   END OF PAPER-FU ORIGAMI
+   ============================================ */

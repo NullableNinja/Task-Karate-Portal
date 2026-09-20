@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="belt-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Belt Testing Requirements | Task Karate School La Crosse, WI</title>
+    <meta name="description" content="White belt testing requirements for Task Karate School. Learn the basic rules, kicks, stances, and self-defense techniques needed for your first belt test.">
+    <link rel="canonical" href="https://taskkarate.com/belts/white-belt.html">
+    
+    <!-- 
+    Belt-Specific Theming Instructions:
+    To change belt colors, update the class on the <html> tag above:
+    - class="belt-white"  -> Light gray accents
+    - class="belt-gold"   -> Gold accents (#fbbf24)
+    - class="belt-orange" -> Orange accents (#f97316)
+    - class="belt-green"  -> Green accents (#10b981)
+    - class="belt-blue"   -> Blue accents (#3b82f6)
+    - class="belt-purple" -> Purple accents (#a855f7)
+    - class="belt-brown"  -> Brown accents (#92400e)
+    - class="belt-red"    -> Red accents (#ef4444)
+    - class="belt-black"  -> Gray accents (#9ca3af)
+    -->
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Belt Color Theme Variables */
+        .belt-white {
+            --belt-color: #e5e7eb;
+            --belt-color-rgb: 229, 231, 235;
+        }
+        
+        .belt-gold {
+            --belt-color: #fbbf24;
+            --belt-color-rgb: 251, 191, 36;
+        }
+        
+        .belt-orange {
+            --belt-color: #f97316;
+            --belt-color-rgb: 249, 115, 22;
+        }
+        
+        .belt-green {
+            --belt-color: #10b981;
+            --belt-color-rgb: 16, 185, 129;
+        }
+        
+        .belt-blue {
+            --belt-color: #3b82f6;
+            --belt-color-rgb: 59, 130, 246;
+        }
+        
+        .belt-purple {
+            --belt-color: #a855f7;
+            --belt-color-rgb: 168, 85, 247;
+        }
+        
+        .belt-brown {
+            --belt-color: #92400e;
+            --belt-color-rgb: 146, 64, 14;
+        }
+        
+        .belt-red {
+            --belt-color: #ef4444;
+            --belt-color-rgb: 239, 68, 68;
+        }
+        
+        .belt-black {
+            --belt-color: #9ca3af;
+            --belt-color-rgb: 156, 163, 175;
+        }
+        
+        /* Screen Styles - Match site aesthetic */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* CSS Variables for Belt-Specific Theming */
+        :root {
+            --belt-color: #e5e7eb; /* White belt - light gray for visibility */
+            --belt-color-rgb: 229, 231, 235;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(26, 26, 46, 0.9);
+            border: 2px solid rgba(var(--belt-color-rgb), 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid rgba(var(--belt-color-rgb), 0.4);
+        }
+        
+        .logo {
+            width: 100px;
+            margin-bottom: 0.75rem;
+            filter: drop-shadow(0 2px 6px rgba(var(--belt-color-rgb), 0.4));
+        }
+        
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--belt-color);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(var(--belt-color-rgb), 0.5);
+            margin: 0;
+        }
+        
+        .congrats {
+            background: rgba(var(--belt-color-rgb), 0.1);
+            border: 2px solid rgba(var(--belt-color-rgb), 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .congrats h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4rem;
+            color: var(--belt-color);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+        
+        .congrats p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .section {
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .section-header {
+            font-family: 'Bebas Neue', sans-serif;
+            background: linear-gradient(135deg, rgba(var(--belt-color-rgb), 0.2), rgba(var(--belt-color-rgb), 0.1));
+            border-left: 4px solid var(--belt-color);
+            color: white;
+            padding: 0.6rem 1rem;
+            font-size: 1.3rem;
+            font-weight: normal;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-icon {
+            font-size: 1.1rem;
+        }
+        
+        .subsection-header {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            color: var(--belt-color);
+            margin: 1rem 0 0.75rem 0;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid rgba(var(--belt-color-rgb), 0.3);
+            letter-spacing: 1px;
+        }
+        
+        .item {
+            margin: 0.75rem 0;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-left: 3px solid var(--belt-color);
+            border-radius: 4px;
+        }
+        
+        .item-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            margin-bottom: 0.35rem;
+        }
+        
+        .item-desc {
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.85rem;
+            margin-left: 1rem;
+        }
+        
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.25rem 0;
+        }
+        
+        .callout {
+            background: rgba(251, 191, 36, 0.08);
+            border: 2px solid rgba(251, 191, 36, 0.25);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .callout h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 0.5rem;
+            color: #fbbf24;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        
+        .callout p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        
+        .goal-box {
+            background: rgba(var(--belt-color-rgb), 0.08);
+            border: 2px solid rgba(var(--belt-color-rgb), 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .goal-box h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 0.75rem;
+            font-size: 1.3rem;
+            color: var(--belt-color);
+            letter-spacing: 1px;
+        }
+        
+        .goal-item {
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        
+        .goal-label {
+            font-weight: 700;
+            color: var(--belt-color);
+        }
+        
+        .dates-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(var(--belt-color-rgb), 0.25);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.25rem 0;
+            text-align: center;
+        }
+        
+        .dates-section h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            margin-bottom: 0.75rem;
+            color: var(--belt-color);
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+        }
+        
+        .date-entry {
+            margin: 0.6rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .date-label {
+            font-weight: 700;
+            color: white;
+        }
+        
+        .date-line {
+            display: inline-block;
+            width: 180px;
+            border-bottom: 2px solid rgba(var(--belt-color-rgb), 0.4);
+            margin-left: 0.5rem;
+        }
+        
+        .footer {
+            text-align: center;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid rgba(var(--belt-color-rgb), 0.25);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+        
+        strong {
+            color: var(--belt-color);
+            font-weight: 700;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .bottom-section {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* Print Styles - Clean, Professional, Single Page */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            body {
+                background: white;
+                color: #000;
+                padding: 0;
+                font-size: 9pt;
+                line-height: 1.3;
+            }
+            
+            .container {
+                max-width: 100%;
+                background: white;
+                border: none;
+                border-radius: 0;
+                padding: 0.4in;
+                box-shadow: none;
+            }
+            
+            .header {
+                border-bottom: 2px solid #000;
+                margin-bottom: 0.15in;
+                padding-bottom: 0.1in;
+            }
+            
+            .logo {
+                width: 80px;
+                filter: none;
+                margin-bottom: 0.08in;
+            }
+            
+            h1 {
+                color: #000;
+                text-shadow: none;
+                font-size: 18pt;
+                margin: 0;
+            }
+            
+            .congrats {
+                background: #f5f5f5;
+                border: 2px solid #ddd;
+                border-radius: 3px;
+                padding: 0.12in;
+                margin-bottom: 0.15in;
+                box-shadow: none;
+            }
+            
+            .congrats h2 {
+                color: #000;
+                font-size: 12pt;
+                margin-bottom: 0.05in;
+            }
+            
+            .congrats p {
+                color: #333;
+                font-size: 9pt;
+                line-height: 1.3;
+            }
+            
+            .section {
+                background: none;
+                border: none;
+                padding: 0;
+                margin-bottom: 0.15in;
+                page-break-inside: avoid;
+            }
+            
+            .section-header {
+                background: #333;
+                color: white;
+                padding: 5pt 10pt;
+                border-radius: 2pt;
+                margin-bottom: 0.1in;
+                box-shadow: none;
+                font-size: 11pt;
+                border-left: none;
+            }
+            
+            .section-icon {
+                display: none;
+            }
+            
+            .subsection-header {
+                color: #000;
+                border-bottom: 1px solid #666;
+                font-size: 10pt;
+                margin: 0.1in 0 0.08in 0;
+                padding-bottom: 0.03in;
+            }
+            
+            .item {
+                background: #fafafa;
+                border-left: 2px solid #666;
+                padding: 5pt;
+                margin: 5pt 0;
+                page-break-inside: avoid;
+            }
+            
+            .item-title {
+                color: #000;
+                font-size: 9pt;
+                margin-bottom: 0.02in;
+            }
+            
+            .item-desc {
+                color: #555;
+                font-size: 8pt;
+                margin-left: 0.1in;
+                line-height: 1.2;
+            }
+            
+            .bottom-section {
+                gap: 0.12in;
+                margin: 0.15in 0;
+                page-break-inside: avoid;
+            }
+            
+            .callout {
+                background: #fffbf0;
+                border: 2px solid #ffc107;
+                padding: 0.1in;
+            }
+            
+            .callout h3 {
+                color: #856404;
+                font-size: 10pt;
+                margin-bottom: 0.05in;
+            }
+            
+            .callout p {
+                color: #333;
+                font-size: 8pt;
+                line-height: 1.3;
+            }
+            
+            .goal-box {
+                background: #f0f8f0;
+                border: 2px solid #4caf50;
+                padding: 0.1in;
+                box-shadow: none;
+            }
+            
+            .goal-box h2 {
+                color: #2e7d32;
+                font-size: 11pt;
+                margin-bottom: 0.06in;
+            }
+            
+            .goal-item {
+                color: #333;
+                font-size: 8pt;
+                margin: 0.04in 0;
+                line-height: 1.3;
+            }
+            
+            .goal-label {
+                color: #2e7d32;
+            }
+            
+            .dates-section {
+                background: #f5f5f5;
+                border: 2px solid #ccc;
+                padding: 0.1in;
+                margin: 0.12in 0;
+            }
+            
+            .dates-section h3 {
+                color: #000;
+                font-size: 11pt;
+                margin-bottom: 0.08in;
+            }
+            
+            .date-entry {
+                font-size: 9pt;
+                margin: 0.06in 0;
+            }
+            
+            .date-label {
+                color: #000;
+            }
+            
+            .date-line {
+                border-bottom: 1px solid #000;
+                width: 160px;
+            }
+            
+            .footer {
+                border-top: 1px solid #ccc;
+                color: #666;
+                font-size: 8pt;
+                margin-top: 0.12in;
+                padding-top: 0.1in;
+            }
+            
+            strong {
+                color: #000;
+            }
+            
+            @page {
+                margin: 0.4in;
+                size: letter;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-container" style="position: absolute; top: -40px; left: 0; background: #0f4c81; color: white; padding: 8px 16px; text-decoration: none; font-weight: 600; z-index: 100; border-radius: 0 0 4px 0;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to main content</a>
+    
+    <div id="main-container" class="container">
+        <div class="header">
+            <img src="../images/logo/Logo.png" alt="Task Karate Logo" class="logo">
+            <h1>White Belt Testing Sheet</h1>
+        </div>
+
+    <div class="congrats">
+        <h2>Congratulations!</h2>
+        <p>We hope you enjoyed your first Karate lesson! At the end of your <strong>second lesson</strong>, you will be eligible to test for your <strong>WHITE BELT</strong>!</p>
+    </div>
+
+        <div class="section">
+            <div class="section-header"><span class="section-icon">📋</span>Testing Requirements</div>        <div class="subsection-header">The Three Basic Rules of Martial Arts</div>
+        
+        <div class="item">
+            <div class="item-title">1. Don't use it the wrong way!</div>
+            <div class="item-desc">Never abuse your Martial Arts skills.</div>
+        </div>
+        
+        <div class="item">
+            <div class="item-title">2. Be respectful.</div>
+            <div class="item-desc">Show respect to your instructors, fellow students, and everyone around you.</div>
+        </div>
+        
+        <div class="item">
+            <div class="item-title">3. Do your best.</div>
+            <div class="item-desc">Always give your maximum effort in everything you do.</div>
+        </div>
+        
+        <div class="subsection-header">The Three Basic Stances</div>
+        
+        <div class="item">
+            <div class="item-title">1. Attention</div>
+            <div class="item-desc">Feet together, hands at your sides, standing straight and still.</div>
+        </div>
+        
+        <div class="item">
+            <div class="item-title">2. Chun Bi (Ready Stance)</div>
+            <div class="item-desc">Feet apart, hands in fists at belt level.</div>
+        </div>
+        
+        <div class="item">
+            <div class="item-title">3. Fighting Stance</div>
+            <div class="item-desc">Right foot steps back, hands come up in a guard position.</div>
+        </div>
+    </div>
+
+    <div class="bottom-section">
+        <div class="callout">
+            <h3>💭 Reflection Challenge</h3>
+            <p>Think of ways you have used the <strong>second and third rules</strong> of Martial Arts in your daily life since your last lesson! Be prepared to share examples during your test.</p>
+        </div>
+
+        <div class="goal-box">
+            <h2>🎯 Set A Goal!</h2>
+            <div class="goal-item">
+                <span class="goal-label">Your Goal:</span> Earn your WHITE BELT!
+            </div>
+            <div class="goal-item">
+                <span class="goal-label">Your Action:</span> Learn and practice the three basic rules. Take time to work toward your goal, and you <strong style="color: white;">will</strong> achieve it!
+            </div>
+        </div>
+    </div>
+
+    <div class="dates-section">
+        <h3>📅 Important Dates</h3>
+        <div class="date-entry">
+            <span class="date-label">Date of First Lesson:</span>
+            <span class="date-line"></span>
+        </div>
+        <div class="date-entry">
+            <span class="date-label">Date of White Belt:</span>
+            <span class="date-line"></span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Keep practicing, stay focused, and believe in yourself!
+    </div>
+</body>
+</html>

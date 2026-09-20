@@ -1,0 +1,185 @@
+<!-- ============================================
+     NAVIGATION BAR PARTIAL
+     Version: 1.0.0 - TaskKarate v4
+     
+     ╔════════════════════════════════════════════╗
+     ║  FILE FOLDER TAB NAVIGATION                ║
+     ╠════════════════════════════════════════════╣
+     ║  This file is loaded via JavaScript into   ║
+     ║  the #site-header div on each page.        ║
+     ╚════════════════════════════════════════════╝
+     
+     📁 Loaded by: js/partials.js
+     🎨 Styled by: css/paper-fu-navigation.css
+     
+     HOW TO EDIT:
+     ────────────────────────────────────────────
+     • To change a link URL: Update the href=""
+     • To change text: Update the <span> content
+     • To add a page: Copy an <li> block and modify
+     • To change icons: Replace the SVG code
+     
+     IMPORTANT: Keep the data-nav="" attributes!
+     These are used for active state highlighting.
+     ============================================ -->
+
+<!-- Google Fonts for Navigation -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+  rel="stylesheet"
+/>
+
+<!-- ============================================
+     FLOATING LOGO
+     ============================================
+     This logo floats separately from the nav.
+     Clicking it spins it (handled by JS).
+     
+     TO CHANGE THE LOGO:
+     Update the src="" path to your logo file.
+     ============================================ -->
+<div class="tk-logo-floating" id="tk-logo-spin">
+  <img
+    class="tk-logo-img"
+    src="images/logo/Logo.png"
+    alt="Task Karate Logo"
+  />
+</div>
+
+
+<!-- ============================================
+     MAIN NAVIGATION BAR
+     ============================================ -->
+<nav class="navbar">
+  
+  <!-- ==========================================
+       HAMBURGER BUTTON (Mobile Only)
+       ==========================================
+       Three-line menu button for mobile.
+       Opens/closes the navigation dropdown.
+       ========================================== -->
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- ==========================================
+       NAVIGATION LINKS
+       ==========================================
+       Each <li> is a file-folder tab.
+       
+       ATTRIBUTES:
+       • href="" → The page URL
+       • data-nav="" → Used for active highlighting
+       • The SVG is the tab icon
+       • The <span> is the tab text
+       ========================================== -->
+  <ul class="nav-links">
+
+    <!-- ========== HOME ========== -->
+    <li>
+      <a
+        class="nav-link"
+        href="index.html"
+        data-nav="home"
+      >
+        <!-- Home Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>HOME</span>
+      </a>
+    </li>
+
+    <!-- ========== SCHEDULE ========== -->
+    <li>
+      <a
+        class="nav-link"
+        href="schedule.html"
+        data-nav="schedule"
+      >
+        <!-- Calendar Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>SCHEDULE</span>
+      </a>
+    </li>
+
+    <!-- ========== STUDENTS ========== -->
+    <li>
+      <a
+        class="nav-link"
+        href="students.html"
+        data-nav="students"
+      >
+        <!-- Users Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>STUDENTS</span>
+      </a>
+    </li>
+
+    <!-- ========== NEWS ========== -->
+    <li>
+      <a
+        class="nav-link"
+        href="news.html"
+        data-nav="news"
+      >
+        <!-- Newspaper Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+          <path d="M18 14h-8"/>
+          <path d="M15 18h-5"/>
+          <path d="M10 6h8v4h-8V6Z"/>
+        </svg>
+        <span>NEWS</span>
+      </a>
+    </li>
+
+    <!-- ========== ABOUT ========== -->
+    <li>
+      <a
+        class="nav-link"
+        href="about.html"
+        data-nav="about"
+      >
+        <!-- Info Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4"/>
+          <path d="M12 8h.01"/>
+        </svg>
+        <span>ABOUT</span>
+      </a>
+    </li>
+
+  </ul>
+
+</nav>
+
+<!-- ============================================
+     END OF NAVIGATION PARTIAL
+     ============================================
+     
+     To add a new page to navigation:
+     
+     1. Copy one of the <li>...</li> blocks above
+     2. Update:
+        - href="newpage.html"
+        - data-nav="newpage"
+        - Replace the SVG with your icon
+        - Update the <span>TEXT</span>
+     3. Add styling in paper-fu-navigation.css:
+        .nav-link[data-nav="newpage"] { ... }
+     ============================================ -->

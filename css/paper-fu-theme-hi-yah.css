@@ -1,0 +1,650 @@
+/* ============================================
+   PAPER-FU THEME: HI-YAH!
+   Version: 1.0.0 - TaskKarate v4
+   
+   ╔════════════════════════════════════════════╗
+   ║  THE OFFICIAL TASK KARATE THEME            ║
+   ╠════════════════════════════════════════════╣
+   ║  Dark, warm navy backgrounds with the      ║
+   ║  Pantone "Classic Blue" accent system.     ║
+   ║                                            ║
+   ║  Inspired by the dojo at night:            ║
+   ║  • Deep navy backgrounds                   ║
+   ║  • Warm, welcoming accent colors           ║
+   ║  • High-contrast for readability           ║
+   ║  • Belt-color accents for buttons          ║
+   ╚════════════════════════════════════════════╝
+   
+   🎨 COLOR INSPIRATION:
+      • Background: Deep navy (#0a0e1a to #0f172a)
+      • Accent: Pantone Classic Blue (#0f4c81)
+      • Belt colors for variety
+   
+   📁 Dependencies:
+      - Requires: paper-fu-core.css (loaded first)
+   
+   ⚠️  This file ONLY overrides colors, fonts,
+       and decorative elements - NOT structure!
+   ============================================ */
+
+
+/* ============================================
+   GOOGLE FONTS IMPORT
+   ============================================
+   
+   FONTS USED:
+   • Bebas Neue - Headlines (bold, martial arts feel)
+   • Inter Variable - Body text (smooth weight transitions)
+   • Caveat Variable - Handwritten notes (Paper-Fu touch)
+   
+   VARIABLE FONT BENEFITS:
+   • Smoother weight transitions on hover
+   • Better optical sizing for legibility
+   • More design control with font-weight
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+
+/* ============================================
+   SECTION 1: BRAND COLOR PALETTE
+   ============================================
+   
+   These are the raw colors that everything
+   else is built from. Change these to change
+   the entire feel of the site.
+   ============================================ */
+
+:root {
+  
+  /* -----------------------------------------
+     PANTONE CLASSIC BLUE SCALE
+     -----------------------------------------
+     The signature Task Karate blue.
+     Ranges from light (100) to dark (900).
+     
+     Primary usage: --classic-blue-500
+     ----------------------------------------- */
+  --classic-blue-100: #b8d4e8;  /* Lightest */
+  --classic-blue-200: #8fbddb;
+  --classic-blue-300: #66a5ce;
+  --classic-blue-400: #3d8ec1;  /* Light accent */
+  --classic-blue-500: #0f4c81;  /* ← PRIMARY BLUE */
+  --classic-blue-600: #0d4070;
+  --classic-blue-700: #0a345e;
+  --classic-blue-800: #08284d;  /* Dark accent */
+  --classic-blue-900: #051c3b;  /* Darkest */
+  
+  
+  /* -----------------------------------------
+     NAVY BACKGROUND SCALE
+     -----------------------------------------
+     Deep, warm navy for backgrounds.
+     Creates that "dojo at night" atmosphere.
+     ----------------------------------------- */
+  --navy-50:  #1e2942;  /* Lightest navy */
+  --navy-100: #0f172a;  /* Primary background */
+  --navy-200: #0a0e1a;  /* Deeper */
+  --navy-300: #050814;  /* Deepest */
+  
+  
+  /* -----------------------------------------
+     BELT COLORS
+     -----------------------------------------
+     Traditional karate belt progression.
+     Used for buttons, accents, and indicators.
+     
+     ORDER: White → Gold → Orange → Green → 
+            Purple → Blue → Red → Brown → Black
+     ----------------------------------------- */
+  --belt-white:  #f5f5f0;
+  --belt-gold:   #ffd700;
+  --belt-orange: #ff8c00;
+  --belt-green:  #22c55e;
+  --belt-purple: #a855f7;
+  --belt-blue:   #3b82f6;
+  --belt-red:    #ef4444;
+  --belt-brown:  #92400e;
+  --belt-black:  #1a1a1a;
+}
+
+
+/* ============================================
+   SECTION 2: SEMANTIC COLOR MAPPINGS
+   ============================================
+   
+   These variables are used by paper-fu-core.css.
+   They map our brand colors to the Paper-Fu
+   variable system.
+   ============================================ */
+
+:root {
+  
+  /* -----------------------------------------
+     BACKGROUND COLORS
+     -----------------------------------------
+     Main page backgrounds.
+     ----------------------------------------- */
+  --pf-bg-primary: var(--navy-300);      /* #050814 - Main background */
+  --pf-bg-secondary: var(--navy-100);    /* #0f172a - Sections */
+  --pf-bg-tertiary: var(--navy-50);      /* #1e2942 - Cards/panels */
+  
+  
+  /* -----------------------------------------
+     SURFACE COLORS (Cards, Panels, etc.)
+     -----------------------------------------
+     PAPER-FU: These must be SOLID colors!
+     Real paper is opaque, not transparent.
+     ----------------------------------------- */
+  --pf-surface-1: #2a3441;   /* Primary surface - main cards/panels */
+  --pf-surface-2: #1f2732;   /* Secondary surface - stacked paper behind */
+  --pf-surface-3: #343f4d;   /* Tertiary surface - lighter paper */
+  
+  
+  /* -----------------------------------------
+     TEXT COLORS
+     -----------------------------------------
+     Primary: Main content text
+     Secondary: Descriptions, subtitles
+     Tertiary: Hints, placeholders
+     Inverse: Text on dark buttons
+     ----------------------------------------- */
+  --pf-text-primary: #e5e7eb;    /* Light gray - main text */
+  --pf-text-secondary: #9ca3af;  /* Medium gray - descriptions */
+  --pf-text-tertiary: #6b7280;   /* Dim gray - hints */
+  --pf-text-inverse: #ffffff;    /* White - on buttons */
+  
+  
+  /* -----------------------------------------
+     ACCENT COLORS (Brand highlights)
+     -----------------------------------------
+     Used for buttons, links, focus states.
+     ----------------------------------------- */
+  --pf-accent-primary: var(--classic-blue-400);       /* #3d8ec1 */
+  --pf-accent-primary-hover: var(--classic-blue-300); /* #66a5ce */
+  --pf-accent-primary-alpha: rgba(61, 142, 193, 0.2); /* Translucent */
+  --pf-accent-secondary: var(--belt-purple);          /* #a855f7 */
+  
+  /* Status colors */
+  --pf-accent-success: var(--belt-green);   /* #22c55e */
+  --pf-accent-warning: var(--belt-orange);  /* #ff8c00 */
+  --pf-accent-error: var(--belt-red);       /* #ef4444 */
+  
+  
+  /* -----------------------------------------
+     BORDER COLORS
+     -----------------------------------------
+     Subtle borders for definition.
+     ----------------------------------------- */
+  --pf-border-subtle: rgba(148, 163, 184, 0.15);  /* Barely visible */
+  --pf-border-medium: rgba(148, 163, 184, 0.25);  /* Normal borders */
+  --pf-border-strong: rgba(148, 163, 184, 0.40);  /* Emphasis */
+  
+  
+  /* -----------------------------------------
+     SHADOW COLORS
+     -----------------------------------------
+     Dark theme uses darker shadows.
+     ----------------------------------------- */
+  --pf-shadow-color: rgba(0, 0, 0, 0.35);
+  --pf-shadow-color-strong: rgba(0, 0, 0, 0.50);
+}
+
+
+/* ============================================
+   SECTION 3: TYPOGRAPHY
+   ============================================
+   
+   Font family assignments for the theme.
+   ============================================ */
+
+:root {
+  /* Primary font - body text */
+  --pf-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Headline font - big, bold, martial arts */
+  --pf-font-headline: 'Bebas Neue', 'Impact', sans-serif;
+  
+  /* Handwritten font - Paper-Fu sticky notes */
+  --pf-font-handwritten: 'Caveat', cursive;
+  
+  /* Monospace - code, if needed */
+  --pf-font-mono: 'Fira Code', 'Courier New', monospace;
+}
+
+
+/* ============================================
+   SECTION 4: BODY & BACKGROUND STYLING
+   ============================================
+   
+   The overall page background with the
+   signature Task Karate geometric gradient.
+   ============================================ */
+
+body {
+  background-color: var(--pf-bg-primary);
+  color: var(--pf-text-primary);
+  font-family: var(--pf-font-primary);
+  font-optical-sizing: auto;
+  font-feature-settings: "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Geometric gradient background overlay */
+.bg-geo {
+  position: fixed;
+  inset: -10vmax;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* First gradient layer */
+.bg-geo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    /* Diagonal blue bands */
+    linear-gradient(
+      120deg,
+      transparent 0% 30%,
+      rgba(36, 77, 120, 0.18) 30% 60%,
+      transparent 60%
+    ),
+    linear-gradient(
+      -35deg,
+      transparent 0% 45%,
+      rgba(20, 54, 88, 0.22) 45% 72%,
+      transparent 72%
+    ),
+    /* Radial glows */
+    radial-gradient(
+      1200px 700px at 20% 15%,
+      rgba(34, 72, 112, 0.20),
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 600px at 85% 90%,
+      rgba(8, 26, 41, 0.35),
+      transparent 65%
+    );
+  filter: saturate(0.9);
+  animation: subtle-float 20s ease-in-out infinite;
+}
+
+/* Second gradient layer */
+.bg-geo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      200deg,
+      transparent 0% 40%,
+      rgba(16, 45, 80, 0.18) 40% 66%,
+      transparent 66%
+    ),
+    linear-gradient(
+      30deg,
+      transparent 0% 50%,
+      rgba(8, 32, 52, 0.18) 50% 78%,
+      transparent 78%
+    ),
+    radial-gradient(
+      1400px 800px at 50% -10%,
+      rgba(10, 36, 60, 0.35),
+      transparent 70%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.35;
+  transform: translateY(6vh);
+  animation: subtle-float 20s ease-in-out infinite;
+  animation-delay: -10s;
+}
+
+/* Gentle floating animation */
+@keyframes subtle-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.35;
+  }
+  25% {
+    transform: translateY(-2vh) translateX(1vw);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(1vh) translateX(-1vw);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translateY(-1vh) translateX(0.5vw);
+    opacity: 0.38;
+  }
+}
+
+
+/* ============================================
+   SECTION 5: HEADING OVERRIDES
+   ============================================
+   
+   Headlines use Bebas Neue for that bold
+   martial arts poster feel.
+   ============================================ */
+
+h1, h2, h3 {
+  font-family: var(--pf-font-headline);
+  font-weight: 400; /* Bebas Neue doesn't need weight */
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Specific heading classes from Task Karate */
+.heading-1 {
+  font-family: var(--pf-font-headline);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+  margin-bottom: var(--pf-space-lg);
+  text-transform: uppercase;
+}
+
+.heading-2 {
+  font-family: var(--pf-font-headline);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 1.2;
+  margin-bottom: var(--pf-space-md);
+  text-transform: uppercase;
+}
+
+.heading-3 {
+  font-family: var(--pf-font-headline);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+
+/* ============================================
+   SECTION 6: PANEL & CARD THEME OVERRIDES
+   ============================================
+   
+   Make panels and cards use our dark theme.
+   ============================================ */
+
+.pf-panel,
+.pf-panel.card {
+  background: var(--pf-surface-1);
+  border: 1px solid var(--pf-border-medium);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.pf-layer.bottom {
+  background: var(--pf-surface-2);
+  border: 1px solid var(--pf-border-subtle);
+}
+
+.pf-card {
+  background: var(--pf-surface-1);
+  border: 1px solid var(--pf-border-subtle);
+}
+
+
+/* ============================================
+   SECTION 7: BUTTON THEME - BELT COLORS
+   ============================================
+   
+   Buttons use the classic Task Karate belt
+   color system for variety and recognition.
+   ============================================ */
+
+/* ============================================
+   PAPER-FU BUTTONS
+   ============================================
+   Buttons styled as paper cards with stacked
+   layers and solid matte colors.
+   ============================================ */
+
+/* Base button - Paper card style */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pf-space-sm);
+  
+  padding: 0.875rem 1.75rem;
+  
+  /* Solid matte paper color */
+  background: var(--pf-surface-2);
+  color: var(--pf-text-primary);
+  
+  border: 2px solid var(--pf-surface-3);
+  border-radius: var(--pf-radius-md);
+  
+  font-family: var(--pf-font-primary);
+  font-size: var(--pf-font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  
+  cursor: pointer;
+  text-decoration: none;
+  
+  position: relative;
+  
+  /* Paper shadow */
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.2),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+  
+  transition: 
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* Stacked paper layer behind */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pf-surface-3);
+  border-radius: var(--pf-radius-md);
+  transform: translate(3px, 3px) rotate(0.5deg);
+  z-index: -1;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  border-color: var(--pf-accent-primary);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.25),
+    0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn:hover::before {
+  transform: translate(4px, 4px) rotate(0.8deg);
+}
+
+.btn:active {
+  transform: translateY(-1px);
+}
+
+/* Button with accent left border (like a sticky note) */
+.btn-orange {
+  border-left: 4px solid var(--belt-orange);
+}
+.btn-orange:hover {
+  border-color: var(--belt-orange);
+  border-left-width: 4px;
+}
+
+.btn-purple {
+  border-left: 4px solid var(--belt-purple);
+}
+.btn-purple:hover {
+  border-color: var(--belt-purple);
+  border-left-width: 4px;
+}
+
+.btn-red {
+  border-left: 4px solid var(--belt-red);
+}
+.btn-red:hover {
+  border-color: var(--belt-red);
+  border-left-width: 4px;
+}
+
+.btn-green {
+  border-left: 4px solid var(--belt-green);
+}
+.btn-green:hover {
+  border-color: var(--belt-green);
+  border-left-width: 4px;
+}
+
+/* Secondary/outline button */
+.btn-secondary,
+.btn-outline {
+  background: transparent;
+  color: var(--pf-text-primary);
+  border: 1px solid var(--pf-border-medium);
+}
+.btn-secondary:hover,
+.btn-outline:hover {
+  background: var(--pf-surface-2);
+  border-color: var(--pf-accent-primary);
+}
+
+
+/* ============================================
+   SECTION 8: FORM OVERRIDES
+   ============================================
+   
+   Dark theme form styling.
+   ============================================ */
+
+.pf-input,
+.pf-textarea,
+.pf-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+  background: var(--pf-surface-1);
+  border: 1px solid var(--pf-border-medium);
+  color: var(--pf-text-primary);
+}
+
+.pf-input:focus,
+.pf-textarea:focus,
+.pf-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--pf-accent-primary);
+  box-shadow: 
+    0 0 0 3px var(--pf-accent-primary-alpha),
+    var(--pf-shadow-sm);
+}
+
+/* Form labels */
+.form-label,
+label {
+  color: var(--pf-text-secondary);
+  font-weight: 500;
+}
+
+
+/* ============================================
+   SECTION 9: EYEBROW TEXT OVERRIDE
+   ============================================
+   
+   Eyebrows use the accent color.
+   ============================================ */
+
+.eyebrow {
+  color: var(--pf-accent-primary);
+  font-size: var(--pf-font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+
+/* ============================================
+   SECTION 10: LINK COLORS
+   ============================================ */
+
+a {
+  color: var(--pf-accent-primary);
+}
+
+a:hover {
+  color: var(--pf-accent-primary-hover);
+}
+
+
+/* ============================================
+   SECTION 11: SCROLLBAR STYLING
+   ============================================
+   
+   Custom scrollbar that matches the theme.
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pf-bg-secondary);
+  border-radius: var(--pf-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--classic-blue-600);
+  border-radius: var(--pf-radius-sm);
+  border: 2px solid var(--pf-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--classic-blue-500);
+}
+
+
+/* ============================================
+   SECTION 12: SELECTION HIGHLIGHT
+   ============================================
+   
+   When users select text, use brand colors.
+   ============================================ */
+
+::selection {
+  background: var(--pf-accent-primary-alpha);
+  color: var(--pf-text-primary);
+}
+
+
+/* ============================================
+   END OF HI-YAH! THEME
+   ============================================
+   
+   This theme transforms Paper-Fu into the
+   signature Task Karate look and feel.
+   
+   To modify colors:
+   1. Update the color palette in Section 1
+   2. The semantic mappings in Section 2 will
+      automatically use the new colors
+   
+   To add a new button color:
+   1. Add the color to the palette
+   2. Create a .btn-{name} class in Section 7
+   ============================================ */

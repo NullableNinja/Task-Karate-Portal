@@ -10,12 +10,11 @@
         <li><a href="{root}index.html" data-nav="home">Home</a></li>
         <li><a href="{root}programs.html" data-nav="programs">Programs</a></li>
         <li><a href="{root}schedule.html" data-nav="schedule">Schedule</a></li>
-        <li><a href="{root}students.html" data-nav="students">Students</a></li>
+        <li class="nav-dropdown"><details><summary>Students</summary><div class="nav-dropdown__menu"><a href="{root}students.html" data-nav="students">Student resources</a><a href="{root}belts.html">Belt requirements</a><a href="{root}rules.html">Task Karate rules</a><a href="{root}portal/login.html">Student check-in</a></div></details></li>
         <li><a href="{root}news.html" data-nav="news">News</a></li>
         <li><a href="{root}about.html" data-nav="about">About</a></li>
-        <li><a class="nav-portal" href="{root}portal/login.html">Student check-in</a></li>
-        <li><button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Use dark mode" title="Use dark mode">◐</button></li>
-        <li><a class="nav-cta nav-action" href="{root}contact.html" data-open-contact>Contact us</a></li>
+        <li><button class="theme-toggle" type="button" role="switch" data-theme-toggle aria-checked="false" aria-pressed="false" aria-label="Use dark mode" title="Use dark mode"><span class="theme-toggle__track" aria-hidden="true"><span class="theme-toggle__thumb"></span></span><span class="theme-toggle__label">Theme</span></button></li>
+        <li><a class="nav-action" href="{root}contact.html" data-open-contact>Contact us</a></li>
       </ul>
     </nav>
   </div>

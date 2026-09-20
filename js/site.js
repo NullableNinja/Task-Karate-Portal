@@ -34,9 +34,11 @@ const Site = (() => {
     document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
       const isDark = safeTheme === "dark";
       toggle.setAttribute("aria-pressed", String(isDark));
+      toggle.setAttribute("aria-checked", String(isDark));
       toggle.setAttribute("aria-label", isDark ? "Use light mode" : "Use dark mode");
       toggle.setAttribute("title", isDark ? "Use light mode" : "Use dark mode");
-      toggle.textContent = isDark ? "☼" : "◐";
+      toggle.classList.toggle("is-dark", isDark);
+      toggle.innerHTML = `<span class="theme-toggle__track" aria-hidden="true"><span class="theme-toggle__thumb"></span></span><span class="theme-toggle__label">${isDark ? "Dark" : "Light"}</span>`;
     });
   }
 
@@ -62,6 +64,13 @@ const Site = (() => {
   async function loadShell() {
     try {
       config = await loadJson(`${root}data/site.json`);
+      if (body.classList.contains("portal-page") && !document.querySelector("[data-portal-modern-styles]")) {
+        const portalStyles = document.createElement("link");
+        portalStyles.rel = "stylesheet";
+        portalStyles.href = `${root}css/portal-modern.css`;
+        portalStyles.dataset.portalModernStyles = "true";
+        document.head.appendChild(portalStyles);
+      }
       const [nav, footer] = await Promise.all([
         fetch(`${root}partials/navigation.html`).then((r) => r.text()),
         fetch(`${root}partials/footer.html`).then((r) => r.text())

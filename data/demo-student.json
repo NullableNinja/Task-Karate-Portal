@@ -1,0 +1,29 @@
+{
+  "name": "Emma",
+  "fullName": "Emma Thompson",
+  "rank": "Green Belt",
+  "nextRank": "Green Belt · 2nd stripe",
+  "progress": 62,
+  "classesSinceStripe": 5,
+  "classesToStripe": 8,
+  "totalClasses": 62,
+  "nextClass": { "day": "Tuesday", "time": "6:00 PM", "program": "Kids Karate", "group": "Green • Purple" },
+  "attendance": ["Nov 25", "Nov 24", "Nov 18", "Nov 11"],
+  "assignments": [
+    { "title": "Front kick snap & return", "detail": "3 sets of 10 each leg. Pause at the chamber to feel your balance.", "due": "Next class", "done": false },
+    { "title": "Green Belt Combo 2", "detail": "Jab, cross, rear roundhouse into backfist finish.", "due": "This week", "done": false }
+  ],
+  "achievements": [
+    { "title": "First Class", "category": "Attendance", "tier": "Bronze", "progress": "Complete" },
+    { "title": "Warmup Warrior", "category": "Effort", "tier": "Silver", "progress": "3 / 4 weeks" },
+    { "title": "Form Explorer", "category": "Forms", "tier": "Bronze", "progress": "2 / 3 forms" }
+  ],
+  "messages": [
+    { "from": "Ms. Yehle", "role": "Instructor", "text": "Great focus in class today. Keep it up!", "date": "Today", "unread": true },
+    { "from": "Logan Perez", "role": "Training partner", "text": "Congrats on landing the roundhouse combo!", "date": "Yesterday", "unread": false }
+  ],
+  "events": [
+    { "date": "Last Saturday of the month", "title": "Promotion testing", "detail": "By invitation. Check with your instructor for your time." },
+    { "date": "Ask at the front desk", "title": "School events and seminars", "detail": "Upcoming dates are announced by the school." }
+  ]
+}

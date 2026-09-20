@@ -1,0 +1,14 @@
+{
+  "id": "2025-09-30-update-number-1",
+  "title": "Update Number 1",
+  "subtitle": "First Update",
+  "date": "2025-09-30",
+  "hero": "news/images/2025-09-30-update-number-1-hero.png",
+  "heroAlt": "Update Number 1",
+  "summary": "Test of first update",
+  "bodyHtml": "<p>Test of first update</p>",
+  "tags": [],
+  "author": "Task Karate",
+  "pinned": false,
+  "draft": false
+}

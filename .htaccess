@@ -176,11 +176,13 @@ ErrorDocument 403 /404.html
 # Prevent directory browsing
 Options -Indexes
 
-# Protect sensitive data files
-<FilesMatch "\.(json|md|txt)$">
+# Protect documentation and private source files while allowing the public data contracts.
+<FilesMatch "\.(md|txt)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "\.json$">
     <IfModule mod_authz_core.c>
-        # Allow data/schedules.json but protect others
-        <If "%{REQUEST_URI} !~ m#^/data/schedules\.json$#">
+        <If "%{REQUEST_URI} !~ m#/(data/(site|schedules|demo-student)|news/posts-index|news/posts/)#">
             Require all denied
         </If>
     </IfModule>

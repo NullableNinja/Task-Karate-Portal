@@ -1,132 +1,54 @@
-# Task Karate School - Website v4
+# Task Karate School · Paper-Fu 2.0
 
-**Live Site:** [taskkarate.com](https://taskkarate.com)  
-**Version:** 4.0.0  
-**Last Updated:** December 26, 2025  
-**Overall Quality Score:** 91/100
+This folder is the modernization branch for the Task Karate public website and student portal foundation.
 
----
+## Run locally
 
-## 📋 Quick Reference
+The site uses `fetch()` for shared navigation, footer, schedules, news, and demo portal data, so open it through a local HTTP server rather than `file://`.
 
-- **Design System:** Paper-Fu (custom framework)
-- **Theme:** Hi-Yah! (Pantone Classic Blue #0f4c81)
-- **Pages:** 5 main + 9 belt testing sheets
-- **Technology:** Vanilla HTML/CSS/JavaScript (no frameworks)
-- **SEO Score:** 88/100
-- **Accessibility Score:** 90/100
-- **Performance Score:** 80/100
-
----
-
-## 🎨 Design System: Paper-Fu
-
-A custom design framework inspired by scrapbooking and Paper Mario aesthetics.
-
-**CSS Architecture:**
-```
-css/
-  paper-fu-core.css         ← Structural foundation
-  paper-fu-theme-hi-yah.css ← Colors, fonts, brand
-  paper-fu-origami.css      ← Shadow depth, polish
-  paper-fu-navigation.css   ← Nav components
-  paper-fu-footer.css       ← Footer components
+```powershell
+cd "C:\Users\Thoma\OneDrive\Web Design\Task_Karate_v4"
+python -m http.server 4173
 ```
 
----
+Then open [http://localhost:4173/](http://localhost:4173/).
 
-## 📁 Project Structure
+Key paths:
 
-```
-TaskKarate_v4/
-├── index.html, about.html, schedule.html, students.html, news.html
-├── 404.html, offline.html
-├── belts/ (9 belt testing requirement sheets)
-├── css/ (stylesheets)
-├── js/ (JavaScript modules)
-├── images/ (assets)
-├── data/ (JSON files)
-├── partials/ (reusable HTML)
-├── robots.txt, sitemap.xml, manifest.json, .htaccess
-```
+- `/index.html` — public home
+- `/programs.html` — programs
+- `/schedule.html` — responsive, JSON-backed schedule
+- `/students.html` — student resources and preserved downloads
+- `/news.html` — historical/demo news archive
+- `/about.html` — school and instructor story
+- `/contact.html` — trial/contact flow with a safe demo state
+- `/portal/login.html` — demo login
+- `/portal/index.html` — portal overview
+- `/portal/training.html`, `/portal/progress.html`, `/portal/messages.html`, `/portal/events.html`, `/portal/profile.html` — direct portal routes
 
----
+## Configuration
 
-## ⚡ Key Features
+Edit `data/site.json` for school identity and contact details. Leave `siteUrl` empty until the production domain is verified. The new pages use relative links and do not require a repository-name base path.
 
-- Free trial popup with localStorage
-- Layered paper stack hero sections
-- Dynamic schedule loader (JSON)
-- Belt requirements modal system
-- Contact form modal
-- Progressive image loading
-- Scroll progress bar
-- PWA support (installable)
-- Skip links (accessibility)
+Public class times live in `data/schedules.json`. Do not add capacity/countdown values unless the school has an authoritative live source. `data/demo-student.json` is synthetic presentation data only.
 
----
+## Content and assets
 
-## 📊 Quality Metrics
+The original high-resolution images remain in place. The modernization adds responsive dimensions and lazy loading to the new pages, while preserving the older v4 CSS/JS and belt HTML as historical compatibility material. Original v2 PDFs were copied into `files/forms/` and `files/testing/` without overwriting the source archive.
 
-**Overall Score:** 91/100
-- Performance: 80/100
-- Accessibility: 90/100
-- SEO: 88/100
-- UX: 96/100
-- Security: 68/100
-- Code Quality: 92/100
+The current news JSON contains historical/demo test entries. Confirm editorial content before publishing it as current news.
 
-**Visual Design:** 88.4/100 (A- grade)
+## Portal security boundary
 
----
+The Student Portal is a frontend prototype. Its login sets a local demo session and loads synthetic data; it is not authentication and must not be used for real student records. A production backend must enforce sessions, authorization between students/guardians/instructors, validation, CSRF protection, rate limiting, privacy controls, and safe message handling.
 
-## 💰 Estimated Market Value
+## Deployment checklist
 
-**$2,500 - $4,500** (Recommended: $3,200)
+1. Verify the production domain and set `data/site.json.siteUrl`.
+2. Generate a sitemap from that verified origin; the included historical sitemap is intentionally not treated as authoritative.
+3. Confirm contact details, schedule, program language, and news with staff.
+4. Replace the demo portal adapter with a secure backend/auth provider.
+5. Run responsive and keyboard QA at 320, 375, 390, 768, 1024, and 1440px on the deployed host.
+6. Add an image build step for AVIF/WebP and `srcset` variants when the hosting pipeline is selected.
 
-Based on:
-- Custom Paper-Fu design system
-- Professional code quality
-- Complete SEO implementation
-- Unique visual identity
-- Production-ready state
-
----
-
-## 🔧 Customization
-
-**Edit Colors:**
-```css
-/* css/paper-fu-theme-hi-yah.css */
-:root {
-  --pantone-classic-blue: #0f4c81;
-  --navy-100: #0f172a;
-}
-```
-
-**Update Schedules:**
-Edit `data/schedules.json`
-
-**Add Photos:**
-Add to `images/photos/` and update `index.html`
-
----
-
-## 📚 Documentation
-
-- **COMPREHENSIVE_AUDIT.md** - 50-criteria quality assessment
-- **IMPLEMENTATION_LOG.md** - Development progress
-- **ENHANCEMENT_PLAN.md** - Future improvements
-- **FEATURES.md** - Feature documentation
-
----
-
-## 📞 Contact
-
-**Task Karate School**  
-2433 Losey Blvd S, La Crosse, WI 54601  
-taskkarate@gmail.com | (608) 788-3126
-
----
-
-**Built with ❤️ and Hi-Yahs! 🥋**
+See `docs/DESIGN_ARCHAEOLOGY.md` and `docs/MODERNIZATION_PLAN.md` for the evidence, preserved functionality, retired behavior, architecture decision, and known limitations.

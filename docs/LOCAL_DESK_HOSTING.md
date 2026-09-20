@@ -31,7 +31,7 @@ The front-end still labels the service as a desk adapter, not a secure internet 
 
 ## Desk workflow and local gates
 
-The check-in screen follows the historical SvelteKit roster flow: search for a student, select the student, optionally choose a class, and check in. Opening the private student portal is a separate action. It requires the student's local demo PIN and a fresh profile-access acknowledgment each time. Seed records use `1234` only as a frontend demonstration value; this is not suitable for production authentication.
+The desk workflow follows the historical SvelteKit roster flow: search for a student, select the student, and open the student portal. It requires the student's local demo PIN and a fresh profile-access acknowledgment each time. Class attendance is a separate module on `/schedule.html`: after portal access, a student can choose today's eligible classes and record attendance. Seed records use `1234` only as a frontend demonstration value; this is not suitable for production authentication.
 
 Staff management is available at `/admin/index.html`. The local prototype gate uses `8675309`, matching the historical instructor-demo PIN. This is only a convenience boundary for a supervised local prototype. It is not a secure staff login and must be replaced with server-side authentication and authorization before real student records are used.
 

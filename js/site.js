@@ -67,7 +67,7 @@ const Site = (() => {
       if (body.classList.contains("portal-page") && !document.querySelector("[data-portal-modern-styles]")) {
         const portalStyles = document.createElement("link");
         portalStyles.rel = "stylesheet";
-        portalStyles.href = `${root}css/portal-modern.css`;
+        portalStyles.href = `${root}css/portal-modern.css?v=portal-20260920`;
         portalStyles.dataset.portalModernStyles = "true";
         document.head.appendChild(portalStyles);
       }

@@ -15,6 +15,19 @@ body {
   font-family: var(--font-body);
   line-height: 1.55;
 }
+
+/* Schedule attendance module. This is intentionally separate from student-portal access. */
+.schedule-checkin { margin-top:1.25rem; padding:1.15rem; border:1px solid var(--tk-line-strong); background:var(--tk-surface-strong); }
+.schedule-checkin__intro { display:flex; align-items:end; justify-content:space-between; gap:1rem; padding-bottom:.95rem; border-bottom:1px solid var(--tk-line); }
+.schedule-checkin__intro h2 { margin:.25rem 0 .35rem; font-size:clamp(1.45rem,3vw,2.2rem); }
+.schedule-checkin__intro p { max-width:48rem; margin:0; color:var(--tk-muted); font-size:.88rem; line-height:1.5; }
+.schedule-checkin__day { display:flex; align-items:center; gap:.7rem; padding:.8rem 0 .55rem; }.schedule-checkin__day strong { color:var(--tk-ink); }.schedule-checkin__day span { color:var(--tk-muted); font-size:.75rem; }
+.schedule-checkin__classes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; }
+.schedule-checkin__class { display:grid; grid-template-columns:90px minmax(0,1fr) auto; align-items:center; gap:.7rem; min-height:66px; padding:.7rem .8rem; border:1px solid var(--tk-line); background:var(--tk-paper); color:var(--tk-ink); text-align:left; cursor:pointer; }
+.schedule-checkin__class:hover,.schedule-checkin__class:focus-visible,.schedule-checkin__class.is-selected { border-color:var(--tk-blue-700); background:var(--tk-blue-100); outline:none; }.schedule-checkin__class.is-checked { border-color:var(--belt-green); background:color-mix(in srgb,var(--belt-green) 14%,var(--tk-paper)); cursor:default; }
+.schedule-checkin__time { color:var(--tk-blue-700); font-weight:900; }.schedule-checkin__class strong,.schedule-checkin__class small { display:block; }.schedule-checkin__class strong { font-size:.8rem; }.schedule-checkin__class small { margin-top:.2rem; color:var(--tk-muted); font-size:.7rem; }.schedule-checkin__class b { color:var(--tk-blue-700); font-size:.68rem; white-space:nowrap; }
+.schedule-checkin__actions { display:flex; align-items:center; gap:1rem; margin-top:.9rem; padding-top:.9rem; border-top:1px solid var(--tk-line); }.schedule-checkin__actions button:disabled { opacity:.48; cursor:not-allowed; }.schedule-checkin__status,.schedule-checkin__message { color:var(--tk-muted); font-size:.78rem; }.schedule-checkin__message { margin:.5rem 0 0; }
+@media (max-width:700px) { .schedule-checkin__intro { align-items:start; flex-direction:column; }.schedule-checkin__intro .new-button { width:100%; }.schedule-checkin__classes { grid-template-columns:1fr; }.schedule-checkin__class { grid-template-columns:76px minmax(0,1fr) auto; }.schedule-checkin__actions { align-items:start; flex-direction:column; gap:.55rem; } }
 body::before {
   position: fixed;
   inset: 0;

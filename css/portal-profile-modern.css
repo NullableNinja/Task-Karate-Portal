@@ -7,3 +7,18 @@
 @media (max-width:900px) { .profile-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:700px) { .profile-hero { align-items:start; flex-direction:column; }.profile-hero__actions { justify-content:start; width:100%; }.profile-grid { grid-template-columns:1fr; }.profile-panel--wide { grid-column:auto; } }
 @media (max-width:500px) { .profile-hero__identity { align-items:start; flex-direction:column; }.profile-hero__avatar { flex-basis:72px; width:72px; height:72px; }.profile-hero h2 { font-size:3rem; }.profile-stat-grid { grid-template-columns:1fr 1fr; }.profile-stat-grid strong { font-size:1.35rem; }.profile-detail-list { grid-template-columns:1fr; }.profile-hero__actions { display:grid; grid-template-columns:1fr; }.profile-hero__actions>* { width:100%; } }
+
+/* Profile is a useful record, not a billboard. Keep the SvelteKit density on every viewport. */
+.profile-hero { gap:1rem; padding:1rem 1.1rem; }
+.profile-hero__identity { gap:.8rem; }
+.profile-hero__avatar { flex-basis:68px; width:68px; height:68px; border-width:3px; transform:none; }
+.profile-hero h2 { max-width:100%; margin:.2rem 0 .35rem; font-size:clamp(1.8rem,4vw,3rem); line-height:.95; }
+.profile-hero__meta { gap:.45rem; font-size:.72rem; }
+.profile-stat-grid { gap:.7rem; margin:1rem 0; }
+.profile-stat-grid>div { padding:.75rem .85rem; }
+.profile-stat-grid strong { font-size:1.25rem; }
+.profile-panel { padding:1rem; }
+.profile-panel__heading h2 { font-size:1.35rem; line-height:1; }
+.profile-hero__avatar[data-rank*="white"] { border-color:#e5e7eb; box-shadow:0 0 0 2px rgba(229,231,235,.16); }
+.profile-hero__avatar[data-rank*="yellow"] { border-color:#facc15; }.profile-hero__avatar[data-rank*="orange"] { border-color:#fb923c; }.profile-hero__avatar[data-rank*="green"] { border-color:#22c55e; }.profile-hero__avatar[data-rank*="blue"] { border-color:#3b82f6; }.profile-hero__avatar[data-rank*="purple"] { border-color:#a855f7; }.profile-hero__avatar[data-rank*="red"] { border-color:#ef4444; }.profile-hero__avatar[data-rank*="brown"] { border-color:#92400e; }.profile-hero__avatar[data-rank*="black"] { border-color:#64748b; }
+@media (max-width:500px) { .profile-hero h2 { font-size:2.25rem; }.profile-hero__identity { flex-direction:row; align-items:center; }.profile-hero__avatar { flex-basis:60px; width:60px; height:60px; } }

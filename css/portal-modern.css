@@ -78,3 +78,37 @@ body.portal-page .portal-content-header p { font-size:.8rem; }
 @media (max-width:1100px) { .status-kpi-row { grid-template-columns:repeat(3,1fr); }.status-dashboard-grid { grid-template-columns:repeat(2,1fr); }.dashboard-tabs a { min-width:auto; } }
 @media (max-width:760px) { body.portal-page .portal-container { width:calc(100% - 1rem); padding-top:6.7rem; }.portal-profile-float { top:82px; left:10px; }.portal-logout-float { top:82px; right:10px; }.dashboard-tabs { top:158px; width:calc(100% - 1rem); justify-content:flex-start; gap:6px; padding:6px; overflow-x:auto; border-radius:14px; }.dashboard-tabs a { flex:1 0 auto; min-height:40px; padding:8px 12px; font-size:.66rem; }.status-kpi-row,.status-dashboard-grid,.status-bottom-grid { grid-template-columns:1fr; }.status-kpi-row article { min-height:70px; }.status-attendance-grid { grid-template-columns:repeat(10,1fr); gap:5px; }.status-attendance-cell { width:auto; height:15px; }.portal-content-header { min-height:0!important; }.portal-content-header h1 { font-size:3rem!important; } }
 @media (prefers-reduced-motion:reduce) { .portal-profile-float,.portal-profile-float__details,.dashboard-tabs a { transition:none; } }
+
+/* Community/news cleanup: useful density, real content, and no repeated giant placeholders. */
+.portal-news-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:14px; }
+.portal-news-card { min-width:0; overflow:hidden; border:1px solid rgba(148,163,184,.28); background:rgba(15,23,42,.9); box-shadow:0 8px 18px rgba(0,0,0,.24); }
+.portal-news-card--featured { grid-column:1/-1; display:grid; grid-template-columns:minmax(240px,.8fr) minmax(0,1.2fr); }
+.portal-news-card>img { display:block; width:100%; height:100%; min-height:190px; object-fit:cover; }
+.portal-news-card__body { display:flex; flex-direction:column; align-items:flex-start; padding:1.05rem 1.15rem 1.15rem; }
+.portal-news-meta { display:flex; flex-wrap:wrap; gap:.6rem; color:#7dd3fc; font-size:.68rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.portal-news-meta span+span::before { content:"·"; margin-right:.6rem; color:#64748b; }
+.portal-news-card h2 { margin:.45rem 0 .35rem; color:#f8fafc; font-family:var(--font-display,Impact,sans-serif); font-size:clamp(1.45rem,2.2vw,2.15rem); line-height:.95; text-transform:uppercase; }
+.portal-news-card p { margin:0 0 .7rem; color:#cbd5e1; font-size:.84rem; line-height:1.5; }
+.portal-news-card__subtitle { color:#facc15!important; font-weight:700; }
+.portal-news-card .portal-text-link { margin-top:auto; padding:0; border:0; background:none; color:#38bdf8; font:800 .76rem/1.4 inherit; cursor:pointer; }
+.portal-calendar-summary { margin-top:0; }
+.portal-event-list { display:grid; gap:0; }
+.portal-event-list>div { display:grid; grid-template-columns:150px 1fr; gap:1rem; padding:.7rem 0; border-top:1px solid rgba(148,163,184,.16); }
+.portal-event-date { color:#facc15; font-size:.72rem; font-weight:800; text-transform:uppercase; }
+.portal-event-list strong,.portal-event-list small { display:block; }.portal-event-list strong { color:#f8fafc; font-size:.84rem; }.portal-event-list small { margin-top:.2rem; color:#94a3b8; font-size:.76rem; }
+.portal-messages-layout--community { grid-template-columns:minmax(230px,.9fr) minmax(210px,.8fr) minmax(0,1.45fr); align-items:start; }
+.portal-community-directory { min-width:0; }
+.portal-buddy-search { position:relative; display:block; margin:.75rem 0; }
+.portal-buddy-search input { width:100%; min-height:40px; padding:.55rem 2rem .55rem .75rem; border:1px solid rgba(148,163,184,.35); border-radius:8px; background:#071321; color:#e2e8f0; font:inherit; }
+.portal-buddy-search span[aria-hidden] { position:absolute; top:50%; right:.75rem; color:#7dd3fc; transform:translateY(-50%); }
+.portal-buddy-list { display:grid; gap:.25rem; }
+.portal-buddy-row { display:grid; grid-template-columns:34px minmax(0,1fr) auto; align-items:center; gap:.55rem; width:100%; padding:.55rem .45rem; border:1px solid transparent; border-radius:8px; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.portal-buddy-row:hover,.portal-buddy-row:focus-visible { border-color:rgba(56,189,248,.38); background:#10243a; outline:none; }
+.portal-buddy-row__meta { min-width:0; }.portal-buddy-row__meta strong,.portal-buddy-row__meta small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.portal-buddy-row__meta strong { color:#f8fafc; font-size:.76rem; }.portal-buddy-row__meta small { margin-top:.16rem; color:#94a3b8; font-size:.68rem; }.portal-buddy-row__action { color:#38bdf8; font-size:.65rem; font-weight:800; }
+.portal-messages-layout--community .portal-conversation-list { min-width:0; }.portal-messages-layout--community .portal-thread { min-width:0; }
+
+/* Rank accents are semantic: a white belt must never render as a green belt. */
+.portal-rank-mark[data-rank*="white"] { background:#e5e7eb; color:#172033; }.portal-rank-mark[data-rank*="yellow"] { background:#facc15; color:#172033; }.portal-rank-mark[data-rank*="orange"] { background:#fb923c; color:#172033; }.portal-rank-mark[data-rank*="green"] { background:#22c55e; color:#052e16; }.portal-rank-mark[data-rank*="blue"] { background:#3b82f6; color:#eff6ff; }.portal-rank-mark[data-rank*="purple"] { background:#a855f7; color:#fff; }.portal-rank-mark[data-rank*="red"] { background:#ef4444; color:#fff; }.portal-rank-mark[data-rank*="brown"] { background:#92400e; color:#fff; }.portal-rank-mark[data-rank*="black"] { background:#020617; color:#fff; box-shadow:inset 0 0 0 3px #64748b; }
+
+@media (max-width:900px) { .portal-news-card--featured { grid-template-columns:1fr; }.portal-messages-layout--community { grid-template-columns:1fr 1fr; }.portal-messages-layout--community .portal-thread { grid-column:1/-1; } }
+@media (max-width:650px) { .portal-news-list { grid-template-columns:1fr; }.portal-news-card--featured { grid-column:auto; }.portal-messages-layout--community { grid-template-columns:1fr; }.portal-messages-layout--community .portal-thread { grid-column:auto; }.portal-event-list>div { grid-template-columns:1fr; gap:.25rem; } }

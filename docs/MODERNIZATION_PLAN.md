@@ -34,11 +34,15 @@ The portal uses a demo session only. Production authentication, authorization, s
 - [x] Add about and contact/trial pages with accessible forms and failure/success states.
 - [x] Restore the historical About content, instructor credentials, What We Teach copy, and exact TASK dojo code.
 
-### Phase 3 — portal foundation
+### Phase 3 — portal foundation and community rebuild
 
 - [x] Add login/demo-login boundary and an explicit demo-data notice.
 - [x] Add dashboard, training, progression, achievements, messages, events, and profile views.
-- [x] Keep training and instructor communication central; omit the social feed from the primary navigation.
+- [x] Rebuild the portal around the historical SvelteKit-era student hub hierarchy rather than the previous card-only dashboard.
+- [x] Add a moderated-community foundation: feed, instructor notes, private-looking message threads, Gold Stars, achievements, rank progression, assignments, and journey history.
+- [x] Add a family/guardian consent workflow with explicit demo-only and attorney-review boundaries.
+- [x] Add a local staff workspace for demo moderation, staff notes, Gold Stars, synthetic profile edits, consent status, and snapshot export.
+- [x] Keep the social layer training-focused instead of making a generic social feed the product's only purpose.
 - [x] Add logout behavior and direct static route files for nested portal views.
 
 ### Phase 4 — polish
@@ -50,6 +54,7 @@ The portal uses a demo session only. Production authentication, authorization, s
 - [x] Restore Paper-Fu schedule pills, public rules/belt pages, schedule PDF access, and interactive class/news details.
 - [x] Add themed scroll progress, belt-rank progress, back-to-top, contact, and trial interactions.
 - [x] Add an explicitly local-only admin workflow demo and connect its synthetic profile draft to the portal.
+- [x] Document production roles, moderation, guardian consent, privacy, audit, retention, and legal-review requirements.
 
 ### Phase 5 — validation
 
@@ -62,9 +67,9 @@ The portal uses a demo session only. Production authentication, authorization, s
 
 - `data/site.json` owns school identity, contact details, social links, and the optional canonical origin.
 - `data/schedules.json` remains the source of truth for public class times.
-- `data/demo-student.json` is synthetic portal presentation data only.
+- `data/portal-demo.json` is synthetic portal presentation data only.
 - News JSON remains an archive/demo format until staff supplies verified editorial content.
-- `admin/index.html` is a local workflow prototype; it is not a production content-management system.
+- `admin/index.html` is a local workflow prototype; it is not a production content-management system. It cannot publish, authorize, or protect real student data.
 
 ## Deployment and domain
 

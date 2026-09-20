@@ -74,12 +74,12 @@ The main regression is the missing first-class student login/portal experience. 
 | v2/v4 photos and logos | Brand imagery | Preserve originals; use responsive sizing and `loading` hints. |
 | v3 dashboard data shape | Portal information architecture | Use safe, clearly labeled demo data until a backend exists. |
 | v3 dashboard components | Feature inventory | Rebuild the hierarchy; do not copy the dark/glass-heavy UI. |
-| karate-connect journey/Gold Star concepts | Portal motivation | Keep as private training/progress surfaces, not a public social feed. |
+| karate-connect journey/Gold Star concepts | Portal motivation | Keep as private training/progress surfaces and a moderated student community, not an unbounded public social feed. |
 | schedule-app | Operational schedule ideas | Review separately when live schedule administration becomes a requirement. |
 
-## Retire from the first modern generation
+## Retire or constrain from the first modern generation
 
-- A public social feed, open posting, comments, and buddy graph as the portal home.
+- An unmoderated public social feed, unrestricted open posting, and a buddy graph as the portal's only purpose. The rebuilt portal now keeps a private, training-focused community feed because the requested student experience depends on it; production access and moderation must be server-enforced.
 - Decorative fixed floating action menus and scroll progress bars that do not communicate useful state.
 - Per-page copies of navigation/footer and hardcoded production URLs.
 - Fake availability, capacity, countdown, or online-presence claims.
@@ -93,7 +93,7 @@ The schedule JSON and school contact details are the best available operational 
 
 Use a static public site plus a separate static portal shell in the same deployable project, sharing one token layer, site configuration, navigation vocabulary, and data contracts. This is the least risky modernization for the current no-backend environment: it preserves SEO and fast public pages, avoids a framework migration before there is an authenticated data boundary, and keeps route files deployable on ordinary static hosting.
 
-The portal is a demo frontend boundary today. A future backend can replace `data/demo-student.json` and the demo session adapter without changing the information hierarchy. If authenticated SSR, instructor tools, or real-time messaging become requirements, migrate the portal boundary to SvelteKit or a server-rendered application at that point—not before.
+The portal is a demo frontend boundary today. A future backend can replace `data/portal-demo.json` and the demo session adapter without changing the information hierarchy. If authenticated SSR, instructor tools, or real-time messaging become requirements, migrate the portal boundary to SvelteKit or a server-rendered application at that point—not before.
 
 ## Current visual correction
 

@@ -1,0 +1,68 @@
+{
+  "student": {
+    "id": "emma-thompson",
+    "name": "Emma",
+    "fullName": "Emma Thompson",
+    "rank": "Green Belt",
+    "nextRank": "Green Belt · 2nd stripe",
+    "progress": 62,
+    "classesSinceStripe": 5,
+    "classesToStripe": 8,
+    "totalClasses": 62,
+    "trainingDays": "Tuesday · Thursday · Saturday",
+    "nextClass": { "day": "Tuesday", "time": "6:00 PM", "program": "Kids Karate", "group": "Green · Purple" },
+    "attendance": ["Nov 25", "Nov 24", "Nov 18", "Nov 11"],
+    "bio": "Working on clean combinations, better balance, and being a helpful partner.",
+    "guardianStatus": "Needs guardian review"
+  },
+  "staffNote": {
+    "author": "Ms. Yehle",
+    "role": "Instructor note",
+    "title": "Keep the chamber quiet.",
+    "body": "Your front kick is getting stronger. This week, slow the return down and see if you can keep your balance all the way home.",
+    "date": "Today"
+  },
+  "posts": [
+    { "id": "post-1", "author": "Ms. Yehle", "role": "Instructor", "rank": "3rd Degree Black Belt", "type": "instructor", "content": "Great focus in class today. Remember: the belt is a marker of the work, not the finish line.", "date": "Today", "fistbumps": 12, "fistbumped": false, "comments": 3 },
+    { "id": "post-2", "author": "Emma Thompson", "role": "Student", "rank": "Green Belt", "type": "training", "content": "Finally landed that roundhouse-backfist combo. The hip rotation tip helped a lot!", "date": "Yesterday", "fistbumps": 8, "fistbumped": true, "comments": 2 },
+    { "id": "post-3", "author": "Task Karate School", "role": "Announcement", "rank": "School note", "type": "announcement", "content": "Promotion testing is by invitation. Check with your instructor for your time and bring your questions to class.", "date": "Monday", "fistbumps": 18, "fistbumped": false, "comments": 4 },
+    { "id": "post-4", "author": "Logan Perez", "role": "Training partner", "rank": "Brown Belt", "type": "achievement", "content": "Gold Star earned for helping a newer partner through the combination line. Nice work, everyone.", "date": "Sunday", "fistbumps": 21, "fistbumped": false, "comments": 6 }
+  ],
+  "goldStars": [
+    { "id": "star-1", "student": "Emma Thompson", "reason": "Consistent effort", "from": "Ms. Yehle", "date": "This week", "color": "gold" },
+    { "id": "star-2", "student": "Logan Perez", "reason": "Helpful training partner", "from": "Mr. T", "date": "This week", "color": "blue" },
+    { "id": "star-3", "student": "Maya Chen", "reason": "Courage to try again", "from": "Anne Markos", "date": "Last week", "color": "orange" }
+  ],
+  "achievements": [
+    { "title": "First Class", "category": "Attendance", "tier": "Bronze", "progress": "Complete" },
+    { "title": "Warmup Warrior", "category": "Effort", "tier": "Silver", "progress": "3 / 4 weeks" },
+    { "title": "Form Explorer", "category": "Forms", "tier": "Bronze", "progress": "2 / 3 forms" },
+    { "title": "Helpful Partner", "category": "Community", "tier": "Gold", "progress": "Complete" }
+  ],
+  "assignments": [
+    { "id": "assignment-1", "title": "Front kick snap & return", "detail": "3 sets of 10 each leg. Pause at the chamber to feel your balance.", "due": "Next class", "done": false },
+    { "id": "assignment-2", "title": "Green Belt Combo 2", "detail": "Jab, cross, rear roundhouse into backfist finish.", "due": "This week", "done": false }
+  ],
+  "messages": [
+    { "id": "msg-1", "from": "Ms. Yehle", "role": "Instructor", "preview": "Great focus in class today. Keep it up!", "date": "Today", "unread": true, "messages": [{ "from": "Ms. Yehle", "body": "Great focus in class today. Keep it up! Try the slower front-kick return before Tuesday.", "date": "Today · 6:18 PM" }] },
+    { "id": "msg-2", "from": "Logan Perez", "role": "Training partner", "preview": "Congrats on landing the roundhouse combo!", "date": "Yesterday", "unread": false, "messages": [{ "from": "Logan Perez", "body": "Congrats on landing the roundhouse combo! Want to review it before class?", "date": "Yesterday · 7:04 PM" }] },
+    { "id": "msg-3", "from": "Task Karate School", "role": "School staff", "preview": "Your current testing sheet is ready to review.", "date": "Last week", "unread": false, "messages": [{ "from": "Task Karate School", "body": "Your current testing sheet is ready to review. Bring questions to your instructor.", "date": "Last week" }] }
+  ],
+  "events": [
+    { "date": "By invitation", "title": "Promotion testing", "detail": "Check with your instructor for your time." },
+    { "date": "Ask at the front desk", "title": "School events and seminars", "detail": "Upcoming dates are announced by the school." },
+    { "date": "Every training week", "title": "Practice check-in", "detail": "Mark what you worked on and bring questions to class." }
+  ],
+  "journey": [
+    { "date": "Current", "title": "Green Belt · 2nd stripe", "detail": "Working toward the next stripe through attendance, technique, and effort.", "color": "green" },
+    { "date": "Earlier", "title": "Green Belt", "detail": "Promotion recognized after steady work on combinations and forms.", "color": "green" },
+    { "date": "Earlier", "title": "Purple Belt", "detail": "A foundation of balance, focus, and training partner care.", "color": "purple" },
+    { "date": "First step", "title": "First class", "detail": "Everyone starts somewhere.", "color": "white" }
+  ],
+  "waiver": {
+    "version": "Draft 2026-01",
+    "title": "Task Karate participation and community acknowledgment",
+    "status": "Not signed",
+    "reviewNote": "This demo copy is a workflow placeholder. It is not legal advice, does not waive any legal right, and requires review by the school’s attorney before production use."
+  }
+}

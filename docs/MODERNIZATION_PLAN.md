@@ -80,6 +80,10 @@ The current pass deliberately restores the most useful v4 interaction language i
 
 Known limitations remain intentional: only the historical Kids and Teens/Adults PDFs are currently available; other schedule views offer print output until verified PDFs exist. The admin page cannot securely publish or manage real records, and the portal still uses synthetic data.
 
+### Visual reset pass
+
+The first modernization pass was functionally useful but visually too close to a generic card-based school template. The follow-up reset establishes a stronger Paper-Fu / Field Notes direction: a warm paper-and-ink palette, cobalt and yellow as controlled accents, the transparent TASK mark in the shared header, editorial typography, photographic tape layers, fewer rounded surfaces, clearer home-page pathways, and a portal that shares the same visual grammar. Existing factual content, public rules, schedule behavior, belt resources, and demo security boundaries remain intact.
+
 ## Exit criteria
 
 The modernization is ready for production handoff when staff verifies content/domain, a backend replaces the demo portal adapter, responsive and keyboard QA passes on the deployed host, and large images are emitted in responsive modern formats by the chosen build/deploy pipeline.

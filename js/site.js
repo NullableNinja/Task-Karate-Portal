@@ -4,6 +4,33 @@ const Site = (() => {
   const page = body?.dataset.page || "";
   let config = null;
 
+  function applyTheme(theme) {
+    const safeTheme = theme === "dark" ? "dark" : "light";
+    document.documentElement.dataset.theme = safeTheme;
+    document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+      const isDark = safeTheme === "dark";
+      toggle.setAttribute("aria-pressed", String(isDark));
+      toggle.setAttribute("aria-label", isDark ? "Use light mode" : "Use dark mode");
+      toggle.setAttribute("title", isDark ? "Use light mode" : "Use dark mode");
+      toggle.textContent = isDark ? "☼" : "◐";
+    });
+  }
+
+  function wireTheme() {
+    const saved = (() => {
+      try { return localStorage.getItem("task-karate-theme"); } catch { return null; }
+    })();
+    const preferred = saved || (window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    applyTheme(preferred);
+    document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+      toggle.addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        applyTheme(next);
+        try { localStorage.setItem("task-karate-theme", next); } catch { /* preference remains session-only */ }
+      });
+    });
+  }
+
   async function loadJson(path) {
     const response = await fetch(path, { cache: "no-store" });
     if (!response.ok) throw new Error(`Could not load ${path}`);
@@ -26,6 +53,7 @@ const Site = (() => {
       document.querySelector("#site-footer")?.replaceWith(document.createRange().createContextualFragment(interpolate(footer, values)));
       document.querySelector(`[data-nav="${page}"]`)?.setAttribute("aria-current", "page");
       wireNavigation();
+      wireTheme();
       document.querySelectorAll("[data-year]").forEach((node) => { node.textContent = new Date().getFullYear(); });
       setMetadata(config);
     } catch (error) {

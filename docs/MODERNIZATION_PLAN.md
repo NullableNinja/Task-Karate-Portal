@@ -20,6 +20,7 @@ The portal uses a demo session only. Production authentication, authorization, s
 - [x] Capture the v4 baseline in a local `modernization` Git branch.
 - [x] Add centralized site configuration with an unset production URL until verified.
 - [x] Create the Paper-Fu 2.0 token layer: color, type, spacing, radii, elevation, motion, z-index, containers, and breakpoints.
+- [x] Add a persistent light/dark theme preference with a night-blue Paper-Fu palette.
 - [x] Replace the dynamic v4 shell with a small accessible shared navigation/footer.
 - [x] Preserve old CSS/JS and source assets until the new surface is validated.
 
@@ -31,6 +32,7 @@ The portal uses a demo session only. Production authentication, authorization, s
 - [x] Rebuild student resources with downloads, belt requirements, and a distinct portal entry point.
 - [x] Add a restrained news/archive page and preserve the historical JSON pipeline as clearly non-authoritative content.
 - [x] Add about and contact/trial pages with accessible forms and failure/success states.
+- [x] Restore the historical About content, instructor credentials, What We Teach copy, and exact TASK dojo code.
 
 ### Phase 3 — portal foundation
 

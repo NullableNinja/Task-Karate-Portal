@@ -43,10 +43,12 @@ The main regression is the missing first-class student login/portal experience. 
 - The new-student form and belt testing resources from the v2 lineage.
 - Gold Stars, achievement tiers, rank/stripe progression, assignments, attendance, and training history.
 - The welcoming voice and local La Crosse identity.
+- The exact dojo code from the TASK student resources: “Don’t use it the wrong way!”, “Be respectful!”, and “Do your best!”
 
 ## Recurring problems
 
 - Three-layer paper stacks were applied to nearly every container, making hierarchy noisy.
+- A shortened About page can accidentally discard authoritative instructor credentials and the dojo code; factual copy needs to be treated as content, not disposable marketing text.
 - Large shadows, rotations, animated backgrounds, and fixed widgets competed with content and sometimes collided on mobile.
 - Static pages duplicated canonical URLs, school data, navigation, and footer details.
 - Schedule iterations repeatedly tried to make desktop tables behave like mobile layouts.
@@ -92,3 +94,7 @@ The schedule JSON and school contact details are the best available operational 
 Use a static public site plus a separate static portal shell in the same deployable project, sharing one token layer, site configuration, navigation vocabulary, and data contracts. This is the least risky modernization for the current no-backend environment: it preserves SEO and fast public pages, avoids a framework migration before there is an authenticated data boundary, and keeps route files deployable on ordinary static hosting.
 
 The portal is a demo frontend boundary today. A future backend can replace `data/demo-student.json` and the demo session adapter without changing the information hierarchy. If authenticated SSR, instructor tools, or real-time messaging become requirements, migrate the portal boundary to SvelteKit or a server-rendered application at that point—not before.
+
+## Current visual correction
+
+The first modernization pass was too restrained in the wrong places: it preserved usability but made the public experience read like a polished card-based marketing template. The current direction keeps the strong photographic hero and blue identity while bringing back selective Paper-Fu signals—file tabs, a dossier treatment for instructor information, tape/paper edges, and clearer editorial pacing. A persistent theme control adds a dark night-ink palette without turning the product into a black/red MMA template.

@@ -8,6 +8,11 @@
   --tk-paper: #fffdf8;
   --tk-paper-warm: #f5efe4;
   --tk-surface: #ffffff;
+  --tk-page-bg: var(--tk-paper-warm);
+  --tk-text: var(--tk-ink);
+  --tk-surface-strong: #ffffff;
+  --tk-header-bg: rgb(255 253 248 / .94);
+  --tk-footer-bg: #102431;
   --tk-line: #d7dee5;
   --tk-line-strong: #b7c3ce;
   --tk-focus: #f6b73c;
@@ -56,6 +61,33 @@
   --z-overlay: 50;
   --container: 1180px;
   --container-narrow: 820px;
+}
+
+/* Paper-Fu 2.0 keeps the paper/ink relationship in dark mode instead of
+   inverting every color. Blue ink becomes the night surface and paper panels
+   remain legible, tactile islands for content. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --tk-blue-900: #071a2a;
+  --tk-blue-800: #2b82bf;
+  --tk-blue-700: #58a9dc;
+  --tk-blue-100: #173c55;
+  --tk-ink: #edf5f8;
+  --tk-text: #edf5f8;
+  --tk-muted: #afc1cc;
+  --tk-paper: #142936;
+  --tk-paper-warm: #091722;
+  --tk-page-bg: #091722;
+  --tk-surface: #142936;
+  --tk-surface-strong: #1a3442;
+  --tk-header-bg: rgb(9 23 34 / .94);
+  --tk-footer-bg: #050f17;
+  --tk-line: #2b4554;
+  --tk-line-strong: #496475;
+  --tk-focus: #ffd36b;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / .25);
+  --shadow-2: 0 8px 22px rgb(0 0 0 / .3);
+  --shadow-3: 0 20px 45px rgb(0 0 0 / .4);
 }
 
 @media (prefers-reduced-motion: reduce) {

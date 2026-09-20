@@ -47,6 +47,9 @@ The portal uses a demo session only. Production authentication, authorization, s
 - [x] Add responsive image dimensions, lazy-loading hints, and a small image inventory.
 - [ ] Convert large raster sources to AVIF/WebP in a build pipeline when the deployment toolchain is chosen.
 - [x] Remove production-domain hardcoding from the new shell and document the remaining legacy pages.
+- [x] Restore Paper-Fu schedule pills, public rules/belt pages, schedule PDF access, and interactive class/news details.
+- [x] Add themed scroll progress, belt-rank progress, back-to-top, contact, and trial interactions.
+- [x] Add an explicitly local-only admin workflow demo and connect its synthetic profile draft to the portal.
 
 ### Phase 5 — validation
 
@@ -61,6 +64,7 @@ The portal uses a demo session only. Production authentication, authorization, s
 - `data/schedules.json` remains the source of truth for public class times.
 - `data/demo-student.json` is synthetic portal presentation data only.
 - News JSON remains an archive/demo format until staff supplies verified editorial content.
+- `admin/index.html` is a local workflow prototype; it is not a production content-management system.
 
 ## Deployment and domain
 
@@ -69,6 +73,12 @@ The new pages use relative links and do not require a repository-name base path.
 ## Security boundary
 
 The demo login is a visual/product-flow prototype. It does not authenticate a person, protect data, or authorize an instructor action. A production implementation must use server-managed sessions or a trusted identity provider, server-side authorization, validation/sanitization, CSRF protection for state-changing forms, rate limiting, and privacy-conscious logging. No real student records or secrets belong in this repository.
+
+### Corrective interaction pass
+
+The current pass deliberately restores the most useful v4 interaction language instead of replacing it with generic dashboard controls: schedule pills remain the primary program switcher, each class opens a detail dialog, verified historical schedule PDFs are downloadable, belt requirements and the exact TASK rules are public, news entries open detail dialogs, and the shared shell provides contact/trial dialogs, themed scroll affordances, and a back-to-top control. The two-week trial dialog is phrased as an inquiry because eligibility and terms must be confirmed by the school.
+
+Known limitations remain intentional: only the historical Kids and Teens/Adults PDFs are currently available; other schedule views offer print output until verified PDFs exist. The admin page cannot securely publish or manage real records, and the portal still uses synthetic data.
 
 ## Exit criteria
 

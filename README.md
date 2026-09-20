@@ -19,9 +19,12 @@ Key paths:
 - `/programs.html` — programs
 - `/schedule.html` — responsive, JSON-backed schedule
 - `/students.html` — student resources and preserved downloads
+- `/belts.html` — public belt testing requirements and downloads
+- `/rules.html` — public Task Karate rules
 - `/news.html` — historical/demo news archive
 - `/about.html` — school and instructor story
 - `/contact.html` — trial/contact flow with a safe demo state
+- `/admin/index.html` — local instructor/admin workflow demo
 - `/portal/login.html` — demo login
 - `/portal/index.html` — portal overview
 - `/portal/training.html`, `/portal/progress.html`, `/portal/messages.html`, `/portal/events.html`, `/portal/profile.html` — direct portal routes
@@ -30,7 +33,11 @@ Key paths:
 
 Edit `data/site.json` for school identity and contact details. Leave `siteUrl` empty until the production domain is verified. The new pages use relative links and do not require a repository-name base path.
 
-Public class times live in `data/schedules.json`. Do not add capacity/countdown values unless the school has an authoritative live source. `data/demo-student.json` is synthetic presentation data only.
+Public class times live in `data/schedules.json`; the historical Kids and Teens/Adults PDF exports are in `files/schedules/`. The admin demo can download the current JSON, but it does not publish changes to a server. News is managed from `news/posts-index.json` and the associated post JSON files. Do not add capacity/countdown values unless the school has an authoritative live source.
+
+The admin page is intentionally a management prototype, not a secure back office. It can edit a synthetic profile in this browser, save it to local storage, and export content for a developer/staff workflow. The student portal reads that local draft when present. A production admin page still needs authenticated server-side roles, persistence, audit history, and validation before it can manage real students, schedules, or news.
+
+The exact student rules and belt requirements are public and do not require portal sign-in.
 
 ## Content and assets
 
@@ -40,7 +47,7 @@ The current news JSON contains historical/demo test entries. Confirm editorial c
 
 ## Portal security boundary
 
-The Student Portal is a frontend prototype. Its login sets a local demo session and loads synthetic data; it is not authentication and must not be used for real student records. A production backend must enforce sessions, authorization between students/guardians/instructors, validation, CSRF protection, rate limiting, privacy controls, and safe message handling.
+The Student Portal is a frontend prototype. Its login sets a local demo session and loads synthetic data; it is not authentication and must not be used for real student records. The companion admin page is likewise local-only. A production backend must enforce sessions, authorization between students/guardians/instructors, validation, CSRF protection, rate limiting, privacy controls, and safe message handling.
 
 ## Deployment checklist
 

@@ -7,7 +7,8 @@
   }
   const view = document.body.dataset.view || "dashboard";
   try {
-    const student = await fetch("../data/demo-student.json", { cache: "no-store" }).then((r) => r.json());
+    const savedProfile = localStorage.getItem("task-karate-demo-student");
+    const student = savedProfile ? JSON.parse(savedProfile) : await fetch("../data/demo-student.json", { cache: "no-store" }).then((r) => r.json());
     mount.innerHTML = render(view, student);
     document.querySelectorAll("[data-logout]").forEach((button) => button.addEventListener("click", () => { sessionStorage.removeItem("task-karate-demo-session"); location.href = "login.html"; }));
     document.querySelectorAll("[data-assignment]").forEach((input) => input.addEventListener("change", (event) => event.target.closest(".list-item")?.classList.toggle("is-complete", event.target.checked)));

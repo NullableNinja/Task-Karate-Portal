@@ -3,3 +3,21 @@ __pycache__/
 data/task-karate-desk.sqlite3
 data/task-karate-desk.sqlite3-shm
 data/task-karate-desk.sqlite3-wal
+
+# Task Karate platform local state
+server/TaskKarate.Api/App_Data/
+server/TaskKarate.Api/*.db
+server/TaskKarate.Api/*.db-shm
+server/TaskKarate.Api/*.db-wal
+server/TaskKarate.Api/appsettings.Local.json
+server/TaskKarate.Api/appsettings.Development.local.json
+server/TaskKarate.Api/Properties/launchSettings.local.json
+.usersecrets/
+**/bin/
+**/obj/
+node_modules/
+apps/task-karate-web/.svelte-kit/
+apps/task-karate-web/build/
+apps/task-karate-web/.env
+apps/task-karate-web/.env.*
+!apps/task-karate-web/.env.example

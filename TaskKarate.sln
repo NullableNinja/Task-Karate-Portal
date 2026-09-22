@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{91D9309B-BE2C-4867-9475-04328866771A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskKarate.Api", "server\TaskKarate.Api\TaskKarate.Api.csproj", "{0137FA61-23CD-494E-B3F1-CC812EF7DD9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskKarate.Api.Tests", "server\TaskKarate.Api.Tests\TaskKarate.Api.Tests.csproj", "{E0E88D8F-8C1C-4D37-BDC6-2914BF65E16C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0137FA61-23CD-494E-B3F1-CC812EF7DD9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0137FA61-23CD-494E-B3F1-CC812EF7DD9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0137FA61-23CD-494E-B3F1-CC812EF7DD9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0137FA61-23CD-494E-B3F1-CC812EF7DD9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0E88D8F-8C1C-4D37-BDC6-2914BF65E16C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0E88D8F-8C1C-4D37-BDC6-2914BF65E16C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0E88D8F-8C1C-4D37-BDC6-2914BF65E16C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0E88D8F-8C1C-4D37-BDC6-2914BF65E16C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0137FA61-23CD-494E-B3F1-CC812EF7DD9B} = {91D9309B-BE2C-4867-9475-04328866771A}
+		{E0E88D8F-8C1C-4D37-BDC6-2914BF65E16C} = {91D9309B-BE2C-4867-9475-04328866771A}
+	EndGlobalSection
+EndGlobal

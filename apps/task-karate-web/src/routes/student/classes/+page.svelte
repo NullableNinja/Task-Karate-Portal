@@ -26,7 +26,7 @@
     try {
       const today = new Date();
       const from = today.toISOString().slice(0, 10);
-      const to = new Date(today.getTime() + 1000 * 60 * 60 * 24 * 21).toISOString().slice(0, 10);
+      const to = new Date(today.getTime() + 1000 * 60 * 60 * 24 * 6).toISOString().slice(0, 10);
       [profile, classes] = await Promise.all([api('/api/student/profile'), api<any[]>(`/api/student/public/schedule?from=${from}&to=${to}`)]);
     } catch (e) { error = apiError(e); }
     finally { loading = false; }
@@ -37,7 +37,7 @@
 
 {#if session}
   <StudentShell {session} active="classes">
-    <section class="student-heading"><span class="student-eyebrow">YOUR DOJO CALENDAR</span><h1>MY CLASSES</h1><p>See the next three weeks, choose the class you are attending, and check in from one clear place.</p></section>
+    <section class="student-heading"><span class="student-eyebrow">YOUR DOJO CALENDAR</span><h1>MY CLASSES</h1><p>See the next seven days, choose the class you are attending, and check in from one clear place.</p></section>
     {#if error}<div class="error" role="alert">{error}</div>{/if}
     {#if loading}<div class="student-panel loading-panel">Loading your classes…</div>{:else if classes.length === 0}<section class="student-panel empty-panel"><span class="rank-orb">▣</span><h2>No upcoming classes published</h2><p>Ask staff to publish the current schedule, then your next class will appear here.</p></section>{:else}
       <section class="student-panel classes-hero"><div><span class="student-eyebrow">NEXT STEP</span><h2>Choose your class, then check in.</h2><p>Check-in is recorded against the real class session and cannot be duplicated.</p></div><a class="outline-button" href="/schedule">View full schedule</a></section>

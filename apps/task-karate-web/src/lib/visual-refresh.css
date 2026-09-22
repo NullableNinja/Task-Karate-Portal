@@ -26,7 +26,6 @@
 .portal-orb { position: absolute; display: block; border: 1px solid #62caf72b; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #66d2ff26, #1b4b7114 58%, transparent 72%); box-shadow: inset -12px -14px 24px #020b1833, 0 0 42px #2c8bb51c; animation: portal-float-a 24s ease-in-out infinite; }
 .scroll-rank-indicator { position: fixed; z-index: 20; right: 0; bottom: 0; left: 0; height: 6px; background: #08111e; box-shadow: 0 -2px 12px #0008; }
 .scroll-rank-fill { display: block; width: var(--scroll-progress); height: 100%; background: var(--scroll-color); box-shadow: 0 0 12px var(--scroll-color); transition: width .18s ease, background .35s ease; }
-.scroll-rank-label { position: absolute; right: 14px; bottom: 9px; padding: 4px 7px; border: 1px solid color-mix(in srgb, var(--scroll-color) 60%, #fff 15%); border-radius: 6px; background: #091727e8; color: var(--scroll-color); font-size: .62rem; font-weight: 900; letter-spacing: .08em; opacity: .72; text-transform: uppercase; }
 .orb-a { width: 210px; height: 210px; left: -45px; top: 17%; }
 .orb-b { width: 115px; height: 115px; left: 31%; top: -28px; animation-name: portal-float-b; animation-duration: 19s; animation-delay: -6s; }
 .orb-c { width: 330px; height: 330px; right: -105px; top: 22%; animation-name: portal-float-c; animation-duration: 29s; animation-delay: -12s; }
@@ -371,6 +370,10 @@
 }
 
 @media (max-width: 900px) {
+  .student-app { padding-left: 24px; padding-right: 24px; }
+  .student-app .student-grid.two-column { grid-template-columns: 1fr; }
+  .student-app .student-panel { padding: 18px; }
+  .student-app .floating-nav { width: fit-content; max-width: calc(100vw - 48px); box-sizing: border-box; }
   .student-app .student-heading { margin-top: 12px; }
   .student-app .student-main { padding-top: 12px; }
   .profile-layout, .social-feed-layout { grid-template-columns: 1fr; }
@@ -389,6 +392,14 @@
 }
 
 @media (max-width: 560px) {
+  .student-app { padding-left: 17px; padding-right: 17px; }
+  .student-app .student-panel { padding: 16px; }
+  .student-app .floating-nav { max-width: calc(100vw - 34px); }
+  .student-app .training-track-nav { display: grid; grid-template-columns: 1fr; }
+  .student-app .training-track-nav a { text-align: center; }
+  .student-app .feed-card { padding: 16px; }
+  .student-app .reaction-button { min-height: 40px; padding: 8px 9px; }
+  .student-app .comment-compose { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
   .attendance-calendar { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .practice-form, .goal-form { grid-template-columns: 1fr; }
   .practice-form .full { grid-column: auto; }

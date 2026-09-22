@@ -49,5 +49,5 @@
   <button class="floating-logout" type="button" on:click={logout}><span aria-hidden="true">⏻</span> Log out</button>
   {#if error}<div class="student-toast error" role="alert">{error}</div>{/if}
   <main class="student-main"><slot /></main>
-  <div class="scroll-rank-indicator" role="progressbar" aria-label={`Page progress · ${scrollBelt.name}`} aria-valuemin="0" aria-valuemax="100" aria-valuenow={scrollPercent} style={`--scroll-progress:${scrollPercent}%;--scroll-color:${scrollBelt.color}`}><span class="scroll-rank-fill"></span><span class="scroll-rank-label">{scrollBelt.name} · {scrollPercent}%</span></div>
+  <div class="scroll-rank-indicator" role="progressbar" aria-label={`Page progress · ${scrollBelt.name}`} aria-valuemin="0" aria-valuemax="100" aria-valuenow={scrollPercent} style={`--scroll-progress:${scrollPercent}%;--scroll-color:${scrollBelt.color}`}><span class="scroll-rank-fill"></span></div>
 </div>

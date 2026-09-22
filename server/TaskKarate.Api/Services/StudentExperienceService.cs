@@ -30,7 +30,7 @@ public sealed record MessageItem(long MessageId, int SenderId, string SenderName
 public sealed record AchievementItem(string Name, string? Description, string? IconName, DateTime? AwardedAt);
 public sealed record NewsItem(long Id, string Title, string Body, DateTime PublishedAt);
 public sealed record ReactionSummary(string Code, string Label, string Icon, int Count, bool Selected);
-public sealed record FeedItem(long PostId, int AuthorId, string AuthorName, string? RankName, string Text, string PostType, DateTime CreatedAt, IReadOnlyList<ReactionSummary> Reactions);
+public sealed record FeedItem(long PostId, int AuthorId, string AuthorName, string? RankName, string Text, string PostType, DateTime CreatedAt, IReadOnlyList<ReactionSummary> Reactions, int CommentCount);
 public sealed record CommentItem(long CommentId, int AuthorId, string AuthorName, string Text, DateTime CreatedAt);
 public sealed record TrainingMissionItem(long MissionId, string Title, string Description, string Category, bool Completed, DateTime? CompletedAt);
 public sealed record TimelineItem(string Type, string Title, string Description, DateTime OccurredAt, string? Link);
@@ -649,7 +649,8 @@ WHERE student_id = $id;";
     public async Task<IReadOnlyList<FeedItem>> GetFeedAsync(int studentId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
-        command.CommandText = @"SELECT p.post_id, COALESCE(p.student_id, 0), COALESCE(sp.display_name, TRIM(s.first_name || ' ' || s.last_name), 'Task Karate'), r.rank_name, p.post_text, p.post_type, p.created_at
+        command.CommandText = @"SELECT p.post_id, COALESCE(p.student_id, 0), COALESCE(sp.display_name, TRIM(s.first_name || ' ' || s.last_name), 'Task Karate'), r.rank_name, p.post_text, p.post_type, p.created_at,
+  (SELECT COUNT(1) FROM post_comments c WHERE c.post_id = p.post_id AND c.visible = 1 AND c.moderation_status = 'approved')
 FROM posts p
 LEFT JOIN students s ON s.student_id = p.student_id
 LEFT JOIN student_profiles sp ON sp.student_id = p.student_id
@@ -657,10 +658,10 @@ LEFT JOIN student_rank_history h ON h.student_id = p.student_id AND h.student_ra
 LEFT JOIN ranks r ON r.rank_id = h.rank_id
 WHERE p.visible = 1 AND p.moderation_status = 'approved' AND p.post_type = 'student' AND (p.student_id = $id OR EXISTS (SELECT 1 FROM student_friendships f WHERE f.status = 'accepted' AND ((f.student_id = $id AND f.friend_id = p.student_id) OR (f.friend_id = $id AND f.student_id = p.student_id))))
 ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", studentId);
-        var rows = new List<(long Id, int AuthorId, string AuthorName, string? RankName, string Text, string Type, DateTime CreatedAt)>();
-        await using (var reader = await command.ExecuteReaderAsync(cancellationToken)) while (await reader.ReadAsync(cancellationToken)) rows.Add(new(reader.GetInt64(0), reader.GetInt32(1), reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetString(4), reader.GetString(5), DateTime.Parse(reader.GetString(6), CultureInfo.InvariantCulture)));
+        var rows = new List<(long Id, int AuthorId, string AuthorName, string? RankName, string Text, string Type, DateTime CreatedAt, int CommentCount)>();
+        await using (var reader = await command.ExecuteReaderAsync(cancellationToken)) while (await reader.ReadAsync(cancellationToken)) rows.Add((reader.GetInt64(0), reader.GetInt32(1), reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetString(4), reader.GetString(5), DateTime.Parse(reader.GetString(6), CultureInfo.InvariantCulture), reader.GetInt32(7)));
         var list = new List<FeedItem>();
-        foreach (var row in rows) list.Add(new(row.Id, row.AuthorId, row.AuthorName, row.RankName, row.Text, row.Type, row.CreatedAt, await GetReactionSummaryAsync(connection, row.Id, studentId, cancellationToken)));
+        foreach (var row in rows) list.Add(new(row.Id, row.AuthorId, row.AuthorName, row.RankName, row.Text, row.Type, row.CreatedAt, await GetReactionSummaryAsync(connection, row.Id, studentId, cancellationToken), row.CommentCount));
         return list;
     }
 

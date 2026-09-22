@@ -57,6 +57,9 @@ builder.Services.Configure<StarterDatabaseOptions>(options =>
     options.Path = builder.Configuration["StarterDatabase:Path"]
         ?? Environment.GetEnvironmentVariable("TASK_KARATE_STARTER_DB")
         ?? Path.Combine(dataDirectory, "TaskKarate_Starter.db");
+    options.ContentRootPath = builder.Environment.ContentRootPath;
+    options.ImportLegacySchedules = builder.Configuration.GetValue<bool>("StarterDatabase:ImportLegacySchedules") || Environment.GetEnvironmentVariable("TASK_KARATE_IMPORT_STARTER_SCHEDULES") is "1" or "true";
+    options.ImportDemoStudents = builder.Configuration.GetValue<bool>("StarterDatabase:ImportDemoStudents") || Environment.GetEnvironmentVariable("TASK_KARATE_IMPORT_STARTER_STUDENTS") is "1" or "true";
 });
 builder.Services.AddSingleton<IPasswordHasher<StarterStudentAccount>, PasswordHasher<StarterStudentAccount>>();
 builder.Services.AddSingleton<StudentExperienceService>();

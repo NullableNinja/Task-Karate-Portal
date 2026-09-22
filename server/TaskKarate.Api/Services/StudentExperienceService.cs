@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
@@ -8,6 +9,9 @@ namespace TaskKarate.Api.Services;
 public sealed class StarterDatabaseOptions
 {
     public string Path { get; set; } = string.Empty;
+    public string ContentRootPath { get; set; } = string.Empty;
+    public bool ImportLegacySchedules { get; set; }
+    public bool ImportDemoStudents { get; set; }
 }
 
 public sealed class StarterStudentAccount
@@ -74,9 +78,93 @@ CREATE INDEX IF NOT EXISTS ix_messages_thread ON student_messages(sender_id, rec
 CREATE INDEX IF NOT EXISTS ix_posts_news ON posts(post_type, visible, moderation_status, created_at);
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
+        await ImportDevelopmentDataAsync(connection, cancellationToken);
+        await MaterializeUpcomingSessionsAsync(connection, cancellationToken);
         await SeedDemoDataAsync(connection, cancellationToken);
         await EnsureBootstrapAccountAsync(connection, cancellationToken);
         Interlocked.Exchange(ref _ready, 1);
+    }
+
+    private async Task ImportDevelopmentDataAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        if (_options.ImportLegacySchedules) await ImportLegacySchedulesAsync(connection, cancellationToken);
+        if (_options.ImportDemoStudents) await ImportDemoStudentsAsync(connection, cancellationToken);
+    }
+
+    private async Task ImportLegacySchedulesAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(_options.ContentRootPath, "..", "..", "..", "..", "data", "schedules.json"));
+        if (!File.Exists(path)) path = System.IO.Path.GetFullPath(System.IO.Path.Combine(_options.ContentRootPath, "..", "..", "data", "schedules.json"));
+        if (!File.Exists(path)) { _logger.LogWarning("Starter schedule import was enabled, but {Path} was not found.", path); return; }
+        using var document = JsonDocument.Parse(await File.ReadAllTextAsync(path, cancellationToken));
+        foreach (var programProperty in document.RootElement.EnumerateObject())
+        {
+            var programName = programProperty.Value.GetProperty("title").GetString() ?? programProperty.Name;
+            foreach (var group in programProperty.Value.GetProperty("groups").EnumerateArray())
+            {
+                var groupName = group.GetProperty("name").GetString() ?? "Class";
+                var className = $"{programName} — {groupName}";
+                var description = programProperty.Value.TryGetProperty("description", out var descriptionProperty) ? descriptionProperty.GetString() : null;
+                var classId = await FindOrInsertClassAsync(connection, className, description, cancellationToken);
+                if (!group.TryGetProperty("schedule", out var schedule)) continue;
+                foreach (var day in schedule.EnumerateObject())
+                {
+                    if (!Enum.TryParse<DayOfWeek>(day.Name, true, out var dayOfWeek)) continue;
+                    foreach (var occurrence in day.Value.EnumerateArray())
+                    {
+                        var timeText = occurrence.GetProperty("time").GetString() ?? "";
+                        if (!DateTime.TryParse(timeText, CultureInfo.InvariantCulture, DateTimeStyles.NoCurrentDateDefault, out var parsedTime)) continue;
+                        var duration = occurrence.TryGetProperty("isHour", out var isHour) && isHour.GetBoolean() ? 60 : 45;
+                        var start = parsedTime.ToString("HH:mm", CultureInfo.InvariantCulture);
+                        var end = parsedTime.AddMinutes(duration).ToString("HH:mm", CultureInfo.InvariantCulture);
+                        await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO class_schedule(class_id, day_of_week, start_time, end_time, location_name, active) SELECT $class, $day, $start, $end, 'Main dojo', 1 WHERE NOT EXISTS (SELECT 1 FROM class_schedule WHERE class_id = $class AND day_of_week = $day AND start_time = $start AND active = 1)"; command.Parameters.AddWithValue("$class", classId); command.Parameters.AddWithValue("$day", (int)dayOfWeek); command.Parameters.AddWithValue("$start", start); command.Parameters.AddWithValue("$end", end); await command.ExecuteNonQueryAsync(cancellationToken);
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task<int> FindOrInsertClassAsync(SqliteConnection connection, string className, string? description, CancellationToken cancellationToken)
+    {
+        await using var find = connection.CreateCommand(); find.CommandText = "SELECT class_id FROM classes WHERE class_name = $name LIMIT 1"; find.Parameters.AddWithValue("$name", className); var existing = await find.ExecuteScalarAsync(cancellationToken); if (existing is not null) return Convert.ToInt32(existing, CultureInfo.InvariantCulture);
+        await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT INTO classes(class_name, description, active) VALUES ($name, $description, 1)"; insert.Parameters.AddWithValue("$name", className); insert.Parameters.AddWithValue("$description", (object?)description ?? DBNull.Value); await insert.ExecuteNonQueryAsync(cancellationToken);
+        await using var select = connection.CreateCommand(); select.CommandText = "SELECT class_id FROM classes WHERE class_name = $name LIMIT 1"; select.Parameters.AddWithValue("$name", className); return Convert.ToInt32(await select.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    private async Task ImportDemoStudentsAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        var path = System.IO.Path.GetFullPath(System.IO.Path.Combine(_options.ContentRootPath, "..", "..", "..", "..", "data", "portal-students.json"));
+        if (!File.Exists(path)) path = System.IO.Path.GetFullPath(System.IO.Path.Combine(_options.ContentRootPath, "..", "..", "data", "portal-students.json"));
+        if (!File.Exists(path)) { _logger.LogWarning("Starter demo-student import was enabled, but {Path} was not found.", path); return; }
+        using var document = JsonDocument.Parse(await File.ReadAllTextAsync(path, cancellationToken));
+        foreach (var item in document.RootElement.GetProperty("students").EnumerateArray())
+        {
+            var fullName = item.GetProperty("name").GetString() ?? "Demo Student"; var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries); if (parts.Length < 2) continue;
+            await using var find = connection.CreateCommand(); find.CommandText = "SELECT student_id FROM students WHERE first_name = $first AND last_name = $last LIMIT 1"; find.Parameters.AddWithValue("$first", parts[0]); find.Parameters.AddWithValue("$last", parts[1]); var value = await find.ExecuteScalarAsync(cancellationToken); int studentId;
+            if (value is not null) studentId = Convert.ToInt32(value, CultureInfo.InvariantCulture); else { await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT INTO students(first_name, last_name, preferred_name, start_date, active) VALUES ($first, $last, $preferred, $join, 1); SELECT last_insert_rowid();"; insert.Parameters.AddWithValue("$first", parts[0]); insert.Parameters.AddWithValue("$last", parts[1]); insert.Parameters.AddWithValue("$preferred", item.TryGetProperty("displayName", out var display) ? display.GetString() ?? fullName : fullName); insert.Parameters.AddWithValue("$join", item.TryGetProperty("joinDate", out var join) ? join.GetString() ?? DateTime.UtcNow.ToString("yyyy-MM-dd") : DateTime.UtcNow.ToString("yyyy-MM-dd")); studentId = Convert.ToInt32(await insert.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture); }
+            await using var profile = connection.CreateCommand(); profile.CommandText = "INSERT OR IGNORE INTO student_profiles(student_id, display_name, bio, favorite_technique) VALUES ($id, $name, 'Development-only imported demo profile.', $technique)"; profile.Parameters.AddWithValue("$id", studentId); profile.Parameters.AddWithValue("$name", item.TryGetProperty("displayName", out var profileName) ? profileName.GetString() ?? fullName : fullName); profile.Parameters.AddWithValue("$technique", item.TryGetProperty("funStats", out var stats) && stats.TryGetProperty("favoriteTechnique", out var technique) ? technique.GetString() ?? (object)DBNull.Value : DBNull.Value); await profile.ExecuteNonQueryAsync(cancellationToken);
+            if (item.TryGetProperty("rank", out var rankProperty)) await AddRankHistoryAsync(connection, studentId, rankProperty.GetString(), cancellationToken);
+        }
+    }
+
+    private static async Task AddRankHistoryAsync(SqliteConnection connection, int studentId, string? rankName, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(rankName)) return;
+        await using var existing = connection.CreateCommand(); existing.CommandText = "SELECT rank_id FROM ranks WHERE rank_name = $name LIMIT 1"; existing.Parameters.AddWithValue("$name", rankName); var existingId = await existing.ExecuteScalarAsync(cancellationToken); int rankId;
+        if (existingId is not null) rankId = Convert.ToInt32(existingId, CultureInfo.InvariantCulture);
+        else
+        {
+            await using var next = connection.CreateCommand(); next.CommandText = "SELECT COALESCE(MAX(rank_order), 0) + 1 FROM ranks"; var order = Convert.ToInt32(await next.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+            await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT INTO ranks(rank_name, rank_order, active) VALUES ($name, $order, 1)"; insert.Parameters.AddWithValue("$name", rankName); insert.Parameters.AddWithValue("$order", order); await insert.ExecuteNonQueryAsync(cancellationToken);
+            await using var select = connection.CreateCommand(); select.CommandText = "SELECT rank_id FROM ranks WHERE rank_name = $name LIMIT 1"; select.Parameters.AddWithValue("$name", rankName); rankId = Convert.ToInt32(await select.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+        }
+        await using var history = connection.CreateCommand(); history.CommandText = "INSERT INTO student_rank_history(student_id, rank_id, awarded_date) SELECT $student, $rank, date('now') WHERE NOT EXISTS (SELECT 1 FROM student_rank_history WHERE student_id = $student AND rank_id = $rank)"; history.Parameters.AddWithValue("$student", studentId); history.Parameters.AddWithValue("$rank", rankId); await history.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task MaterializeUpcomingSessionsAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        var start = DateTime.UtcNow.Date; await using var schedules = connection.CreateCommand(); schedules.CommandText = "SELECT class_id, day_of_week, start_time, end_time, instructor_id, location_name FROM class_schedule WHERE active = 1"; var rows = new List<(int ClassId, int Day, string Start, string End, object? Instructor, object? Location)>(); await using (var reader = await schedules.ExecuteReaderAsync(cancellationToken)) while (await reader.ReadAsync(cancellationToken)) rows.Add((reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetValue(4), reader.IsDBNull(5) ? null : reader.GetValue(5)));
+        foreach (var row in rows) for (var offset = 0; offset < 35; offset++) { var date = start.AddDays(offset); if ((int)date.DayOfWeek != row.Day) continue; await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT OR IGNORE INTO class_sessions(class_id, session_date, start_time, end_time, instructor_id, location_name, cancelled) VALUES ($class, $date, $start, $end, $instructor, $location, 0)"; insert.Parameters.AddWithValue("$class", row.ClassId); insert.Parameters.AddWithValue("$date", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)); insert.Parameters.AddWithValue("$start", row.Start); insert.Parameters.AddWithValue("$end", row.End); insert.Parameters.AddWithValue("$instructor", row.Instructor ?? DBNull.Value); insert.Parameters.AddWithValue("$location", row.Location ?? DBNull.Value); await insert.ExecuteNonQueryAsync(cancellationToken); }
     }
 
     private static async Task SeedDemoDataAsync(SqliteConnection connection, CancellationToken cancellationToken)
@@ -212,7 +300,7 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
 
     public async Task<long> SendMessageAsync(int senderId, int recipientId, string text, CancellationToken cancellationToken = default)
     {
-        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO student_messages(sender_id, recipient_id, message_text, created_at) VALUES ($sender, $recipient, $text, $now); SELECT last_insert_rowid();"; command.Parameters.AddWithValue("$sender", senderId); command.Parameters.AddWithValue("$recipient", recipientId); command.Parameters.AddWithValue("$text", text.Trim()); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); return Convert.ToInt64(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO student_messages(sender_id, recipient_id, message_text, created_at) VALUES ($sender, $recipient, $text, $now)"; command.Parameters.AddWithValue("$sender", senderId); command.Parameters.AddWithValue("$recipient", recipientId); command.Parameters.AddWithValue("$text", text.Trim()); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken); await using var idCommand = connection.CreateCommand(); idCommand.CommandText = "SELECT last_insert_rowid()"; return Convert.ToInt64(await idCommand.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
     }
 
     public async Task<IReadOnlyList<AchievementItem>> GetAchievementsAsync(int studentId, CancellationToken cancellationToken = default)

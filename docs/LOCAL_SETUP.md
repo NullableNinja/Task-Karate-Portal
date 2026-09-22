@@ -44,6 +44,15 @@ On first API startup the service creates only its missing support tables (`stude
 
 The supplied file currently contains the schema but may contain no student or session rows yet. In that case `/schedule` correctly reports that no sessions are published until staff or an explicit development seed creates them; the application does not invent live student records.
 
+For synthetic development data, opt into the repeatable import from the repository archive:
+
+```powershell
+$env:TASK_KARATE_IMPORT_STARTER_SCHEDULES = "1"
+$env:TASK_KARATE_IMPORT_STARTER_STUDENTS = "1"
+```
+
+The schedule importer reads `data/schedules.json` into recurring `classes` and `class_schedule` rows, then materializes the next 35 days into `class_sessions`. The student importer reads `data/portal-students.json` into clearly marked demo profiles and rank history. Both switches are off by default and must never be used for a real database without reviewing the imported rows.
+
 ```powershell
 $env:TASK_KARATE_STUDENT_ID = "1"
 $env:TASK_KARATE_STUDENT_USERNAME = "student.demo"

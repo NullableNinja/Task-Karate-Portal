@@ -7,6 +7,7 @@ namespace TaskKarate.Api.Services;
 public static class StudentAuth
 {
     public const string Scheme = "TaskKarateStudent";
+    public const string DisclaimerClaim = "task_karate_disclaimer";
 
     public static async Task<int?> GetStudentIdAsync(HttpContext context)
     {
@@ -32,13 +33,13 @@ public static class StudentExperienceEndpoints
             if (account is null) return Results.Problem("Invalid student credentials.", statusCode: StatusCodes.Status401Unauthorized);
             var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("student_id", account.StudentId.ToString()), new Claim(ClaimTypes.Name, account.DisplayName)], StudentAuth.Scheme));
             await context.SignInAsync(StudentAuth.Scheme, principal, new AuthenticationProperties { IsPersistent = request.RememberMe, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
-            return Results.Ok(new { authenticated = true, studentId = account.StudentId, displayName = account.DisplayName, rankName = account.RankName, disclaimerRequired = !await service.HasDisclaimerAsync(account.StudentId, ct) });
+            return Results.Ok(new { authenticated = true, studentId = account.StudentId, displayName = account.DisplayName, rankName = account.RankName, disclaimerRequired = true });
         });
         auth.MapGet("/me", async (StudentExperienceService service, HttpContext context, CancellationToken ct) =>
         {
             var authResult = await context.AuthenticateAsync(StudentAuth.Scheme);
             if (!authResult.Succeeded || !int.TryParse(authResult.Principal?.FindFirstValue("student_id"), out var id)) return Results.Unauthorized();
-            return Results.Ok(new { authenticated = true, studentId = id, displayName = authResult.Principal?.FindFirstValue(ClaimTypes.Name), disclaimerRequired = !await service.HasDisclaimerAsync(id, ct) });
+            return Results.Ok(new { authenticated = true, studentId = id, displayName = authResult.Principal?.FindFirstValue(ClaimTypes.Name), disclaimerRequired = authResult.Principal?.HasClaim(StudentAuth.DisclaimerClaim, "v1") != true });
         });
         auth.MapPost("/logout", async (HttpContext context) => { await context.SignOutAsync(StudentAuth.Scheme); return Results.NoContent(); });
 
@@ -47,7 +48,13 @@ public static class StudentExperienceEndpoints
         {
             var id = await StudentAuth.GetStudentIdAsync(context); if (id is null) return Results.Unauthorized();
             if (!request.Accepted) return Results.BadRequest(new { title = "Acknowledgment required", detail = "Accept the profile privacy acknowledgment before opening a student profile." });
-            await service.AcceptDisclaimerAsync(id.Value, ct); return Results.Ok(new { accepted = true });
+            await service.AcceptDisclaimerAsync(id.Value, ct);
+            var authResult = await context.AuthenticateAsync(StudentAuth.Scheme);
+            if (!authResult.Succeeded || authResult.Principal is null) return Results.Unauthorized();
+            var identity = new ClaimsIdentity(authResult.Principal.Claims, StudentAuth.Scheme);
+            identity.AddClaim(new Claim(StudentAuth.DisclaimerClaim, "v1"));
+            await context.SignInAsync(StudentAuth.Scheme, new ClaimsPrincipal(identity), authResult.Properties ?? new AuthenticationProperties { ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
+            return Results.Ok(new { accepted = true });
         });
 
         student.MapGet("/profile", async (StudentExperienceService service, HttpContext context, CancellationToken ct) =>
@@ -125,7 +132,8 @@ public static class StudentExperienceEndpoints
     private static async Task<StudentGate> RequireAcknowledgedStudent(StudentExperienceService service, HttpContext context, CancellationToken ct)
     {
         var id = await StudentAuth.GetStudentIdAsync(context); if (id is null) return new(null, Results.Unauthorized());
-        if (!await service.HasDisclaimerAsync(id.Value, ct)) return new(null, Results.Json(new { title = "Profile acknowledgment required", disclaimerRequired = true }, statusCode: StatusCodes.Status428PreconditionRequired));
+        var authResult = await context.AuthenticateAsync(StudentAuth.Scheme);
+        if (authResult.Principal?.HasClaim(StudentAuth.DisclaimerClaim, "v1") != true) return new(null, Results.Json(new { title = "Profile acknowledgment required", disclaimerRequired = true }, statusCode: StatusCodes.Status428PreconditionRequired));
         return new(id, null);
     }
 }

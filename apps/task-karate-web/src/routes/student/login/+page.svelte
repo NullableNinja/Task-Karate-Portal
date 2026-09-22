@@ -117,7 +117,7 @@
           <div class:selected={selectedStudent?.studentId === student.studentId} class="student-option">
             <button class="student-option-main" type="button" aria-pressed={selectedStudent?.studentId === student.studentId} on:click={() => choose(student)}>
               <span class="student-avatar" style={`--avatar-color: ${beltColor(student.rankName)}`}>{initials(student.displayName)}</span>
-              <span class="student-option-copy"><strong>{student.displayName}</strong><span>{student.rankName ?? 'Student'}</span>{#if student.is3LevelName}<small>{student.is3LevelName}</small>{/if}</span>
+              <span class="student-option-copy"><strong>{student.displayName}</strong>{#if student.is3LevelName}<small>{student.is3LevelName}</small>{/if}</span>
               <span class="belt-pill" style={`--belt-color: ${beltColor(student.rankName)}; --belt-text: ${beltTextColor(student.rankName)}`}>{student.rankName ?? 'Student'}</span>
             </button>
             {#if selectedStudent?.studentId === student.studentId}

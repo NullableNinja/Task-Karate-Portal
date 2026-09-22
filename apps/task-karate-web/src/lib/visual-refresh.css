@@ -462,11 +462,13 @@
 .roster-search { width: 100%; box-sizing: border-box; margin-top: 8px; border: 1px solid #55718a; background: #081526; color: #fff; border-radius: 9px; padding: 14px 15px; }
 .roster-search:focus-visible, .student-option-main:focus-visible, .enter-dojo-option:focus-visible, .pin-input:focus-visible { outline: 2px solid #b7eaff; outline-offset: 3px; }
 .roster-state { margin-top: 18px; border: 1px dashed #49647b; color: #c0cfdd; padding: 22px; text-align: center; }
-.student-roster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-height: min(54vh, 560px); overflow: auto; margin-top: 16px; padding: 3px; }
-.student-option { border: 1px solid #35516b; background: #12243a; border-radius: 12px; overflow: hidden; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
-.student-option:hover, .student-option.selected { border-color: #54bce9; background: #18314a; transform: translateY(-1px); }
-.student-option-main { display: flex; align-items: center; gap: 11px; width: 100%; min-width: 0; padding: 13px; border: 0; background: transparent; color: #f5f8fc; text-align: left; cursor: pointer; }
-.student-avatar { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border: 2px solid var(--avatar-color); border-radius: 50%; background: #213750; color: #f6fbff; font-weight: 900; }
+.student-roster { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-height: min(54vh, 560px); overflow: auto; margin-top: 16px; padding: 5px; }
+.student-option { border: 1px solid #55758f; background: linear-gradient(145deg, #1b3852, #10243a); border-radius: 14px; overflow: hidden; box-shadow: 0 11px 18px #020b16aa, 0 0 0 3px #d9f5ff0c, inset 0 1px 0 #ffffff1a; transition: border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease; }
+.student-option:nth-child(3n + 1) { transform: rotate(-.35deg); }
+.student-option:nth-child(3n) { transform: rotate(.35deg); }
+.student-option:hover, .student-option.selected { border-color: #70d4f5; background: linear-gradient(145deg, #234967, #142d46); transform: translateY(-2px) rotate(0); box-shadow: 0 15px 24px #020b16cc, 0 0 0 3px #d9f5ff18, inset 0 1px 0 #ffffff2a; }
+.student-option-main { display: flex; align-items: center; gap: 9px; width: 100%; min-width: 0; padding: 10px; border: 0; background: transparent; color: #f5f8fc; text-align: left; cursor: pointer; }
+.student-avatar { display: grid; place-items: center; width: 42px; height: 42px; flex: none; border: 2px solid var(--avatar-color); border-radius: 50%; background: #213750; color: #f6fbff; font-weight: 900; font-size: .85rem; box-shadow: 0 4px 8px #020b1644; }
 .student-option-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
 .student-option-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .student-option-copy span, .student-option-copy small { color: #bad0df; font-size: .78rem; }
@@ -494,4 +496,8 @@
   .roster-footer { align-items: flex-start; flex-direction: column; }
   .roster-footer .text-link { align-self: flex-start; }
   .pin-dialog { padding: 24px 18px; }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .student-roster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

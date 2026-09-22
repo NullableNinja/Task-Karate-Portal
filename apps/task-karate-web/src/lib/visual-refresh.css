@@ -1,0 +1,136 @@
+/* Shared visual refresh: higher contrast, clearer hierarchy, and calmer surfaces. */
+:root {
+  --ink: #f4f8fc;
+  --muted: #bfd0df;
+  --navy: #0b1a2d;
+  --panel: #13243a;
+  --panel2: #182b43;
+  --line: #38516c;
+  --cyan: #51c4f5;
+  --blue: #2b9de5;
+  --gold: #d8b45d;
+  --purple: #9671cb;
+  --red: #df6470;
+  --green: #2dbb9b;
+}
+
+/* Student hub readability */
+.student-app {
+  background: radial-gradient(circle at 82% 12%, #1b3a58 0, transparent 28%), linear-gradient(135deg, #0b1a2d 0%, #0a1728 55%, #102942 100%);
+  color: #f4f8fc;
+}
+
+.student-app:before { opacity: .045; }
+.topbar-note, .identity-label { color: #c4d4e3; }
+.student-heading p, .schedule-hero p { color: #c5d5e3; }
+.student-app .student-heading { margin-top: 26px; }
+.student-app .student-main { padding-top: 26px; }
+.student-app .brand strong, .dark-metrics strong, .record-list strong, .student-panel h2, .student-panel h3, .rank-display h2, .big-counter { color: #f4f8fc; }
+.student-panel { background: #12243ae8; border-color: #3a5470; }
+.panel-title { color: #d2e3f1; }
+.student-panel p, .rank-display p { color: #c0cfdd; }
+.dark-metrics article { background: #12243a; border-color: #3a5470; }
+.dark-metrics span, .record-list span { color: #a9d0eb; }
+.dark-metrics small, .muted, .person-row small, .big-counter small { color: #c0cfdd !important; }
+.record-list div { border-color: #38516c; }
+.progress-track { background: #1c334d; border-color: #46617d; }
+
+/* Keep every student section visibly colored; inactive tabs are simply quieter. */
+.floating-nav { background: #101f34f5; border-color: #49627c; }
+.floating-nav a { border: 1px solid transparent; color: #f2f7fb; transition: filter .18s ease, transform .18s ease, background .18s ease; }
+.floating-nav a:nth-child(1) { background: #2d566d; color: #d8f1ff; }
+.floating-nav a:nth-child(2) { background: #245247; color: #d7eee9; }
+.floating-nav a:nth-child(3) { background: #5a4c2e; color: #f1e5bd; }
+.floating-nav a:nth-child(4) { background: #493a64; color: #e7dbfb; }
+.floating-nav a:nth-child(5) { background: #5c3540; color: #f7dbe0; }
+.floating-nav a:not(.active) { filter: saturate(.62) brightness(.82); opacity: .9; }
+.floating-nav a:hover, .floating-nav a:focus-visible { filter: saturate(1) brightness(1.08); transform: translateY(-1px); outline: 2px solid #b7eaff; outline-offset: 2px; }
+.floating-nav a:nth-child(1).active { background: #5ab8eb; color: #082037; }
+.floating-nav a:nth-child(2).active { background: #2d9b7e; color: #071f1a; }
+.floating-nav a:nth-child(3).active { background: #c5a34f; color: #211b0b; }
+.floating-nav a:nth-child(4).active { background: #9065c3; color: #160e24; }
+.floating-nav a:nth-child(5).active { background: #b85260; color: #260d12; }
+.floating-logout { background: #243650; border-color: #58718a; }
+
+/* The public schedule uses a light reading surface so class details scan quickly. */
+.schedule-page {
+  min-height: 100vh;
+  background: #edf3f3;
+  color: #17303a;
+  padding: 28px 5vw 80px;
+}
+.schedule-header { border-bottom-color: #cbd9d9; }
+.schedule-page .brand { color: #17303a; }
+.schedule-page .brand small { color: #147a83; }
+.schedule-page .brand-mark { color: #147a83; border-color: #147a83; box-shadow: none; }
+.schedule-actions { display: flex; gap: 10px; }
+.schedule-page .outline-button { color: #155d68; background: #fff; border-color: #86b5b9; }
+.schedule-page .outline-button:hover, .schedule-page .outline-button:focus-visible { background: #e1f1f0; }
+.schedule-hero { margin: 74px auto 32px; }
+.schedule-hero h1 { color: #17303a; }
+.schedule-hero p { color: #536970; max-width: 600px; }
+.schedule-controls, .selected-day { max-width: 1180px; margin: 0 auto 22px; background: #fff; border: 1px solid #d1dfdf; border-radius: 16px; box-shadow: 0 8px 24px #23404712; }
+.schedule-controls { padding: 22px; }
+.schedule-control-heading, .selected-day-heading, .date-picker-heading { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+.schedule-control-heading h2, .selected-day-heading h2 { margin: 4px 0 0; color: #17303a; font-size: clamp(1.25rem, 2.2vw, 1.75rem); }
+.control-kicker { color: #147a83; font-size: .72rem; font-weight: 900; letter-spacing: .14em; }
+.session-count { color: #557078; font-size: .85rem; font-weight: 750; white-space: nowrap; }
+.date-picker-heading { justify-content: center; margin: 24px 0 12px; color: #29474f; }
+.week-button { width: 38px; height: 38px; border: 1px solid #a5c2c3; border-radius: 9px; background: #f2f8f7; color: #176d76; font-size: 1.15rem; cursor: pointer; }
+.week-button:disabled { opacity: .38; cursor: not-allowed; }
+.date-picker { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.date-choice { display: grid; gap: 3px; min-height: 86px; padding: 11px 7px; border: 1px solid #d3e0e0; border-radius: 10px; background: #f8fbfb; color: #486168; cursor: pointer; text-align: center; }
+.date-choice span { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.date-choice strong { color: #17303a; font-size: 1.5rem; line-height: 1; }
+.date-choice small { font-size: .68rem; }
+.date-choice:hover, .date-choice:focus-visible { border-color: #479ca2; background: #e8f5f3; outline: none; }
+.date-choice.selected { background: #197d84; border-color: #197d84; color: #e4fbfa; box-shadow: 0 4px 0 #115c63; }
+.date-choice.selected strong, .date-choice.selected small { color: #fff; }
+.schedule-filters { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; margin-top: 18px; }
+.schedule-filters label { display: grid; gap: 6px; color: #3e5a61; font-size: .78rem; font-weight: 800; }
+.schedule-filters input, .schedule-filters select { border: 1px solid #b9cdcd; background: #fff; color: #17303a; border-radius: 8px; padding: 11px 12px; }
+.selected-day { padding: 22px; }
+.class-list { display: grid; gap: 10px; margin-top: 20px; }
+.class-card { display: grid; grid-template-columns: 140px minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 17px 18px; border: 1px solid #d5e1e1; border-left: 5px solid #2b9ba0; border-radius: 10px; background: #fbfdfd; box-shadow: 0 3px 10px #27454d0b; }
+.class-card.cancelled { opacity: .65; border-left-color: #a55b65; }
+.class-time { display: grid; gap: 4px; color: #557078; }
+.class-time strong { color: #17303a; font-size: 1.05rem; }
+.class-time span { font-size: .78rem; }
+.class-program { color: #147a83; font-size: .7rem; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
+.class-details h3 { margin: 4px 0 0; color: #17303a; font-size: 1.08rem; }
+.class-details p { margin: 6px 0 0; color: #5a7076; font-size: .86rem; }
+.class-action { white-space: nowrap; }
+.schedule-page .primary-button { background: #167f87; border-color: #167f87; box-shadow: 0 4px 0 #0c5960; }
+.schedule-page .pill { display: inline-block; padding: 9px 12px; border-radius: 99px; font-size: .8rem; font-weight: 800; }
+.schedule-page .success-pill { color: #126651; background: #d7f3e9; }
+.schedule-page .cancelled-pill { color: #863b46; background: #f8dfe2; }
+.day-empty, .schedule-state { color: #557078; text-align: center; }
+.day-empty { padding: 42px 12px 24px; }
+.day-empty strong, .schedule-state h2 { color: #17303a; }
+.schedule-state { max-width: 1180px; margin: 0 auto; padding: 48px; background: #fff; border: 1px solid #d1dfdf; border-radius: 14px; }
+.schedule-page .error { color: #7f3037; background: #fff0f0; border-color: #e4afb4; }
+.schedule-feedback { color: #0a493c; background: #d8f5ea; border-color: #52b99d; }
+
+@media (max-width: 760px) {
+  .schedule-control-heading, .selected-day-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .date-picker { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .date-choice:nth-child(n+5) { display: none; }
+  .schedule-filters { grid-template-columns: 1fr; }
+  .class-card { grid-template-columns: 1fr; gap: 9px; }
+  .class-action { margin-top: 6px; }
+  .class-action .primary-button { width: 100%; }
+}
+
+@media (max-width: 900px) {
+  .student-app .student-heading { margin-top: 12px; }
+  .student-app .student-main { padding-top: 12px; }
+}
+
+@media (max-width: 500px) {
+  .schedule-page { padding-left: 15px; padding-right: 15px; }
+  .schedule-hero { margin-top: 52px; }
+  .schedule-controls, .selected-day { padding: 16px; }
+  .date-picker { gap: 5px; }
+  .date-choice { min-height: 75px; padding: 8px 3px; }
+  .date-choice strong { font-size: 1.25rem; }
+}

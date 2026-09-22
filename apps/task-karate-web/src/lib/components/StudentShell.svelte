@@ -16,7 +16,7 @@
   ];
   async function logout() {
     error = '';
-    try { await api('/api/student/auth/logout', { method: 'POST' }); await goto('/schedule'); }
+    try { await api('/api/student/auth/logout', { method: 'POST' }); await goto('/student/login'); }
     catch (e) { error = e instanceof Error ? e.message : 'Unable to sign out.'; }
   }
   const scrollBelts = [

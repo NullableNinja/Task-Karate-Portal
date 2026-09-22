@@ -6,6 +6,8 @@ Task Karate now contains a local-first platform foundation alongside the preserv
 
 The legacy JSON, browser storage, `server/desk_server.py`, and old portal routes remain for reference and public-site continuity. They are not safe for real student records and are not used by the new app.
 
+The student-facing milestone has two live experiences: `/schedule` for the database-backed class schedule and check-in, and `/student` for authenticated student profiles, status, social, achievements, training, and news. The supplied local `TaskKarate_Starter.db` is connected through the API with `TASK_KARATE_STARTER_DB`; it is never committed or opened by the browser.
+
 ## Run the new platform
 
 PowerShell, from the repository root:
@@ -27,7 +29,7 @@ npm ci
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The staff sign-in is at `/staff/signin`; the public schedule is at `/`.
+Open [http://localhost:5173](http://localhost:5173). The student schedule is at `/schedule`, student sign-in is at `/student/login`, and staff sign-in is at `/staff/signin`.
 
 The API creates `server/TaskKarate.Api/App_Data/task-karate.db` through EF Core migrations. Database, WAL/SHM files, local settings, and credentials are ignored by Git. The first administrator is created only when `TASK_KARATE_ADMIN_EMAIL` and `TASK_KARATE_ADMIN_PASSWORD` (or matching .NET user secrets) are present; there is no default credential.
 

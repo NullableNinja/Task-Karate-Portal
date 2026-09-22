@@ -12,6 +12,9 @@ server/TaskKarate.Api/*.db-wal
 server/TaskKarate.Api/appsettings.Local.json
 server/TaskKarate.Api/appsettings.Development.local.json
 server/TaskKarate.Api/Properties/launchSettings.local.json
+**/TaskKarate_Starter.db
+**/TaskKarate_Starter.db-shm
+**/TaskKarate_Starter.db-wal
 .usersecrets/
 **/bin/
 **/obj/

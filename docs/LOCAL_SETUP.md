@@ -32,6 +32,26 @@ dotnet run --project server\TaskKarate.Api --urls http://127.0.0.1:5167
 
 The database is `server\TaskKarate.Api\App_Data\task-karate.db`; SQLite may also create `-wal` and `-shm` files. All are ignored. The development import is explicit: set `Seed:ImportLegacySchedules` or `Seed:ImportDemoStudents` to `true` in a local settings/user-secret configuration, and never enable demo import for a production database. Legacy schedules are imported as unverified templates; demo students are synthetic.
 
+## Student schedule and profile database
+
+The student experience reads the local starter database through the API. Point it at the supplied file with an environment variable in the API PowerShell window:
+
+```powershell
+$env:TASK_KARATE_STARTER_DB = "C:\Users\Thoma\OneDrive\Web Design\Task-Karate-School\TaskKarate_Starter.db"
+```
+
+On first API startup the service creates only its missing support tables (`student_accounts`, disclaimer acknowledgments, friendships, and messages). It does not import social data or rewrite existing schedule records. Back up the original file before first use. To create a local student login without committing a password, set all three variables before starting the API:
+
+The supplied file currently contains the schema but may contain no student or session rows yet. In that case `/schedule` correctly reports that no sessions are published until staff or an explicit development seed creates them; the application does not invent live student records.
+
+```powershell
+$env:TASK_KARATE_STUDENT_ID = "1"
+$env:TASK_KARATE_STUDENT_USERNAME = "student.demo"
+$env:TASK_KARATE_STUDENT_PASSWORD = "Use-a-long-local-password-with-12-chars!"
+```
+
+The account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub.
+
 ## Backup and restore
 
 Each day, while the API is stopped (or after a SQLite checkpoint), copy the database to a separate encrypted drive/location:

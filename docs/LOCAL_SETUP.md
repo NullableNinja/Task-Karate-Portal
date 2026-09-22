@@ -49,9 +49,10 @@ For synthetic development data, opt into the repeatable import from the reposito
 ```powershell
 $env:TASK_KARATE_IMPORT_STARTER_SCHEDULES = "1"
 $env:TASK_KARATE_IMPORT_STARTER_STUDENTS = "1"
+$env:TASK_KARATE_DEMO_STUDENT_PASSWORD = "Use-a-local-demo-password-with-12-chars!"
 ```
 
-The schedule importer reads `data/schedules.json` into recurring `classes` and `class_schedule` rows, then materializes the next 35 days into `class_sessions`. The student importer reads `data/portal-students.json` into clearly marked demo profiles and rank history. Both switches are off by default and must never be used for a real database without reviewing the imported rows.
+The schedule importer reads `data/schedules.json` into recurring `classes` and `class_schedule` rows, then materializes the next 35 days into `class_sessions`. The student importer reads `data/portal-students.json` into clearly marked demo profiles and rank history. When `TASK_KARATE_DEMO_STUDENT_PASSWORD` is present, it also creates development-only accounts for imported records whose role includes `student`, so the roster sign-in can be exercised. This password is never committed and must never be used for a real database. Both import switches are off by default.
 
 ```powershell
 $env:TASK_KARATE_STUDENT_ID = "1"
@@ -59,7 +60,7 @@ $env:TASK_KARATE_STUDENT_USERNAME = "student.demo"
 $env:TASK_KARATE_STUDENT_PASSWORD = "Use-a-long-local-password-with-12-chars!"
 ```
 
-The account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub.
+The bootstrap account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub. The student sign-in lists active, provisioned student accounts alphabetically; selecting a profile opens the server-verified PIN/password prompt, followed by the profile acknowledgment when required.
 
 ## Backup and restore
 

@@ -453,3 +453,45 @@
   .date-choice { min-height: 75px; padding: 8px 3px; }
   .date-choice strong { font-size: 1.25rem; }
 }
+
+/* Student roster entry keeps the v3 dojo flow while sending real credentials to the API. */
+.roster-auth-stage { align-items: start; padding-top: clamp(28px, 6vh, 72px); }
+.roster-frame { width: min(820px, 100%); }
+.roster-frame .lead { max-width: 650px; }
+.roster-search-label { display: block; margin-top: 26px; color: #d9e9f5; font-size: .8rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.roster-search { width: 100%; box-sizing: border-box; margin-top: 8px; border: 1px solid #55718a; background: #081526; color: #fff; border-radius: 9px; padding: 14px 15px; }
+.roster-search:focus-visible, .student-option-main:focus-visible, .enter-dojo-option:focus-visible, .pin-input:focus-visible { outline: 2px solid #b7eaff; outline-offset: 3px; }
+.roster-state { margin-top: 18px; border: 1px dashed #49647b; color: #c0cfdd; padding: 22px; text-align: center; }
+.student-roster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-height: min(54vh, 560px); overflow: auto; margin-top: 16px; padding: 3px; }
+.student-option { border: 1px solid #35516b; background: #12243a; border-radius: 12px; overflow: hidden; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+.student-option:hover, .student-option.selected { border-color: #54bce9; background: #18314a; transform: translateY(-1px); }
+.student-option-main { display: flex; align-items: center; gap: 11px; width: 100%; min-width: 0; padding: 13px; border: 0; background: transparent; color: #f5f8fc; text-align: left; cursor: pointer; }
+.student-avatar { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border: 2px solid var(--avatar-color); border-radius: 50%; background: #213750; color: #f6fbff; font-weight: 900; }
+.student-option-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.student-option-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.student-option-copy span, .student-option-copy small { color: #bad0df; font-size: .78rem; }
+.student-option-copy small { color: #73d5f2; }
+.belt-pill { display: inline-block; flex: none; border-radius: 99px; padding: 5px 8px; background: var(--belt-color); color: var(--belt-text); font-size: .68rem; font-weight: 900; white-space: nowrap; }
+.enter-dojo-option { display: block; width: calc(100% - 26px); margin: 0 13px 13px; border: 1px solid #47b7ed; border-radius: 8px; padding: 9px 12px; background: #1689cb; color: #fff; box-shadow: 0 3px 0 #075c91; font-weight: 850; cursor: pointer; }
+.enter-dojo-option span { margin-left: 5px; }
+.roster-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 18px; }
+.login-overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: #020a15cc; backdrop-filter: blur(7px); }
+.pin-dialog { width: min(430px, 100%); border: 1px solid #4b7191; border-radius: 18px; background: #0d192c; padding: 30px; box-shadow: 0 24px 80px #000b; text-align: center; }
+.pin-avatar { width: 74px; height: 74px; margin: 0 auto 14px; font-size: 1.35rem; }
+.pin-dialog h2 { margin: 0; color: #f6f9fc; font-size: clamp(1.8rem, 6vw, 2.5rem); }
+.pin-name { margin: 7px 0 12px; color: #bad0df; }
+.dialog-pill { margin-bottom: 20px; }
+.pin-dialog form { display: grid; gap: 9px; text-align: left; }
+.pin-dialog form label { color: #cbe0ed; font-size: .78rem; font-weight: 800; }
+.pin-input { box-sizing: border-box; width: 100%; border: 1px solid #55718a; border-radius: 9px; background: #17283e; color: #fff; padding: 14px; }
+.pin-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.pin-actions > * { text-align: center; }
+
+@media (max-width: 640px) {
+  .roster-auth-stage { padding: 17px; }
+  .roster-frame { padding: 24px 17px; }
+  .student-roster { grid-template-columns: 1fr; max-height: none; }
+  .roster-footer { align-items: flex-start; flex-direction: column; }
+  .roster-footer .text-link { align-self: flex-start; }
+  .pin-dialog { padding: 24px 18px; }
+}

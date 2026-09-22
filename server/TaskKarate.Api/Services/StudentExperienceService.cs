@@ -21,6 +21,7 @@ public sealed class StarterStudentAccount
 
 public sealed record StudentAccount(int StudentId, string Username, string DisplayName, string? RankName);
 public sealed record StudentSummary(int StudentId, string DisplayName, string? RankName, string? ProfileImagePath);
+public sealed record StudentDirectoryItem(int StudentId, string DisplayName, string? RankName, string? Is3LevelName, string? ProfileImagePath);
 public sealed record ScheduleItem(int SessionId, DateTime SessionDate, string? StartTime, string? EndTime, string ClassName, string? Description, string? Location, bool Cancelled);
 public sealed record GuardianItem(string Name, string Relationship, string? Phone, string? Email);
 public sealed record ProgramMembershipItem(string ProgramName, string ProgramCode, string ProgressionType, string? LevelName, string? EnrolledDate);
@@ -420,7 +421,20 @@ WHERE post.post_text = 'Belt Testing Focus This Week — Open Training to review
             await using var details = connection.CreateCommand(); details.CommandText = "UPDATE students SET age_group = COALESCE($ageGroup, age_group), uniform_size = COALESCE($uniform, uniform_size), belt_size = COALESCE($belt, belt_size), birth_date = COALESCE($birth, birth_date) WHERE student_id = $id"; details.Parameters.AddWithValue("$id", studentId); details.Parameters.AddWithValue("$ageGroup", item.TryGetProperty("ageGroup", out var existingAgeGroup) ? existingAgeGroup.GetString() ?? (object)DBNull.Value : DBNull.Value); details.Parameters.AddWithValue("$uniform", item.TryGetProperty("uniformSize", out var existingUniform) ? existingUniform.GetString() ?? (object)DBNull.Value : DBNull.Value); details.Parameters.AddWithValue("$belt", item.TryGetProperty("beltSize", out var existingBelt) ? existingBelt.GetString() ?? (object)DBNull.Value : DBNull.Value); details.Parameters.AddWithValue("$birth", item.TryGetProperty("birthday", out var existingBirth) ? existingBirth.GetString() ?? (object)DBNull.Value : DBNull.Value); await details.ExecuteNonQueryAsync(cancellationToken);
             await using var profile = connection.CreateCommand(); profile.CommandText = "INSERT OR IGNORE INTO student_profiles(student_id, display_name, bio, favorite_technique) VALUES ($id, $name, 'Development-only imported demo profile.', $technique)"; profile.Parameters.AddWithValue("$id", studentId); profile.Parameters.AddWithValue("$name", item.TryGetProperty("displayName", out var profileName) ? profileName.GetString() ?? fullName : fullName); profile.Parameters.AddWithValue("$technique", item.TryGetProperty("funStats", out var stats) && stats.TryGetProperty("favoriteTechnique", out var technique) ? technique.GetString() ?? (object)DBNull.Value : DBNull.Value); await profile.ExecuteNonQueryAsync(cancellationToken);
             if (item.TryGetProperty("rank", out var rankProperty)) await AddRankHistoryAsync(connection, studentId, rankProperty.GetString(), cancellationToken);
+            await EnsureImportedDemoAccountAsync(connection, item, studentId, cancellationToken);
         }
+    }
+
+    private async Task EnsureImportedDemoAccountAsync(SqliteConnection connection, JsonElement item, int studentId, CancellationToken cancellationToken)
+    {
+        var demoPassword = Environment.GetEnvironmentVariable("TASK_KARATE_DEMO_STUDENT_PASSWORD");
+        if (string.IsNullOrWhiteSpace(demoPassword) || !item.TryGetProperty("roles", out var roles) || !roles.EnumerateArray().Any(role => string.Equals(role.GetString(), "student", StringComparison.OrdinalIgnoreCase))) return;
+        await using var exists = connection.CreateCommand(); exists.CommandText = "SELECT COUNT(1) FROM student_accounts WHERE student_id = $id"; exists.Parameters.AddWithValue("$id", studentId);
+        if (Convert.ToInt32(await exists.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 1) return;
+        var sourceId = item.TryGetProperty("id", out var idProperty) ? idProperty.GetString() : null;
+        var username = string.IsNullOrWhiteSpace(sourceId) ? $"demo.student.{studentId}" : $"demo.{sourceId}";
+        var hash = _passwordHasher.HashPassword(new StarterStudentAccount { StudentId = studentId }, demoPassword);
+        await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT OR IGNORE INTO student_accounts(student_id, username, password_hash) VALUES ($id, $username, $hash)"; insert.Parameters.AddWithValue("$id", studentId); insert.Parameters.AddWithValue("$username", username); insert.Parameters.AddWithValue("$hash", hash); await insert.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private static async Task AddRankHistoryAsync(SqliteConnection connection, int studentId, string? rankName, CancellationToken cancellationToken)
@@ -500,6 +514,38 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         var account = new StarterStudentAccount { StudentId = reader.GetInt32(0) };
         var result = _passwordHasher.VerifyHashedPassword(account, reader.GetString(2), password);
         return result == PasswordVerificationResult.Failed ? null : new StudentAccount(reader.GetInt32(0), reader.GetString(1), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4));
+    }
+
+    public async Task<StudentAccount?> AuthenticateByStudentIdAsync(int studentId, string password, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"SELECT a.student_id, a.username, a.password_hash, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), (SELECT r.rank_name FROM student_rank_history h JOIN ranks r ON r.rank_id = h.rank_id WHERE h.student_id = s.student_id ORDER BY h.awarded_date DESC, h.student_rank_id DESC LIMIT 1) FROM student_accounts a JOIN students s ON s.student_id = a.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id WHERE a.student_id = $studentId AND a.active = 1 AND s.active = 1 AND COALESCE(p.profile_visible, 1) = 1";
+        command.Parameters.AddWithValue("$studentId", studentId);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken)) return null;
+        var account = new StarterStudentAccount { StudentId = reader.GetInt32(0) };
+        var result = _passwordHasher.VerifyHashedPassword(account, reader.GetString(2), password);
+        return result == PasswordVerificationResult.Failed ? null : new StudentAccount(reader.GetInt32(0), reader.GetString(1), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4));
+    }
+
+    public async Task<IReadOnlyList<StudentDirectoryItem>> GetStudentDirectoryAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"SELECT s.student_id, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)),
+            (SELECT r.rank_name FROM student_rank_history h JOIN ranks r ON r.rank_id = h.rank_id WHERE h.student_id = s.student_id ORDER BY h.awarded_date DESC, h.student_rank_id DESC LIMIT 1),
+            (SELECT m.level_name FROM student_program_memberships m WHERE m.student_id = s.student_id AND m.active = 1 AND LOWER(m.program_code) = 'is3' ORDER BY m.enrolled_date DESC LIMIT 1),
+            p.profile_image_path
+            FROM students s
+            JOIN student_accounts a ON a.student_id = s.student_id AND a.active = 1
+            LEFT JOIN student_profiles p ON p.student_id = s.student_id
+            WHERE s.active = 1 AND COALESCE(p.profile_visible, 1) = 1
+            ORDER BY UPPER(COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name))) COLLATE NOCASE";
+        var list = new List<StudentDirectoryItem>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt32(0), reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4)));
+        return list;
     }
 
     public async Task<bool> HasDisclaimerAsync(int studentId, CancellationToken cancellationToken = default)

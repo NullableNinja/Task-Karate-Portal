@@ -22,12 +22,13 @@ public static class StudentExperienceEndpoints
         var publicApi = app.MapGroup("/api/student/public");
         publicApi.MapGet("/schedule", async (StudentExperienceService service, DateTime? from, DateTime? to, CancellationToken ct) => Results.Ok(await service.GetScheduleAsync((from ?? DateTime.UtcNow.Date).Date, (to ?? DateTime.UtcNow.Date.AddDays(30)).Date.AddDays(1), ct)));
         publicApi.MapGet("/news", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetNewsAsync(ct)));
+        publicApi.MapGet("/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetStudentDirectoryAsync(ct)));
 
         var auth = app.MapGroup("/api/student/auth");
         auth.MapPost("/login", async (StudentLoginRequest request, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["credentials"] = ["Username and password are required."] });
-            var account = await service.AuthenticateAsync(request.Username, request.Password, ct);
+            if (((request.StudentId is null || request.StudentId <= 0) && string.IsNullOrWhiteSpace(request.Username)) || string.IsNullOrWhiteSpace(request.Password)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["credentials"] = ["Choose a student and enter the account password."] });
+            var account = request.StudentId is > 0 ? await service.AuthenticateByStudentIdAsync(request.StudentId.Value, request.Password, ct) : await service.AuthenticateAsync(request.Username!, request.Password, ct);
             if (account is null) return Results.Problem("Invalid student credentials.", statusCode: StatusCodes.Status401Unauthorized);
             var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("student_id", account.StudentId.ToString()), new Claim(ClaimTypes.Name, account.DisplayName)], StudentAuth.Scheme));
             await context.SignInAsync(StudentAuth.Scheme, principal, new AuthenticationProperties { IsPersistent = request.RememberMe, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
@@ -35,8 +36,9 @@ public static class StudentExperienceEndpoints
         });
         auth.MapGet("/me", async (StudentExperienceService service, HttpContext context, CancellationToken ct) =>
         {
-            var id = await StudentAuth.GetStudentIdAsync(context); if (id is null) return Results.Unauthorized();
-            return Results.Ok(new { authenticated = true, studentId = id.Value, displayName = context.User.Identity?.Name, disclaimerRequired = !await service.HasDisclaimerAsync(id.Value, ct) });
+            var authResult = await context.AuthenticateAsync(StudentAuth.Scheme);
+            if (!authResult.Succeeded || !int.TryParse(authResult.Principal?.FindFirstValue("student_id"), out var id)) return Results.Unauthorized();
+            return Results.Ok(new { authenticated = true, studentId = id, displayName = authResult.Principal?.FindFirstValue(ClaimTypes.Name), disclaimerRequired = !await service.HasDisclaimerAsync(id, ct) });
         });
         auth.MapPost("/logout", async (HttpContext context) => { await context.SignOutAsync(StudentAuth.Scheme); return Results.NoContent(); });
 
@@ -130,7 +132,7 @@ public static class StudentExperienceEndpoints
 
 public sealed record StudentGate(int? Id, IResult? Result);
 
-public sealed record StudentLoginRequest(string Username, string Password, bool RememberMe = false);
+public sealed record StudentLoginRequest(string? Username, string Password, bool RememberMe = false, int? StudentId = null);
 public sealed record DisclaimerRequest(bool Accepted);
 public sealed record FriendResponseRequest(bool Accept);
 public sealed record MessageRequest(int RecipientId, string Message);

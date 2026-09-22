@@ -22,7 +22,15 @@
   let signingIn = false;
   let showPin = false;
 
-  $: filteredStudents = students.filter((student) => student.displayName.toLowerCase().includes(search.trim().toLowerCase()));
+  $: filteredStudents = students
+    .filter((student) => student.displayName.toLowerCase().includes(search.trim().toLowerCase()))
+    .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  $: groupedStudents = filteredStudents.reduce<Record<string, StudentDirectoryItem[]>>((groups, student) => {
+    const letter = student.displayName.trim().charAt(0).toUpperCase() || '#';
+    (groups[letter] ??= []).push(student);
+    return groups;
+  }, {});
+  $: rosterLetters = Object.keys(groupedStudents).sort();
 
   onMount(async () => {
     try {
@@ -55,6 +63,16 @@
   function beltTextColor(rank?: string | null) {
     const value = rank?.toLowerCase() ?? '';
     return value.includes('black') || value.includes('brown') || value.includes('red') ? '#fff' : '#102038';
+  }
+
+  function profileLabel(student: StudentDirectoryItem) {
+    if (student.rankName) return student.rankName;
+    if (student.is3LevelName) return `IS3 · ${student.is3LevelName}`;
+    return 'Student';
+  }
+
+  function avatarTextColor(rank?: string | null) {
+    return beltTextColor(rank);
   }
 
   function choose(student: StudentDirectoryItem) {
@@ -96,6 +114,14 @@
 <svelte:head><title>Task Karate | Enter the dojo</title></svelte:head>
 
 <main class="auth-stage roster-auth-stage">
+  <div class="auth-orbs" aria-hidden="true">
+    <span class="auth-orb auth-orb-a"></span>
+    <span class="auth-orb auth-orb-b"></span>
+    <span class="auth-orb auth-orb-c"></span>
+    <span class="auth-orb auth-orb-d"></span>
+    <span class="auth-orb auth-orb-e"></span>
+    <span class="auth-orb auth-orb-f"></span>
+  </div>
   <section class="auth-frame roster-frame" aria-labelledby="dojo-title">
     <a class="brand" href="/schedule"><span class="brand-mark">TK</span><span><strong>TASK KARATE</strong><small>STUDENT HUB</small></span></a>
     <span class="student-eyebrow">SECURE STUDENT ACCESS</span>
@@ -113,17 +139,24 @@
       <div class="roster-state">No student profiles match that search.</div>
     {:else}
       <div class="student-roster" aria-label="Student profiles">
-        {#each filteredStudents as student}
-          <div class:selected={selectedStudent?.studentId === student.studentId} class="student-option">
-            <button class="student-option-main" type="button" aria-pressed={selectedStudent?.studentId === student.studentId} on:click={() => choose(student)}>
-              <span class="student-avatar" style={`--avatar-color: ${beltColor(student.rankName)}`}>{initials(student.displayName)}</span>
-              <span class="student-option-copy"><strong>{student.displayName}</strong>{#if student.is3LevelName}<small>{student.is3LevelName}</small>{/if}</span>
-              <span class="belt-pill" style={`--belt-color: ${beltColor(student.rankName)}; --belt-text: ${beltTextColor(student.rankName)}`}>{student.rankName ?? 'Student'}</span>
-            </button>
-            {#if selectedStudent?.studentId === student.studentId}
-              <button class="enter-dojo-option" type="button" on:click={() => openDojo(student)}>Enter Dojo <span aria-hidden="true">→</span></button>
-            {/if}
-          </div>
+        {#each rosterLetters as letter}
+          <section class="roster-group" aria-labelledby={`roster-${letter}`}>
+            <div class="roster-divider" id={`roster-${letter}`}><span>{letter}</span><i aria-hidden="true"></i></div>
+            <div class="roster-group-grid">
+              {#each groupedStudents[letter] as student}
+                <div class:selected={selectedStudent?.studentId === student.studentId} class="student-option">
+                  <button class="student-option-main" type="button" aria-pressed={selectedStudent?.studentId === student.studentId} on:click={() => choose(student)}>
+                    <span class="student-avatar" style={`--avatar-color: ${beltColor(student.rankName)}; --avatar-text: ${avatarTextColor(student.rankName)}`}>{initials(student.displayName)}</span>
+                    <span class="student-option-copy"><strong>{student.displayName}</strong>{#if student.is3LevelName}<small>{student.is3LevelName}</small>{/if}</span>
+                    <span class:is3-marker={!student.rankName && !!student.is3LevelName} class="belt-marker"><i class="belt-marker-swatch" style={`--belt-color: ${beltColor(student.rankName)}`}></i>{profileLabel(student)}</span>
+                  </button>
+                  {#if selectedStudent?.studentId === student.studentId}
+                    <button class="enter-dojo-option" type="button" on:click={() => openDojo(student)}>Enter Dojo <span aria-hidden="true">→</span></button>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          </section>
         {/each}
       </div>
     {/if}
@@ -138,10 +171,10 @@
 {#if showPin && selectedStudent}
   <div class="login-overlay" role="presentation">
     <div class="pin-dialog" role="dialog" aria-modal="true" aria-labelledby="pin-title" tabindex="-1">
-      <span class="student-avatar pin-avatar" style={`--avatar-color: ${beltColor(selectedStudent.rankName)}`}>{initials(selectedStudent.displayName)}</span>
+      <span class="student-avatar pin-avatar" style={`--avatar-color: ${beltColor(selectedStudent.rankName)}; --avatar-text: ${avatarTextColor(selectedStudent.rankName)}`}>{initials(selectedStudent.displayName)}</span>
       <h2 id="pin-title">Enter Your PIN</h2>
       <p class="pin-name">{selectedStudent.displayName}</p>
-      <span class="belt-pill dialog-pill" style={`--belt-color: ${beltColor(selectedStudent.rankName)}; --belt-text: ${beltTextColor(selectedStudent.rankName)}`}>{selectedStudent.rankName ?? 'Student'}</span>
+      <span class:is3-marker={!selectedStudent.rankName && !!selectedStudent.is3LevelName} class="belt-marker dialog-marker"><i class="belt-marker-swatch" style={`--belt-color: ${beltColor(selectedStudent.rankName)}`}></i>{profileLabel(selectedStudent)}</span>
       <form on:submit|preventDefault={submit}>
         <label for="student-pin">PIN / password</label>
         <input id="student-pin" class="pin-input" type="password" bind:value={pin} autocomplete="current-password" maxlength="128" placeholder="Enter PIN or password…" required />

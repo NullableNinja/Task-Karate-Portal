@@ -19,7 +19,7 @@
 
   async function loadFriends() { friends = await api<any[]>('/api/student/friends'); }
   async function loadFeed() { feed = await api<any[]>('/api/student/feed'); }
-  onMount(async () => { session = await requireStudent(); if (!session) return; try { await Promise.all([loadFriends(), loadFeed()]); } catch (e) { error = apiError(e); } finally { loading = false; } });
+  onMount(async () => { session = await requireStudent(); if (!session) return; try { await Promise.all([loadFriends(), loadFeed()]); if (new URL(window.location.href).searchParams.get('focus') === 'messages') { const firstFriend = friends.find((friend) => friend.status === 'accepted'); if (firstFriend) await selectFriend(firstFriend); } } catch (e) { error = apiError(e); } finally { loading = false; } });
   async function search() { try { results = await api<any[]>(`/api/student/social/search?q=${encodeURIComponent(query)}`); } catch (e) { error = apiError(e); } }
   async function request(id: number) { try { await api(`/api/student/friends/${id}/request`, { method: 'POST' }); results = results.filter((item) => item.studentId !== id); } catch (e) { error = apiError(e); } }
   async function respond(friend: any, accept: boolean) { try { await api(`/api/student/friends/${friend.studentId}/respond`, { method: 'POST', body: JSON.stringify({ accept }) }); await loadFriends(); } catch (e) { error = apiError(e); } }

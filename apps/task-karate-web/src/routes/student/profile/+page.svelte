@@ -3,6 +3,7 @@
   import StudentShell from '$lib/components/StudentShell.svelte';
   import { api } from '$lib/api';
   import { apiError, requireStudent, type StudentSession } from '$lib/student-session';
+  import { rankColor, rankTextColor } from '$lib/rank-colors';
 
   let session: StudentSession | null = null;
   let profile: any = null;
@@ -27,7 +28,7 @@
           <span class="student-eyebrow">STUDENT</span>
           <h2>{profile.displayName}</h2>
           <p>{profile.bio ?? 'Your instructor can add a short dojo biography here.'}</p>
-          <div class="profile-tags"><span>{profile.rankName ?? 'Rank in progress'}</span><span>Member since {profile.joinDate ?? 'on file'}</span></div>
+          <div class="profile-tags"><span class="belt-pill" style={`--belt-color:${rankColor(profile.rankName)};--belt-text:${rankTextColor(profile.rankName)}`}>{profile.rankName ?? 'Rank in progress'}</span><span>Member since {profile.joinDate ?? 'on file'}</span></div>
         </section>
         <section class="student-panel profile-details">
           <div class="panel-title"><span>TRAINING RECORD</span><a href="/student/training">Open training →</a></div>
@@ -38,6 +39,7 @@
         <section class="student-panel"><div class="panel-title"><span>UNIFORM & BELT</span></div><div class="record-list"><div><span>Uniform size</span><strong>{profile.uniformSize ?? 'Not on file'}</strong></div><div><span>Belt size</span><strong>{profile.beltSize ?? 'Not on file'}</strong></div><div><span>Age group</span><strong>{profile.ageGroup ?? 'Not on file'}</strong></div><div><span>Birthday</span><strong>{profile.birthDate ? new Date(profile.birthDate).toLocaleDateString() : 'Not on file'}</strong></div></div></section>
         <section class="student-panel"><div class="panel-title"><span>GUARDIANS</span></div>{#if profile.guardians?.length}<div class="guardian-list">{#each profile.guardians as guardian}<div class="guardian-row"><strong>{guardian.name}</strong><span>{guardian.relationship}</span>{#if guardian.phone}<small>{guardian.phone}</small>{/if}{#if guardian.email}<small>{guardian.email}</small>{/if}</div>{/each}</div>{:else}<p class="muted">No guardian record is linked in this development dataset. Staff can add one when the guardian workflow is connected.</p>{/if}</section>
       </div>
+      <section class="student-panel program-memberships"><div class="panel-title"><span>PROGRAMS & LEVELS</span><span class="muted">Your progress can span both tracks</span></div>{#if profile.programs?.length}<div class="program-membership-grid">{#each profile.programs as program}<div class="program-membership"><span class="program-code">{program.programCode}</span><div><strong>{program.programName}</strong><span>{program.progressionType === 'level' ? 'Level track' : 'Belt track'}</span><small>{program.levelName ?? 'Level in progress'}</small></div></div>{/each}</div>{:else}<p class="muted">No program memberships are on file yet.</p>{/if}</section>
       {#if profile.email || profile.phone}<section class="student-panel profile-contact"><div class="panel-title"><span>CONTACT ON FILE</span></div><div class="profile-contact-values">{#if profile.email}<span>{profile.email}</span>{/if}{#if profile.phone}<span>{profile.phone}</span>{/if}</div></section>{/if}
     {/if}
   </StudentShell>

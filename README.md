@@ -6,7 +6,7 @@ Task Karate now contains a local-first platform foundation alongside the preserv
 
 The legacy JSON, browser storage, `server/desk_server.py`, and old portal routes remain for reference and public-site continuity. They are not safe for real student records and are not used by the new app.
 
-The student-facing milestone has two live experiences: `/schedule` for the database-backed class schedule and check-in, and `/student` for authenticated student profiles, status, social, achievements, training, and news. The supplied local `TaskKarate_Starter.db` is connected through the API with `TASK_KARATE_STARTER_DB`; it is never committed or opened by the browser.
+The student-facing milestone has two live experiences: `/schedule` for the database-backed class schedule and check-in, and `/student` for authenticated student profiles, status, social, achievements, training tracks, and personal classes. Public news belongs to the future public website (`Task-Karate-Web`) and is exposed by the portal only through its authenticated/public-content API boundary; it is not part of the private student navigation. The supplied local `TaskKarate_Starter.db` is connected through the API with `TASK_KARATE_STARTER_DB`; it is never committed or opened by the browser.
 
 ## Run the new platform
 

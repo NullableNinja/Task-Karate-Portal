@@ -53,6 +53,22 @@ public static class StudentExperienceEndpoints
             var gate = await RequireAcknowledgedStudent(service, context, ct); if (gate.Id is null) return gate.Result!;
             var profile = await service.GetProfileAsync(gate.Id.Value, ct); return profile is null ? Results.NotFound() : Results.Ok(profile);
         });
+        student.MapPut("/profile", async (StudentProfileUpdateRequest request, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
+        {
+            var gate = await RequireAcknowledgedStudent(service, context, ct); if (gate.Id is null) return gate.Result!;
+            var errors = new Dictionary<string, string[]>();
+            if (request.DisplayName?.Length > 100) errors["displayName"] = ["Display name must be 100 characters or fewer."];
+            if (request.Bio?.Length > 500) errors["bio"] = ["Bio must be 500 characters or fewer."];
+            if (request.FavoriteTechnique?.Length > 100) errors["favoriteTechnique"] = ["Favorite technique must be 100 characters or fewer."];
+            if (request.Email?.Length > 254) errors["email"] = ["Email must be 254 characters or fewer."];
+            if (request.Phone?.Length > 50) errors["phone"] = ["Phone must be 50 characters or fewer."];
+            if (request.UniformSize?.Length > 50) errors["uniformSize"] = ["Uniform size must be 50 characters or fewer."];
+            if (request.BeltSize?.Length > 50) errors["beltSize"] = ["Belt size must be 50 characters or fewer."];
+            if (errors.Count > 0) return Results.ValidationProblem(errors);
+            await service.UpdateProfileAsync(gate.Id.Value, request, ct);
+            var profile = await service.GetProfileAsync(gate.Id.Value, ct);
+            return Results.Ok(profile);
+        });
         student.MapPost("/schedule/{sessionId:int}/check-in", async (int sessionId, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
         {
             var gate = await RequireAcknowledgedStudent(service, context, ct); if (gate.Id is null) return gate.Result!;
@@ -109,3 +125,4 @@ public sealed record ReactionRequest(string Code);
 public sealed record CommentRequest(string Text);
 public sealed record PracticeLogRequest(string Skill, int Minutes, string? Reflection);
 public sealed record GoalRequest(string Title, DateTime? TargetDate);
+public sealed record StudentProfileUpdateRequest(string? DisplayName, string? Bio, string? FavoriteTechnique, string? Email, string? Phone, string? UniformSize, string? BeltSize);

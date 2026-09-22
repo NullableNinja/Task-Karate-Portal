@@ -27,7 +27,13 @@ All mutation endpoints validate input, create UTC timestamps, and record safe au
 
 `apps/task-karate-web` is a real SvelteKit application with the public `/schedule` check-in experience, server-backed student sign-in and acknowledgment, a floating student hub, social/friend/message pages, and the existing staff workflows. `src/lib/api.ts` attaches cookies and the CSRF header and has no persistence fallback.
 
-The student service adds only missing tables to the supplied starter database: `student_accounts`, `student_disclaimer_acceptances`, `student_friendships`, and `student_messages`. Existing class, attendance, rank, achievement, profile, and post tables remain the source of truth.
+The student service adds only missing tables to the supplied starter database: `student_accounts`, `student_disclaimer_acceptances`, `student_friendships`, `student_messages`, practice logs, goals, and saved posts. Existing class, attendance, rank, achievement, profile, and post tables remain the source of truth. Development normalization repairs duplicate guardian seed rows and prevents an IS3 membership from being shown for a non-Teen/Adult student.
+
+## Product boundary: public news vs. student work
+
+Public news and announcements answer questions for prospective and current families and belong on `Task-Karate-Web`. The portal may provide the authenticated API that supplies published content, but the student hub does not duplicate that public-news destination in its navigation. The hub is for private, actionable work: status, social connections and messages, Gold Star achievements, program-specific training requirements, and My Classes/check-in.
+
+Training is split conceptually into two tracks. The Karate track shows the belt testing requirements from the school’s rank material, adapted for Kids or Teens/Adults. The IS3 track is available only when the student has an active IS3 program membership and uses level progression rather than belts. My Classes is the replacement for the portal News tab: it shows upcoming sessions, location/time, attendance context, and authenticated check-in.
 
 ## Legacy import boundary
 

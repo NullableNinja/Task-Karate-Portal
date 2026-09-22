@@ -13,6 +13,7 @@
   --red: #df6470;
   --green: #2dbb9b;
 }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 /* Student hub readability */
 .student-app {
@@ -55,6 +56,30 @@
 .profile-contact { margin-top: 15px; }
 .profile-contact-values { display: flex; flex-wrap: wrap; gap: 10px; color: #d4e2ed; }
 .profile-contact-values span { border: 1px solid #38516c; border-radius: 99px; padding: 8px 11px; }
+.profile-completion-panel { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 15px; border-color: #3b7895; background: linear-gradient(110deg, #112942, #15223a); }
+.profile-completion-panel h2 { margin: 5px 0; color: #f5fbff; }
+.profile-completion-panel p { margin: 0; color: #c0cfdd; }
+.profile-completion-actions { display: grid; gap: 10px; min-width: 240px; }
+.profile-editor { margin-bottom: 15px; border-color: #45bfe8; }
+.profile-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.profile-form label { display: grid; gap: 6px; color: #a9d0eb; font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.profile-form input, .profile-form textarea { width: 100%; border: 1px solid #45617c; border-radius: 8px; background: #0c1b2e; color: #f4f8fc; padding: 10px 11px; font: inherit; }
+.profile-form .full { grid-column: 1 / -1; }
+.profile-form-actions { display: flex; justify-content: flex-end; gap: 8px; grid-column: 1 / -1; }
+.classes-hero { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 15px; border-color: #3b7895; background: linear-gradient(110deg, #112942, #15223a); }
+.classes-hero h2 { margin: 5px 0; color: #f5fbff; }
+.classes-hero p { margin: 0; color: #c0cfdd; }
+.class-list { display: grid; gap: 12px; }
+.class-session-card { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; align-items: center; gap: 16px; }
+.class-session-date { display: grid; place-items: center; min-height: 70px; border: 1px solid #45617c; background: #152a42; }
+.class-session-date strong { color: #f4f8fc; font-size: 1.8rem; line-height: 1; }
+.class-session-date span { color: #9fe5ff; font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+.class-session-details { display: grid; gap: 4px; }
+.class-session-details h2 { margin: 0; color: #f4f8fc; font-size: 1.15rem; }
+.class-session-details p, .class-session-details small { margin: 0; color: #c0cfdd; }
+.class-session-details small { font-size: .78rem; }
+.class-session-action { display: flex; justify-content: flex-end; min-width: 130px; }
+.checked-in-badge { padding: 9px 11px; border: 1px solid #5bd7b7; border-radius: 99px; background: #153c3c; color: #a9f1dc; font-size: .78rem; font-weight: 900; }
 .stripe-track { height: 16px; margin: 22px 0 12px; overflow: hidden; border: 1px solid #4b6681; border-radius: 99px; background: #1a3048; }
 .stripe-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #42bce9, #9be7ff); box-shadow: 0 0 16px #54c9f877; }
 .stripe-summary { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -62,6 +87,12 @@
 .stripe-summary span { color: #c0cfdd; font-size: .85rem; }
 .degree-note { display: grid; gap: 8px; margin-top: 26px; padding: 14px; border-left: 3px solid var(--gold); background: #26344a; color: #cedbe6; }
 .degree-note strong { color: #f5e5b5; }
+.training-track-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 15px; }
+.training-track-nav a { padding: 9px 12px; border: 1px solid #45617c; border-radius: 99px; background: #10243b; color: #c8dbe8; font-size: .78rem; font-weight: 900; text-decoration: none; }
+.training-track-nav a:hover, .training-track-nav a:focus-visible, .training-track-nav a.active { border-color: var(--cyan); background: #16415d; color: #f4fbff; outline: none; }
+.track-hero, .is3-track-hero { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.track-hero h2, .is3-track-hero h2 { margin: 6px 0; }
+.track-hero p, .is3-track-hero p { max-width: 680px; margin: 0; color: #c0cfdd; }
 .next-class-panel { margin-top: 15px; }
 .next-class-content { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .next-class-content h2 { margin: 6px 0; }
@@ -344,6 +375,8 @@
   .student-app .student-main { padding-top: 12px; }
   .profile-layout, .social-feed-layout { grid-template-columns: 1fr; }
   .briefing-grid, .training-tools-grid { grid-template-columns: 1fr; }
+  .profile-completion-panel, .classes-hero { align-items: flex-start; flex-direction: column; }
+  .profile-completion-actions { width: 100%; min-width: 0; }
   .profile-info-grid { grid-template-columns: 1fr; }
   .next-class-content { align-items: flex-start; flex-direction: column; }
   .next-class-content .primary-button { width: 100%; text-align: center; }
@@ -360,6 +393,12 @@
   .practice-form, .goal-form { grid-template-columns: 1fr; }
   .practice-form .full { grid-column: auto; }
   .feed-controls input { max-width: none; width: 100%; }
+  .profile-form { grid-template-columns: 1fr; }
+  .profile-form .full, .profile-form-actions { grid-column: auto; }
+  .class-session-card { grid-template-columns: 52px minmax(0, 1fr); }
+  .class-session-date { min-height: 58px; }
+  .class-session-date strong { font-size: 1.45rem; }
+  .class-session-action { grid-column: 2; justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {

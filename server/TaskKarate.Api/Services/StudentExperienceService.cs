@@ -109,11 +109,44 @@ CREATE INDEX IF NOT EXISTS ix_post_bookmarks_student ON post_bookmarks(student_i
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureLegacyStudentColumnsAsync(connection, cancellationToken);
         await ImportDevelopmentDataAsync(connection, cancellationToken);
+        await NormalizeLegacyDataAsync(connection, cancellationToken);
         await SeedDevelopmentGoldStarEventsAsync(connection, cancellationToken);
         await MaterializeUpcomingSessionsAsync(connection, cancellationToken);
         await SeedDemoDataAsync(connection, cancellationToken);
         await EnsureBootstrapAccountAsync(connection, cancellationToken);
         Interlocked.Exchange(ref _ready, 1);
+    }
+
+    private static async Task NormalizeLegacyDataAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"
+DELETE FROM student_program_memberships
+WHERE program_code = 'is3'
+  AND student_id IN (SELECT student_id FROM students WHERE lower(replace(age_group, ' ', '')) NOT IN ('teensadults', 'teenadults', 'adult'));
+DELETE FROM student_guardians
+WHERE guardian_id IN (
+    SELECT duplicate.guardian_id
+    FROM guardians duplicate
+    JOIN guardians canonical ON canonical.guardian_id < duplicate.guardian_id
+        AND lower(trim(canonical.first_name)) = lower(trim(duplicate.first_name))
+        AND lower(trim(canonical.last_name)) = lower(trim(duplicate.last_name))
+        AND coalesce(canonical.email, '') = coalesce(duplicate.email, '')
+        AND coalesce(canonical.phone, '') = coalesce(duplicate.phone, '')
+);
+DELETE FROM guardians
+WHERE guardian_id IN (
+    SELECT duplicate.guardian_id
+    FROM guardians duplicate
+    JOIN guardians canonical ON canonical.guardian_id < duplicate.guardian_id
+        AND lower(trim(canonical.first_name)) = lower(trim(duplicate.first_name))
+        AND lower(trim(canonical.last_name)) = lower(trim(duplicate.last_name))
+        AND coalesce(canonical.email, '') = coalesce(duplicate.email, '')
+        AND coalesce(canonical.phone, '') = coalesce(duplicate.phone, '')
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_guardians_identity ON guardians(first_name, last_name, email, phone);
+";
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private async Task SeedDevelopmentGoldStarEventsAsync(SqliteConnection connection, CancellationToken cancellationToken)
@@ -165,8 +198,9 @@ FROM students student
 WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson'
   AND NOT EXISTS (SELECT 1 FROM student_practice_logs WHERE skill = 'IS3 ready position' AND reflection = 'Stayed relaxed and kept safe spacing.');
 
-INSERT OR IGNORE INTO guardians(first_name, last_name, email, phone, active)
-VALUES ('Alex', 'Thompson', 'alex.thompson@example.test', '555-0102', 1);
+INSERT INTO guardians(first_name, last_name, email, phone, active)
+SELECT 'Alex', 'Thompson', 'alex.thompson@example.test', '555-0102', 1
+WHERE NOT EXISTS (SELECT 1 FROM guardians WHERE first_name = 'Alex' AND last_name = 'Thompson' AND email = 'alex.thompson@example.test');
 
 INSERT OR IGNORE INTO student_guardians(student_id, guardian_id, relationship, is_primary)
 SELECT student.student_id, guardian.guardian_id, 'Parent / Guardian', 1
@@ -182,7 +216,8 @@ WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson';
 INSERT OR IGNORE INTO student_program_memberships(student_id, program_code, program_name, progression_type, level_name, enrolled_date)
 SELECT student.student_id, 'is3', 'IS3', 'level', 'IS3 Student Level 0', student.start_date
 FROM students student
-WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson';
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson'
+  AND lower(replace(student.age_group, ' ', '')) IN ('teensadults', 'teenadults', 'adult');
 
 INSERT OR IGNORE INTO classes(class_name, description, active)
 VALUES ('Development Attendance Sample', 'Development-only attendance records used to demonstrate the 30-day training view. You can remove this class from a local demo database at any time.', 1);
@@ -504,10 +539,50 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         var nextMilestone = classesPerStripe == 0 ? "Next degree · instructor tracked" : "Next stripe";
         string? ageGroup; DateTime? birthDate; string? email; string? phone; string? uniformSize; string? beltSize;
         await using (var details = connection.CreateCommand()) { details.CommandText = "SELECT age_group, birth_date, email, phone, uniform_size, belt_size FROM students WHERE student_id = $id"; details.Parameters.AddWithValue("$id", studentId); await using var detailsReader = await details.ExecuteReaderAsync(cancellationToken); await detailsReader.ReadAsync(cancellationToken); ageGroup = detailsReader.IsDBNull(0) ? null : detailsReader.GetString(0); birthDate = detailsReader.IsDBNull(1) || !DateTime.TryParse(detailsReader.GetString(1), CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedBirthDate) ? null : parsedBirthDate; email = detailsReader.IsDBNull(2) ? null : detailsReader.GetString(2); phone = detailsReader.IsDBNull(3) ? null : detailsReader.GetString(3); uniformSize = detailsReader.IsDBNull(4) ? null : detailsReader.GetString(4); beltSize = detailsReader.IsDBNull(5) ? null : detailsReader.GetString(5); }
-        var guardians = new List<GuardianItem>(); await using (var guardianCommand = connection.CreateCommand()) { guardianCommand.CommandText = "SELECT g.first_name, g.last_name, sg.relationship, g.phone, g.email FROM student_guardians sg JOIN guardians g ON g.guardian_id = sg.guardian_id WHERE sg.student_id = $id AND g.active = 1 ORDER BY sg.is_primary DESC, g.last_name, g.first_name"; guardianCommand.Parameters.AddWithValue("$id", studentId); await using var guardianReader = await guardianCommand.ExecuteReaderAsync(cancellationToken); while (await guardianReader.ReadAsync(cancellationToken)) guardians.Add(new($"{guardianReader.GetString(0)} {guardianReader.GetString(1)}", guardianReader.GetString(2), guardianReader.IsDBNull(3) ? null : guardianReader.GetString(3), guardianReader.IsDBNull(4) ? null : guardianReader.GetString(4))); }
+        var guardians = new List<GuardianItem>(); await using (var guardianCommand = connection.CreateCommand()) { guardianCommand.CommandText = "SELECT DISTINCT g.first_name, g.last_name, sg.relationship, g.phone, g.email FROM student_guardians sg JOIN guardians g ON g.guardian_id = sg.guardian_id WHERE sg.student_id = $id AND g.active = 1 ORDER BY sg.is_primary DESC, g.last_name, g.first_name"; guardianCommand.Parameters.AddWithValue("$id", studentId); await using var guardianReader = await guardianCommand.ExecuteReaderAsync(cancellationToken); while (await guardianReader.ReadAsync(cancellationToken)) guardians.Add(new($"{guardianReader.GetString(0)} {guardianReader.GetString(1)}", guardianReader.GetString(2), guardianReader.IsDBNull(3) ? null : guardianReader.GetString(3), guardianReader.IsDBNull(4) ? null : guardianReader.GetString(4))); }
         var programs = new List<ProgramMembershipItem>(); await using (var programCommand = connection.CreateCommand()) { programCommand.CommandText = "SELECT program_name, program_code, progression_type, level_name, enrolled_date FROM student_program_memberships WHERE student_id = $id AND active = 1 ORDER BY program_name"; programCommand.Parameters.AddWithValue("$id", studentId); await using var programReader = await programCommand.ExecuteReaderAsync(cancellationToken); while (await programReader.ReadAsync(cancellationToken)) programs.Add(new(programReader.GetString(0), programReader.GetString(1), programReader.GetString(2), programReader.IsDBNull(3) ? null : programReader.GetString(3), programReader.IsDBNull(4) ? null : programReader.GetString(4))); }
         return new(profileId, displayName, bio, favoriteTechnique, image, rank, joinDate, totalClasses, classesThisMonth, unread, achievements, dates, classesIntoStripe, classesPerStripe, classesToNextStripe, nextMilestone, ageGroup, birthDate, email, phone, uniformSize, beltSize, guardians, programs);
     }
+
+    public async Task UpdateProfileAsync(int studentId, StudentProfileUpdateRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using (var profile = connection.CreateCommand())
+        {
+            profile.Transaction = (SqliteTransaction)transaction;
+            profile.CommandText = @"
+INSERT OR IGNORE INTO student_profiles(student_id, display_name, profile_visible)
+VALUES ($id, NULL, 1);
+UPDATE student_profiles
+SET display_name = $displayName,
+    bio = $bio,
+    favorite_technique = $favoriteTechnique,
+    updated_at = $now
+WHERE student_id = $id;";
+            profile.Parameters.AddWithValue("$id", studentId);
+            profile.Parameters.AddWithValue("$displayName", (object?)NullIfBlank(request.DisplayName) ?? DBNull.Value);
+            profile.Parameters.AddWithValue("$bio", (object?)NullIfBlank(request.Bio) ?? DBNull.Value);
+            profile.Parameters.AddWithValue("$favoriteTechnique", (object?)NullIfBlank(request.FavoriteTechnique) ?? DBNull.Value);
+            profile.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O"));
+            await profile.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await using (var student = connection.CreateCommand())
+        {
+            student.Transaction = (SqliteTransaction)transaction;
+            student.CommandText = @"UPDATE students SET email = $email, phone = $phone, uniform_size = $uniformSize, belt_size = $beltSize, updated_at = $now WHERE student_id = $id AND active = 1";
+            student.Parameters.AddWithValue("$id", studentId);
+            student.Parameters.AddWithValue("$email", (object?)NullIfBlank(request.Email) ?? DBNull.Value);
+            student.Parameters.AddWithValue("$phone", (object?)NullIfBlank(request.Phone) ?? DBNull.Value);
+            student.Parameters.AddWithValue("$uniformSize", (object?)NullIfBlank(request.UniformSize) ?? DBNull.Value);
+            student.Parameters.AddWithValue("$beltSize", (object?)NullIfBlank(request.BeltSize) ?? DBNull.Value);
+            student.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O"));
+            await student.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await transaction.CommitAsync(cancellationToken);
+    }
+
+    private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     public async Task<(bool Success, bool Duplicate)> CheckInAsync(int studentId, int sessionId, CancellationToken cancellationToken = default)
     {
@@ -580,7 +655,7 @@ LEFT JOIN students s ON s.student_id = p.student_id
 LEFT JOIN student_profiles sp ON sp.student_id = p.student_id
 LEFT JOIN student_rank_history h ON h.student_id = p.student_id AND h.student_rank_id = (SELECT MAX(h2.student_rank_id) FROM student_rank_history h2 WHERE h2.student_id = p.student_id)
 LEFT JOIN ranks r ON r.rank_id = h.rank_id
-WHERE p.visible = 1 AND p.moderation_status = 'approved' AND (p.post_type = 'news' OR p.student_id = $id OR EXISTS (SELECT 1 FROM student_friendships f WHERE f.status = 'accepted' AND ((f.student_id = $id AND f.friend_id = p.student_id) OR (f.friend_id = $id AND f.student_id = p.student_id))))
+WHERE p.visible = 1 AND p.moderation_status = 'approved' AND p.post_type = 'student' AND (p.student_id = $id OR EXISTS (SELECT 1 FROM student_friendships f WHERE f.status = 'accepted' AND ((f.student_id = $id AND f.friend_id = p.student_id) OR (f.friend_id = $id AND f.student_id = p.student_id))))
 ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", studentId);
         var rows = new List<(long Id, int AuthorId, string AuthorName, string? RankName, string Text, string Type, DateTime CreatedAt)>();
         await using (var reader = await command.ExecuteReaderAsync(cancellationToken)) while (await reader.ReadAsync(cancellationToken)) rows.Add(new(reader.GetInt64(0), reader.GetInt32(1), reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetString(4), reader.GetString(5), DateTime.Parse(reader.GetString(6), CultureInfo.InvariantCulture)));

@@ -1,2 +1,8 @@
-<script lang="ts">import { onMount } from 'svelte'; import { api } from '$lib/api'; import StudentShell from '$lib/components/StudentShell.svelte'; import { apiError, requireStudent, type StudentSession } from '$lib/student-session'; let session: StudentSession | null = null; let items: any[] = []; let error = ''; onMount(async () => { session = await requireStudent(); if (!session) return; try { items = await api<any[]>('/api/student/news'); } catch (e) { error = apiError(e); } });</script>
-{#if session}<StudentShell {session} active="news"><section class="student-heading"><span class="student-eyebrow">FROM THE DOJO</span><h1>NEWS FEED</h1><p>Official updates, event notes, and announcements from Task Karate.</p></section>{#if error}<div class="error">{error}</div>{:else if items.length === 0}<section class="student-panel empty-panel"><h2>No published news yet.</h2><p>New dojo updates will appear here when they are published.</p></section>{:else}<div class="news-stack">{#each items as item}<a class="student-panel feed-card news-card news-link" href={`/student/news/${item.id}`}><div class="feed-author"><span class="mini-avatar">TK</span><div><strong>Task Karate</strong><small>Official dojo update · {new Date(item.publishedAt).toLocaleDateString()}</small></div></div><h2>{item.title}</h2><p>{item.body}</p><div class="feed-actions"><span>▤ News feed · Read full update →</span></div></a>{/each}</div>{/if}</StudentShell>{/if}
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  onMount(() => goto('/student/classes'));
+</script>
+
+<svelte:head><title>Task Karate | My classes</title></svelte:head>
+<p class="visually-hidden">Student news moved to the public Task Karate website. Redirecting to My Classes.</p>

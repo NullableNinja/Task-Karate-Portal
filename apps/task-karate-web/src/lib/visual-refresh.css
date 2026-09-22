@@ -20,7 +20,57 @@
   color: #f4f8fc;
 }
 
-.student-app:before { opacity: .045; }
+.student-app:before { opacity: 0; background: none; }
+.portal-orbs { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.portal-orb { position: absolute; display: block; border: 1px solid #62caf72b; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #66d2ff26, #1b4b7114 58%, transparent 72%); box-shadow: inset -12px -14px 24px #020b1833, 0 0 42px #2c8bb51c; animation: portal-float-a 24s ease-in-out infinite; }
+.orb-a { width: 210px; height: 210px; left: -45px; top: 17%; }
+.orb-b { width: 115px; height: 115px; left: 31%; top: -28px; animation-name: portal-float-b; animation-duration: 19s; animation-delay: -6s; }
+.orb-c { width: 330px; height: 330px; right: -105px; top: 22%; animation-name: portal-float-c; animation-duration: 29s; animation-delay: -12s; }
+.orb-d { width: 78px; height: 78px; right: 26%; bottom: 13%; animation-name: portal-float-b; animation-duration: 17s; animation-delay: -3s; }
+.orb-e { width: 165px; height: 165px; left: 43%; bottom: -90px; animation-name: portal-float-c; animation-duration: 26s; animation-delay: -14s; }
+@keyframes portal-float-a { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(45px, -24px, 0) scale(1.06); } }
+@keyframes portal-float-b { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-34px, 38px, 0); } }
+@keyframes portal-float-c { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(-36px, 26px, 0) scale(.96); } }
+.student-identity-link { color: inherit; text-decoration: none; }
+.student-identity-link:hover .identity-avatar, .student-identity-link:focus-visible .identity-avatar { border-color: var(--cyan); box-shadow: 0 0 0 3px #51c4f533, 0 12px 24px #0005; }
+.profile-layout { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(0, 1.4fr); gap: 15px; }
+.profile-card { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; }
+.profile-card h2 { margin: 4px 0 0; font-size: 2rem; }
+.profile-card p { max-width: 520px; line-height: 1.7; }
+.profile-avatar { display: grid; place-items: center; width: 94px; height: 94px; border: 2px solid var(--cyan); border-radius: 28px; background: #23415f; color: #e9f8ff; font-size: 2.1rem; font-weight: 900; box-shadow: 0 12px 28px #0004; }
+.profile-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.profile-tags span { border: 1px solid #46617d; border-radius: 99px; padding: 7px 10px; color: #c9d9e6; font-size: .76rem; }
+.stripe-track { height: 16px; margin: 22px 0 12px; overflow: hidden; border: 1px solid #4b6681; border-radius: 99px; background: #1a3048; }
+.stripe-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #42bce9, #9be7ff); box-shadow: 0 0 16px #54c9f877; }
+.stripe-summary { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.stripe-summary strong { color: #f4f8fc; }
+.stripe-summary span { color: #c0cfdd; font-size: .85rem; }
+.degree-note { display: grid; gap: 8px; margin-top: 26px; padding: 14px; border-left: 3px solid var(--gold); background: #26344a; color: #cedbe6; }
+.degree-note strong { color: #f5e5b5; }
+.belt-graphic { position: relative; display: block; width: min(100%, 330px); height: 58px; margin-bottom: 18px; }
+.belt-strip { position: absolute; inset: 14px 0; border-radius: 9px; background: var(--belt-color); box-shadow: inset 0 -8px 12px #0003, 0 8px 18px #0004; }
+.belt-strip:after { content: ''; position: absolute; right: 25%; top: 0; bottom: 0; width: 7px; background: #1a2533; box-shadow: 18px 0 #f2e5c2; }
+.belt-knot { position: absolute; z-index: 1; left: 40%; top: 3px; width: 70px; height: 52px; border-radius: 11px; background: var(--belt-color); box-shadow: inset 0 -8px 12px #0003, 0 8px 18px #0004; }
+.training-top-grid { margin-bottom: 15px; }
+.training-note-panel { margin-bottom: 15px; }
+.requirement-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+.requirement-card .panel-title { margin-bottom: 8px; }
+.requirement-count { display: grid; place-items: center; min-width: 26px; height: 26px; border-radius: 99px; background: #29425d; color: #c8edff; font-size: .75rem; }
+.requirement-card ul { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.requirement-card li { display: flex; gap: 10px; align-items: flex-start; color: #d5e1eb; line-height: 1.45; }
+.requirement-marker { color: #64c9f1; font-size: 1.1rem; line-height: 1.1; }
+.social-feed-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .8fr); gap: 15px; align-items: start; }
+.feed-column, .social-sidebar { display: grid; gap: 15px; }
+.post-composer textarea { display: block; width: 100%; min-height: 92px; resize: vertical; border: 1px solid #45617c; border-radius: 9px; background: #0c1b2e; color: #f4f8fc; padding: 12px; }
+.post-composer textarea::placeholder { color: #9fb5c8; }
+.composer-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+.feed-stream { display: grid; gap: 15px; }
+.feed-card { padding: 20px; }
+.feed-author { display: flex; align-items: center; gap: 11px; }
+.feed-author strong, .feed-author small { display: block; }
+.feed-author small { margin-top: 3px; color: #c0cfdd; font-size: .76rem; }
+.feed-card > p { margin: 18px 0; color: #e0eaf2; white-space: pre-wrap; line-height: 1.7; }
+.feed-actions { padding-top: 11px; border-top: 1px solid #304964; color: #8edbf6; font-size: .78rem; }
 .topbar-note, .identity-label { color: #c4d4e3; }
 .student-heading p, .schedule-hero p { color: #c5d5e3; }
 .student-app .student-heading { margin-top: 26px; }
@@ -124,6 +174,13 @@
 @media (max-width: 900px) {
   .student-app .student-heading { margin-top: 12px; }
   .student-app .student-main { padding-top: 12px; }
+  .profile-layout, .social-feed-layout { grid-template-columns: 1fr; }
+  .requirement-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-orb { animation: none; }
+  .floating-nav a { transition: none; }
 }
 
 @media (max-width: 500px) {

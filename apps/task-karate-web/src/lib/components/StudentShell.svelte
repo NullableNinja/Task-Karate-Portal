@@ -21,11 +21,12 @@
 
 <svelte:head><meta name="theme-color" content="#081526" /></svelte:head>
 <div class="student-app">
+  <div class="portal-orbs" aria-hidden="true"><span class="portal-orb orb-a"></span><span class="portal-orb orb-b"></span><span class="portal-orb orb-c"></span><span class="portal-orb orb-d"></span><span class="portal-orb orb-e"></span></div>
   <header class="student-topbar">
     <a class="brand" href="/schedule" aria-label="Task Karate schedule"><span class="brand-mark">TK</span><span><strong>TASK KARATE</strong><small>STUDENT HUB</small></span></a>
     <div class="topbar-note">{session.displayName ?? 'Student'} <span aria-hidden="true">·</span> connected securely</div>
   </header>
-  <aside class="student-identity" aria-label="Student identity"><span class="identity-avatar">{initials(session.displayName)}</span><span class="identity-label">{session.displayName ?? 'Student'}</span></aside>
+  <a class="student-identity student-identity-link" href="/student/profile" aria-label={`Open ${session.displayName ?? 'student'} profile`}><span class="identity-avatar">{initials(session.displayName)}</span><span class="identity-label">{session.displayName ?? 'Student'}</span></a>
   <nav class="floating-nav" aria-label="Student sections">
     {#each tabs as tab}<a class:active={active === tab.id} href={tab.href} aria-current={active === tab.id ? 'page' : undefined}><span aria-hidden="true">{tab.id === 'status' ? '◉' : tab.id === 'social' ? '✦' : tab.id === 'achievements' ? '★' : tab.id === 'training' ? '➜' : '▤'}</span>{tab.label}</a>{/each}
   </nav>

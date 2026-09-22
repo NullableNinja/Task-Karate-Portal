@@ -35,6 +35,8 @@ public sealed record CommentItem(long CommentId, int AuthorId, string AuthorName
 public sealed record TrainingMissionItem(long MissionId, string Title, string Description, string Category, bool Completed, DateTime? CompletedAt);
 public sealed record TimelineItem(string Type, string Title, string Description, DateTime OccurredAt, string? Link);
 public sealed record GoldStarEventItem(long EventId, string Name, string Description, DateTime? EventDate, bool Awarded, bool Interested);
+public sealed record PracticeLogItem(long PracticeLogId, string Skill, int Minutes, string? Reflection, DateTime LoggedAt);
+public sealed record GoalItem(long GoalId, string Title, DateTime? TargetDate, bool Completed, DateTime CreatedAt, DateTime? CompletedAt);
 
 public sealed class StudentExperienceService
 {
@@ -89,6 +91,9 @@ CREATE TABLE IF NOT EXISTS student_friendships (student_id INTEGER NOT NULL, fri
 CREATE TABLE IF NOT EXISTS student_messages (message_id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER NOT NULL, recipient_id INTEGER NOT NULL, message_text TEXT NOT NULL, created_at TEXT NOT NULL, read_at TEXT, FOREIGN KEY(sender_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(recipient_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS post_reactions (post_id INTEGER NOT NULL, student_id INTEGER NOT NULL, reaction_code TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(post_id, student_id), CHECK(reaction_code IN ('fist_bump', 'respect', 'fire')), FOREIGN KEY(post_id) REFERENCES posts(post_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS post_comments (comment_id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER NOT NULL, student_id INTEGER NOT NULL, comment_text TEXT NOT NULL, visible INTEGER NOT NULL DEFAULT 1, moderation_status TEXT NOT NULL DEFAULT 'approved', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(post_id) REFERENCES posts(post_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS student_practice_logs (practice_log_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, skill TEXT NOT NULL, minutes INTEGER NOT NULL, reflection TEXT, logged_at TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS student_goals (goal_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, title TEXT NOT NULL, target_date TEXT, completed INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, completed_at TEXT, UNIQUE(student_id, title), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS post_bookmarks (post_id INTEGER NOT NULL, student_id INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(post_id, student_id), FOREIGN KEY(post_id) REFERENCES posts(post_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE INDEX IF NOT EXISTS ix_student_accounts_username ON student_accounts(username);
 CREATE INDEX IF NOT EXISTS ix_class_sessions_date ON class_sessions(session_date, cancelled);
 CREATE INDEX IF NOT EXISTS ix_attendance_student ON attendance(student_id, session_id);
@@ -97,6 +102,9 @@ CREATE INDEX IF NOT EXISTS ix_posts_news ON posts(post_type, visible, moderation
 CREATE INDEX IF NOT EXISTS ix_post_reactions_post ON post_reactions(post_id, reaction_code);
 CREATE INDEX IF NOT EXISTS ix_post_comments_post ON post_comments(post_id, created_at);
 CREATE INDEX IF NOT EXISTS ix_timeline_attendance ON attendance(student_id, check_in_time);
+CREATE INDEX IF NOT EXISTS ix_practice_logs_student ON student_practice_logs(student_id, logged_at);
+CREATE INDEX IF NOT EXISTS ix_goals_student ON student_goals(student_id, completed, target_date);
+CREATE INDEX IF NOT EXISTS ix_post_bookmarks_student ON post_bookmarks(student_id, created_at);
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureLegacyStudentColumnsAsync(connection, cancellationToken);
@@ -111,8 +119,9 @@ CREATE INDEX IF NOT EXISTS ix_timeline_attendance ON attendance(student_id, chec
     private async Task SeedDevelopmentGoldStarEventsAsync(SqliteConnection connection, CancellationToken cancellationToken)
     {
         if (!_options.ImportDemoStudents) return;
+        var resetDemoAttendance = Environment.GetEnvironmentVariable("TASK_KARATE_RESET_DEMO_ATTENDANCE") is "1" or "true";
         await using var command = connection.CreateCommand();
-        command.CommandText = @"
+        command.CommandText = (resetDemoAttendance ? "DELETE FROM attendance WHERE student_id = (SELECT student_id FROM students WHERE first_name = 'Emma' AND last_name = 'Thompson');\n" : string.Empty) + @"
 INSERT OR IGNORE INTO gold_star_events(event_name, description, event_date) VALUES
     ('Tunnel Hike', 'A special gold-star event for students who take on the studio tunnel hike.', date('now', '-30 days')),
     ('1,000 Kick Challenge', 'Complete the studio 1,000-kick challenge with focus and good technique.', date('now', '-14 days')),
@@ -133,6 +142,28 @@ INSERT OR IGNORE INTO student_mission_progress(student_id, mission_id, completed
 SELECT student.student_id, mission.mission_id, 0, NULL
 FROM students student CROSS JOIN training_missions mission
 WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson';
+
+INSERT OR IGNORE INTO student_goals(student_id, title, target_date, completed, created_at, completed_at)
+SELECT student.student_id, 'Attend two classes this week', date('now', '+6 days'), 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 days'), NULL
+FROM students student
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson';
+
+INSERT OR IGNORE INTO student_goals(student_id, title, target_date, completed, created_at, completed_at)
+SELECT student.student_id, 'Practice my roundhouse with control', date('now', '+14 days'), 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-5 days'), NULL
+FROM students student
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson';
+
+INSERT INTO student_practice_logs(student_id, skill, minutes, reflection, logged_at)
+SELECT student.student_id, 'Roundhouse kick', 12, 'Better balance on the landing today.', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 day')
+FROM students student
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson'
+  AND NOT EXISTS (SELECT 1 FROM student_practice_logs WHERE skill = 'Roundhouse kick' AND reflection = 'Better balance on the landing today.');
+
+INSERT INTO student_practice_logs(student_id, skill, minutes, reflection, logged_at)
+SELECT student.student_id, 'IS3 ready position', 8, 'Stayed relaxed and kept safe spacing.', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days')
+FROM students student
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson'
+  AND NOT EXISTS (SELECT 1 FROM student_practice_logs WHERE skill = 'IS3 ready position' AND reflection = 'Stayed relaxed and kept safe spacing.');
 
 INSERT OR IGNORE INTO guardians(first_name, last_name, email, phone, active)
 VALUES ('Alex', 'Thompson', 'alex.thompson@example.test', '555-0102', 1);
@@ -276,6 +307,12 @@ WHERE post.post_text = 'Torchlight Parade practice is looking great. See everyon
 
 INSERT OR IGNORE INTO post_reactions(post_id, student_id, reaction_code)
 SELECT post.post_id, emma.student_id, 'respect'
+FROM posts post CROSS JOIN students emma
+WHERE post.post_text = 'Belt Testing Focus This Week — Open Training to review your next-rank requirements, stripe progress, and practice assignments before your next class.'
+  AND emma.first_name = 'Emma' AND emma.last_name = 'Thompson';
+
+INSERT OR IGNORE INTO post_bookmarks(post_id, student_id)
+SELECT post.post_id, emma.student_id
 FROM posts post CROSS JOIN students emma
 WHERE post.post_text = 'Belt Testing Focus This Week — Open Training to review your next-rank requirements, stripe progress, and practice assignments before your next class.'
   AND emma.first_name = 'Emma' AND emma.last_name = 'Thompson';
@@ -601,6 +638,41 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
     public async Task<long> CreatePostAsync(int studentId, string text, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at) VALUES ($student, $text, 'student', 'approved', 1, $now, $now)"; command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$text", text.Trim()); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken); await using var idCommand = connection.CreateCommand(); idCommand.CommandText = "SELECT last_insert_rowid()"; return Convert.ToInt64(await idCommand.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    public async Task<IReadOnlyList<PracticeLogItem>> GetPracticeLogsAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT practice_log_id, skill, minutes, reflection, logged_at FROM student_practice_logs WHERE student_id = $student ORDER BY logged_at DESC LIMIT 30"; command.Parameters.AddWithValue("$student", studentId); var list = new List<PracticeLogItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetInt32(2), reader.IsDBNull(3) ? null : reader.GetString(3), DateTime.Parse(reader.GetString(4), CultureInfo.InvariantCulture))); return list;
+    }
+
+    public async Task<long> CreatePracticeLogAsync(int studentId, string skill, int minutes, string? reflection, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO student_practice_logs(student_id, skill, minutes, reflection, logged_at) VALUES ($student, $skill, $minutes, $reflection, $now)"; command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$skill", skill.Trim()); command.Parameters.AddWithValue("$minutes", minutes); command.Parameters.AddWithValue("$reflection", (object?)reflection?.Trim() ?? DBNull.Value); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken); await using var idCommand = connection.CreateCommand(); idCommand.CommandText = "SELECT last_insert_rowid()"; return Convert.ToInt64(await idCommand.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    public async Task<IReadOnlyList<GoalItem>> GetGoalsAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT goal_id, title, target_date, completed, created_at, completed_at FROM student_goals WHERE student_id = $student ORDER BY completed, target_date IS NULL, target_date, created_at DESC"; command.Parameters.AddWithValue("$student", studentId); var list = new List<GoalItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.IsDBNull(2) ? null : DateTime.Parse(reader.GetString(2), CultureInfo.InvariantCulture), reader.GetInt32(3) != 0, DateTime.Parse(reader.GetString(4), CultureInfo.InvariantCulture), reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5), CultureInfo.InvariantCulture))); return list;
+    }
+
+    public async Task<long> CreateGoalAsync(int studentId, string title, DateTime? targetDate, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO student_goals(student_id, title, target_date, completed, created_at) VALUES ($student, $title, $target, 0, $now) ON CONFLICT(student_id, title) DO UPDATE SET target_date = excluded.target_date"; command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$title", title.Trim()); command.Parameters.AddWithValue("$target", targetDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? (object)DBNull.Value); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken); await using var idCommand = connection.CreateCommand(); idCommand.CommandText = "SELECT goal_id FROM student_goals WHERE student_id = $student AND title = $title"; idCommand.Parameters.AddWithValue("$student", studentId); idCommand.Parameters.AddWithValue("$title", title.Trim()); return Convert.ToInt64(await idCommand.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    public async Task<bool> ToggleGoalAsync(int studentId, long goalId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var check = connection.CreateCommand(); check.CommandText = "SELECT completed FROM student_goals WHERE goal_id = $goal AND student_id = $student"; check.Parameters.AddWithValue("$goal", goalId); check.Parameters.AddWithValue("$student", studentId); var value = await check.ExecuteScalarAsync(cancellationToken); if (value is null) return false; var completed = Convert.ToInt32(value, CultureInfo.InvariantCulture) == 0; await using var command = connection.CreateCommand(); command.CommandText = "UPDATE student_goals SET completed = $completed, completed_at = $completedAt WHERE goal_id = $goal AND student_id = $student"; command.Parameters.AddWithValue("$completed", completed ? 1 : 0); command.Parameters.AddWithValue("$completedAt", completed ? DateTime.UtcNow.ToString("O") : (object)DBNull.Value); command.Parameters.AddWithValue("$goal", goalId); command.Parameters.AddWithValue("$student", studentId); await command.ExecuteNonQueryAsync(cancellationToken); return completed;
+    }
+
+    public async Task<IReadOnlyList<long>> GetBookmarkedPostIdsAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT post_id FROM post_bookmarks WHERE student_id = $student ORDER BY created_at DESC"; command.Parameters.AddWithValue("$student", studentId); var list = new List<long>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(reader.GetInt64(0)); return list;
+    }
+
+    public async Task<bool> ToggleBookmarkAsync(int studentId, long postId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); if (!await CanAccessPostAsync(connection, studentId, postId, cancellationToken)) return false; await using var exists = connection.CreateCommand(); exists.CommandText = "SELECT COUNT(1) FROM post_bookmarks WHERE post_id = $post AND student_id = $student"; exists.Parameters.AddWithValue("$post", postId); exists.Parameters.AddWithValue("$student", studentId); var bookmarked = Convert.ToInt32(await exists.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) > 0; await using var command = connection.CreateCommand(); command.Parameters.AddWithValue("$post", postId); command.Parameters.AddWithValue("$student", studentId); if (bookmarked) command.CommandText = "DELETE FROM post_bookmarks WHERE post_id = $post AND student_id = $student"; else { command.CommandText = "INSERT INTO post_bookmarks(post_id, student_id) VALUES ($post, $student)"; } await command.ExecuteNonQueryAsync(cancellationToken); return !bookmarked;
     }
 
     public async Task<IReadOnlyList<AchievementItem>> GetAchievementsAsync(int studentId, CancellationToken cancellationToken = default)

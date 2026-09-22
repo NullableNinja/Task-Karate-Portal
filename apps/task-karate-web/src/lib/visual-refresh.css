@@ -23,11 +23,17 @@
 .student-app:before { opacity: 0; background: none; }
 .portal-orbs { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .portal-orb { position: absolute; display: block; border: 1px solid #62caf72b; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #66d2ff26, #1b4b7114 58%, transparent 72%); box-shadow: inset -12px -14px 24px #020b1833, 0 0 42px #2c8bb51c; animation: portal-float-a 24s ease-in-out infinite; }
+.scroll-rank-indicator { position: fixed; z-index: 20; right: 0; bottom: 0; left: 0; height: 6px; background: #08111e; box-shadow: 0 -2px 12px #0008; }
+.scroll-rank-fill { display: block; width: var(--scroll-progress); height: 100%; background: var(--scroll-color); box-shadow: 0 0 12px var(--scroll-color); transition: width .18s ease, background .35s ease; }
+.scroll-rank-label { position: absolute; right: 14px; bottom: 9px; padding: 4px 7px; border: 1px solid color-mix(in srgb, var(--scroll-color) 60%, #fff 15%); border-radius: 6px; background: #091727e8; color: var(--scroll-color); font-size: .62rem; font-weight: 900; letter-spacing: .08em; opacity: .72; text-transform: uppercase; }
 .orb-a { width: 210px; height: 210px; left: -45px; top: 17%; }
 .orb-b { width: 115px; height: 115px; left: 31%; top: -28px; animation-name: portal-float-b; animation-duration: 19s; animation-delay: -6s; }
 .orb-c { width: 330px; height: 330px; right: -105px; top: 22%; animation-name: portal-float-c; animation-duration: 29s; animation-delay: -12s; }
 .orb-d { width: 78px; height: 78px; right: 26%; bottom: 13%; animation-name: portal-float-b; animation-duration: 17s; animation-delay: -3s; }
 .orb-e { width: 165px; height: 165px; left: 43%; bottom: -90px; animation-name: portal-float-c; animation-duration: 26s; animation-delay: -14s; }
+.orb-f { width: 52px; height: 52px; left: 12%; top: 44%; animation-name: portal-float-b; animation-duration: 15s; animation-delay: -8s; opacity: .8; }
+.orb-g { width: 260px; height: 260px; right: 18%; bottom: -110px; animation-name: portal-float-a; animation-duration: 31s; animation-delay: -18s; opacity: .65; }
+.orb-h { width: 92px; height: 92px; right: 7%; top: 63%; animation-name: portal-float-c; animation-duration: 21s; animation-delay: -4s; opacity: .75; }
 @keyframes portal-float-a { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(45px, -24px, 0) scale(1.06); } }
 @keyframes portal-float-b { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(-34px, 38px, 0); } }
 @keyframes portal-float-c { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(-36px, 26px, 0) scale(.96); } }
@@ -60,6 +66,23 @@
 .next-class-content { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .next-class-content h2 { margin: 6px 0; }
 .next-class-content p { color: #c0cfdd; }
+.next-class-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.next-class-actions .outline-button { color: #bfeeff; border-color: #4b7894; background: #10243b; }
+.briefing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; margin-top: 15px; }
+.briefing-card { min-height: 190px; }
+.briefing-number { margin-top: 12px; color: #f4f8fc; font-size: 2.4rem; font-weight: 900; line-height: 1; }
+.briefing-number small { color: #9fc5dc; font-size: 1rem; }
+.briefing-card p { margin: 14px 0 0; color: #c0cfdd; line-height: 1.5; }
+.mini-progress { height: 8px; margin-top: 13px; overflow: hidden; border-radius: 99px; background: #1b344d; }
+.mini-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #39bda5, #76d9ca); }
+.event-spotlight { border-color: #68572d; background: linear-gradient(135deg, #1a2b3f, #2c2b24); }
+.event-spotlight h2 { margin: 14px 0 6px; font-size: 1.2rem; }
+.gold-text { color: #f1d27b; }
+.goal-summary-panel { margin-top: 15px; }
+.goal-summary-list { display: grid; gap: 8px; }
+.goal-summary-list > div { display: grid; grid-template-columns: 13px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 10px 12px; border: 1px solid #38516c; background: #152a42; }
+.goal-summary-list strong { color: #f4f8fc; font-size: .86rem; }
+.goal-summary-list small { color: #9fc5dc; font-size: .72rem; }
 .belt-graphic { position: relative; display: block; width: min(100%, 330px); height: 58px; margin-bottom: 18px; }
 .belt-strip { position: absolute; inset: 14px 0; border-radius: 9px; background: var(--belt-color); box-shadow: inset 0 -8px 12px #0003, 0 8px 18px #0004; }
 .belt-strip:after { content: ''; position: absolute; right: 25%; top: 0; bottom: 0; width: 7px; background: #111820; box-shadow: none; }
@@ -121,6 +144,11 @@
 .detail-facts strong { color: #f4f8fc; }
 .social-feed-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .8fr); gap: 15px; align-items: start; }
 .feed-column, .social-sidebar { display: grid; gap: 15px; }
+.feed-controls { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 12px 15px; }
+.feed-controls input { max-width: 240px; border: 1px solid #45617c; background: #0c1b2e; color: #f4f8fc; }
+.feed-filter-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.feed-filter-row button { border: 1px solid #46637e; border-radius: 99px; background: #10243b; color: #bfd0df; padding: 7px 10px; cursor: pointer; font-size: .73rem; font-weight: 800; }
+.feed-filter-row button.active, .feed-filter-row button:hover, .feed-filter-row button:focus-visible { border-color: #8bdfff; background: #18516d; color: #f4fbff; outline: 2px solid #8bdfff; outline-offset: 1px; }
 .post-composer textarea { display: block; width: 100%; min-height: 92px; resize: vertical; border: 1px solid #45617c; border-radius: 9px; background: #0c1b2e; color: #f4f8fc; padding: 12px; }
 .post-composer textarea::placeholder { color: #9fb5c8; }
 .composer-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
@@ -129,6 +157,9 @@
 .feed-author { display: flex; align-items: center; gap: 11px; }
 .feed-author strong, .feed-author small { display: block; }
 .feed-author small { margin-top: 3px; color: #c0cfdd; font-size: .76rem; }
+.bookmark-button { margin-left: auto; border: 0; background: transparent; color: #8ea9bd; font-size: 1.35rem; line-height: 1; cursor: pointer; }
+.bookmark-button.saved { color: #e6c15d; text-shadow: 0 0 9px #e6c15d66; }
+.bookmark-button:hover, .bookmark-button:focus-visible { color: #f4d978; outline: 2px solid #f4d978; outline-offset: 3px; border-radius: 5px; }
 .feed-card > p { margin: 18px 0; color: #e0eaf2; white-space: pre-wrap; line-height: 1.7; }
 .feed-actions { padding-top: 11px; border-top: 1px solid #304964; color: #8edbf6; font-size: .78rem; }
 .feed-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -183,6 +214,30 @@
 .mission-card small { color: #9fe5ff; font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .mission-card strong { color: #f4f8fc; }
 .mission-card em { color: #c0cfdd; font-size: .78rem; font-style: normal; line-height: 1.45; }
+.training-tools-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin-bottom: 15px; }
+.practice-form { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 10px; }
+.practice-form label { display: grid; gap: 6px; color: #a9d0eb; font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.practice-form .full { grid-column: 1 / -1; }
+.practice-form input, .practice-form textarea, .goal-form input { border: 1px solid #45617c; background: #0c1b2e; color: #f4f8fc; }
+.practice-form .primary-button { justify-self: start; }
+.practice-log-list { display: grid; gap: 8px; margin-top: 16px; }
+.practice-log { display: flex; align-items: flex-start; gap: 11px; padding: 10px; border: 1px solid #38516c; background: #152a42; }
+.practice-minutes { display: grid; place-items: center; min-width: 42px; height: 42px; border-radius: 12px; background: #1c5a6f; color: #aee9ff; font-size: 1rem; font-weight: 900; }
+.practice-minutes small { font-size: .55rem; }
+.practice-log > div { display: grid; gap: 3px; }
+.practice-log strong { color: #f4f8fc; font-size: .84rem; }
+.practice-log p { color: #c0cfdd; font-size: .78rem; }
+.practice-log small { color: #8edbf6; font-size: .68rem; }
+.goal-form { display: grid; grid-template-columns: minmax(0, 1fr) 130px auto; gap: 7px; }
+.goal-list { display: grid; gap: 7px; margin-top: 14px; }
+.goal-row { display: flex; align-items: flex-start; gap: 9px; width: 100%; padding: 11px; border: 1px solid #38516c; background: #152a42; color: inherit; text-align: left; cursor: pointer; }
+.goal-row:hover, .goal-row:focus-visible { border-color: var(--cyan); outline: 2px solid #8bdfff; outline-offset: 1px; }
+.goal-row > span:first-child { color: #8edbf6; font-size: 1.15rem; }
+.goal-row > span:last-child { display: grid; gap: 3px; }
+.goal-row strong { color: #f4f8fc; font-size: .84rem; }
+.goal-row small { color: #c0cfdd; font-size: .7rem; }
+.goal-row.completed { border-color: #3bbf9f; background: #173d3d; }
+.goal-row.completed > span:first-child { color: #6ee4c7; }
 .interest-button { margin: 4px 0 20px; }
 .topbar-note, .identity-label { color: #c4d4e3; }
 .student-heading p, .schedule-hero p { color: #c5d5e3; }
@@ -288,6 +343,7 @@
   .student-app .student-heading { margin-top: 12px; }
   .student-app .student-main { padding-top: 12px; }
   .profile-layout, .social-feed-layout { grid-template-columns: 1fr; }
+  .briefing-grid, .training-tools-grid { grid-template-columns: 1fr; }
   .profile-info-grid { grid-template-columns: 1fr; }
   .next-class-content { align-items: flex-start; flex-direction: column; }
   .next-class-content .primary-button { width: 100%; text-align: center; }
@@ -295,14 +351,19 @@
   .gold-star-grid { grid-template-columns: 1fr; }
   .program-membership-grid, .detail-facts { grid-template-columns: 1fr; }
   .is3-focus-grid, .mission-grid { grid-template-columns: 1fr; }
+  .next-class-actions { width: 100%; justify-content: stretch; }
+  .next-class-actions > * { flex: 1; text-align: center; }
 }
 
 @media (max-width: 560px) {
   .attendance-calendar { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .practice-form, .goal-form { grid-template-columns: 1fr; }
+  .practice-form .full { grid-column: auto; }
+  .feed-controls input { max-width: none; width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .portal-orb { animation: none; }
+  .portal-orb, .scroll-rank-fill { animation: none; transition: none; }
   .floating-nav a { transition: none; }
 }
 

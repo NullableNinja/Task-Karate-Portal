@@ -12,7 +12,7 @@
     { id: 'social', label: 'Social', href: '/student/social' },
     { id: 'achievements', label: 'Achievements', href: '/student/achievements' },
     { id: 'training', label: 'Training', href: '/student/training' },
-    { id: 'classes', label: 'My Classes', href: '/student/classes' }
+    { id: 'check-in', label: 'Check In', href: '/student/check-in' }
   ];
   async function logout() {
     error = '';
@@ -44,7 +44,7 @@
   </header>
   <a class="student-identity student-identity-link" href="/student/profile" aria-label={`Open ${session.displayName ?? 'student'} profile`}><span class="identity-avatar">{initials(session.displayName)}</span><span class="identity-label">{session.displayName ?? 'Student'}</span></a>
   <nav class="floating-nav" aria-label="Student sections">
-    {#each tabs as tab}<a class:active={active === tab.id} href={tab.href} aria-current={active === tab.id ? 'page' : undefined}><span aria-hidden="true">{tab.id === 'status' ? '◉' : tab.id === 'social' ? '✦' : tab.id === 'achievements' ? '★' : tab.id === 'training' ? '➜' : '▣'}</span>{tab.label}</a>{/each}
+    {#each tabs as tab}<a class:active={active === tab.id} href={tab.href} aria-current={active === tab.id ? 'page' : undefined}><span aria-hidden="true">{tab.id === 'status' ? '◉' : tab.id === 'social' ? '✦' : tab.id === 'achievements' ? '★' : tab.id === 'training' ? '➜' : '✓'}</span>{tab.label}</a>{/each}
   </nav>
   <button class="floating-logout" type="button" on:click={logout}><span aria-hidden="true">⏻</span> Log out</button>
   {#if error}<div class="student-toast error" role="alert">{error}</div>{/if}

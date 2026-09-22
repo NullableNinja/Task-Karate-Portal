@@ -33,6 +33,9 @@ public sealed record ReactionSummary(string Code, string Label, string Icon, int
 public sealed record FeedItem(long PostId, int AuthorId, string AuthorName, string? RankName, string Text, string PostType, DateTime CreatedAt, IReadOnlyList<ReactionSummary> Reactions, int CommentCount);
 public sealed record CommentItem(long CommentId, int AuthorId, string AuthorName, string Text, DateTime CreatedAt);
 public sealed record TrainingMissionItem(long MissionId, string Title, string Description, string Category, bool Completed, DateTime? CompletedAt);
+public sealed record DailyMissionItem(long DailyMissionId, string MissionKey, string Title, string Description, string Category, DateTime MissionDate, bool Completed, DateTime? CompletedAt);
+public sealed record DailyMissionSeed(string MissionKey, string Title, string Description, string Category);
+public sealed record DailyMissionSyncRequest(string Date, IReadOnlyList<DailyMissionSeed> Missions);
 public sealed record TimelineItem(string Type, string Title, string Description, DateTime OccurredAt, string? Link);
 public sealed record GoldStarEventItem(long EventId, string Name, string Description, DateTime? EventDate, bool Awarded, bool Interested);
 public sealed record PracticeLogItem(long PracticeLogId, string Skill, int Minutes, string? Reflection, DateTime LoggedAt);
@@ -84,6 +87,7 @@ CREATE TABLE IF NOT EXISTS student_gold_stars (student_id INTEGER NOT NULL, even
 CREATE TABLE IF NOT EXISTS student_event_interests (student_id INTEGER NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'interested', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(student_id, event_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(event_id) REFERENCES gold_star_events(event_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS training_missions (mission_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE, description TEXT NOT NULL, category TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE IF NOT EXISTS student_mission_progress (student_id INTEGER NOT NULL, mission_id INTEGER NOT NULL, completed INTEGER NOT NULL DEFAULT 0, completed_at TEXT, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(student_id, mission_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(mission_id) REFERENCES training_missions(mission_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS student_daily_missions (daily_mission_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, mission_date TEXT NOT NULL, mission_key TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL, completed INTEGER NOT NULL DEFAULT 0, completed_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(student_id, mission_date, mission_key), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS posts (post_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, user_id INTEGER, post_text TEXT NOT NULL, post_type TEXT NOT NULL DEFAULT 'student', moderation_status TEXT NOT NULL DEFAULT 'approved', visible INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE IF NOT EXISTS student_accounts (student_id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE COLLATE NOCASE, password_hash TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_disclaimer_acceptances (acceptance_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, disclaimer_version TEXT NOT NULL, accepted_at TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
@@ -104,6 +108,7 @@ CREATE INDEX IF NOT EXISTS ix_post_comments_post ON post_comments(post_id, creat
 CREATE INDEX IF NOT EXISTS ix_timeline_attendance ON attendance(student_id, check_in_time);
 CREATE INDEX IF NOT EXISTS ix_practice_logs_student ON student_practice_logs(student_id, logged_at);
 CREATE INDEX IF NOT EXISTS ix_goals_student ON student_goals(student_id, completed, target_date);
+CREATE INDEX IF NOT EXISTS ix_daily_missions_student_date ON student_daily_missions(student_id, mission_date, completed);
 CREATE INDEX IF NOT EXISTS ix_post_bookmarks_student ON post_bookmarks(student_id, created_at);
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
@@ -517,6 +522,14 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         var list = new List<ScheduleItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt32(0), DateTime.Parse(reader.GetString(1), CultureInfo.InvariantCulture), reader.IsDBNull(2) ? null : reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetString(4), reader.IsDBNull(5) ? null : reader.GetString(5), reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetInt32(7) != 0)); return list;
     }
 
+    public async Task<IReadOnlyList<int>> GetAttendanceSessionIdsAsync(int studentId, DateTime from, DateTime to, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT a.session_id FROM attendance a JOIN class_sessions s ON s.session_id = a.session_id WHERE a.student_id = $student AND a.status = 'present' AND date(s.session_date) >= date($from) AND date(s.session_date) < date($to) ORDER BY s.session_date, s.session_id";
+        command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$from", from.ToString("yyyy-MM-dd")); command.Parameters.AddWithValue("$to", to.ToString("yyyy-MM-dd"));
+        var ids = new List<int>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) ids.Add(reader.GetInt32(0)); return ids;
+    }
+
     public async Task<StudentProfile?> GetProfileAsync(int studentId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
@@ -586,7 +599,7 @@ WHERE student_id = $id;";
 
     public async Task<(bool Success, bool Duplicate)> CheckInAsync(int studentId, int sessionId, CancellationToken cancellationToken = default)
     {
-        await using var connection = await OpenAsync(cancellationToken); await using var exists = connection.CreateCommand(); exists.CommandText = "SELECT COUNT(1) FROM class_sessions s JOIN students st ON st.student_id = $student WHERE s.session_id = $session AND s.cancelled = 0 AND st.active = 1"; exists.Parameters.AddWithValue("$student", studentId); exists.Parameters.AddWithValue("$session", sessionId); if (Convert.ToInt32(await exists.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0) return (false, false);
+        await using var connection = await OpenAsync(cancellationToken); await using var exists = connection.CreateCommand(); exists.CommandText = "SELECT COUNT(1) FROM class_sessions s JOIN students st ON st.student_id = $student WHERE s.session_id = $session AND date(s.session_date) = date('now', 'localtime') AND s.cancelled = 0 AND st.active = 1"; exists.Parameters.AddWithValue("$student", studentId); exists.Parameters.AddWithValue("$session", sessionId); if (Convert.ToInt32(await exists.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0) return (false, false);
         await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO attendance(session_id, student_id, check_in_time, status) VALUES ($session, $student, $now, 'present')"; command.Parameters.AddWithValue("$session", sessionId); command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); try { await command.ExecuteNonQueryAsync(cancellationToken); return (true, false); } catch (SqliteException ex) when (ex.SqliteErrorCode == 19) { return (false, true); }
     }
 
@@ -765,6 +778,42 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
     {
         await using var connection = await OpenAsync(cancellationToken); await using var check = connection.CreateCommand(); check.CommandText = "SELECT completed FROM student_mission_progress WHERE student_id = $student AND mission_id = $mission"; check.Parameters.AddWithValue("$student", studentId); check.Parameters.AddWithValue("$mission", missionId); var current = Convert.ToInt32(await check.ExecuteScalarAsync(cancellationToken) ?? 0, CultureInfo.InvariantCulture); var completed = current == 0;
         await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO student_mission_progress(student_id, mission_id, completed, completed_at, updated_at) VALUES ($student, $mission, $completed, $completedAt, $now) ON CONFLICT(student_id, mission_id) DO UPDATE SET completed = excluded.completed, completed_at = excluded.completed_at, updated_at = excluded.updated_at"; command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$mission", missionId); command.Parameters.AddWithValue("$completed", completed ? 1 : 0); command.Parameters.AddWithValue("$completedAt", completed ? DateTime.UtcNow.ToString("O") : DBNull.Value); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken); return completed;
+    }
+
+    public async Task<IReadOnlyList<DailyMissionItem>> SyncDailyMissionsAsync(int studentId, DateTime missionDate, IReadOnlyList<DailyMissionSeed> seeds, CancellationToken cancellationToken = default)
+    {
+        var date = missionDate.Date.ToString("yyyy-MM-dd");
+        await using var connection = await OpenAsync(cancellationToken); await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        var selectedSeeds = seeds.Take(5).ToList();
+        await using (var removeStale = connection.CreateCommand())
+        {
+            removeStale.Transaction = (SqliteTransaction)transaction;
+            var keyParameters = selectedSeeds.Select((_, index) => $"$key{index}").ToArray();
+            removeStale.CommandText = $"DELETE FROM student_daily_missions WHERE student_id = $student AND mission_date = $date AND mission_key NOT IN ({string.Join(", ", keyParameters)})";
+            removeStale.Parameters.AddWithValue("$student", studentId); removeStale.Parameters.AddWithValue("$date", date);
+            for (var index = 0; index < selectedSeeds.Count; index++) removeStale.Parameters.AddWithValue(keyParameters[index], selectedSeeds[index].MissionKey.Trim());
+            await removeStale.ExecuteNonQueryAsync(cancellationToken);
+        }
+        foreach (var seed in selectedSeeds)
+        {
+            await using var command = connection.CreateCommand(); command.Transaction = (SqliteTransaction)transaction;
+            command.CommandText = "INSERT INTO student_daily_missions(student_id, mission_date, mission_key, title, description, category) VALUES ($student, $date, $key, $title, $description, $category) ON CONFLICT(student_id, mission_date, mission_key) DO UPDATE SET title = excluded.title, description = excluded.description, category = excluded.category";
+            command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$date", date); command.Parameters.AddWithValue("$key", seed.MissionKey.Trim()); command.Parameters.AddWithValue("$title", seed.Title.Trim()); command.Parameters.AddWithValue("$description", seed.Description.Trim()); command.Parameters.AddWithValue("$category", seed.Category.Trim()); await command.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await transaction.CommitAsync(cancellationToken);
+        return await GetDailyMissionsAsync(studentId, missionDate, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DailyMissionItem>> GetDailyMissionsAsync(int studentId, DateTime missionDate, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT daily_mission_id, mission_key, title, description, category, mission_date, completed, completed_at FROM student_daily_missions WHERE student_id = $student AND mission_date = $date ORDER BY daily_mission_id"; command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$date", missionDate.Date.ToString("yyyy-MM-dd"));
+        var list = new List<DailyMissionItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4), DateTime.Parse(reader.GetString(5), CultureInfo.InvariantCulture), reader.GetInt32(6) != 0, reader.IsDBNull(7) ? null : DateTime.Parse(reader.GetString(7), CultureInfo.InvariantCulture))); return list;
+    }
+
+    public async Task<bool?> ToggleDailyMissionAsync(int studentId, long missionId, DateTime missionDate, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var check = connection.CreateCommand(); check.CommandText = "SELECT completed FROM student_daily_missions WHERE daily_mission_id = $mission AND student_id = $student AND mission_date = $date"; check.Parameters.AddWithValue("$mission", missionId); check.Parameters.AddWithValue("$student", studentId); check.Parameters.AddWithValue("$date", missionDate.Date.ToString("yyyy-MM-dd")); var currentValue = await check.ExecuteScalarAsync(cancellationToken); if (currentValue is null) return null;
+        var completed = Convert.ToInt32(currentValue, CultureInfo.InvariantCulture) == 0; await using var command = connection.CreateCommand(); command.CommandText = "UPDATE student_daily_missions SET completed = $completed, completed_at = $completedAt WHERE daily_mission_id = $mission AND student_id = $student AND mission_date = $date"; command.Parameters.AddWithValue("$completed", completed ? 1 : 0); command.Parameters.AddWithValue("$completedAt", completed ? DateTime.UtcNow.ToString("O") : DBNull.Value); command.Parameters.AddWithValue("$mission", missionId); command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$date", missionDate.Date.ToString("yyyy-MM-dd")); await command.ExecuteNonQueryAsync(cancellationToken); return completed;
     }
 
     public async Task<IReadOnlyList<TimelineItem>> GetTimelineAsync(int studentId, CancellationToken cancellationToken = default)

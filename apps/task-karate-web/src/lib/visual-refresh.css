@@ -68,6 +68,24 @@
 .classes-hero { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 15px; border-color: #3b7895; background: linear-gradient(110deg, #112942, #15223a); }
 .classes-hero h2 { margin: 5px 0; color: #f5fbff; }
 .classes-hero p { margin: 0; color: #c0cfdd; }
+.check-in-guide { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 15px; border-color: #3b7895; background: linear-gradient(110deg, #112942, #15223a); }
+.check-in-guide h2 { margin: 5px 0; color: #f5fbff; }
+.check-in-guide p { margin: 0; color: #c0cfdd; }
+.check-in-date { padding: 10px 12px; border: 1px solid #45617c; border-radius: 99px; color: #bfeeff; font-size: .78rem; font-weight: 900; white-space: nowrap; }
+.today-class-list { display: grid; gap: 12px; }
+.today-class-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-left: 4px solid var(--cyan); }
+.today-class-card.selected { border-color: var(--cyan); background: #15324c; box-shadow: 0 0 0 2px #51c4f533, 0 12px 22px #0003; }
+.today-class-card.cancelled { border-left-color: #8a5360; opacity: .7; }
+.today-class-info { min-width: 0; display: grid; gap: 4px; }
+.today-class-info h2 { margin: 0; font-size: 1.15rem; }
+.today-class-info p, .today-class-info small { margin: 0; color: #c0cfdd; }
+.today-class-info small { font-size: .78rem; }
+.today-class-action { display: flex; justify-content: flex-end; min-width: 130px; }
+.cancelled-badge { padding: 9px 11px; border: 1px solid #9b6570; border-radius: 99px; background: #3f2530; color: #f3b9c0; font-size: .78rem; font-weight: 900; }
+.check-in-confirm { position: sticky; bottom: 14px; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 15px; border-color: var(--cyan); background: #122b43f2; box-shadow: 0 16px 34px #0008; }
+.check-in-confirm h2 { margin: 5px 0; }
+.check-in-confirm p { margin: 0; color: #c0cfdd; }
+.check-in-confirm-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .class-list { display: grid; gap: 12px; }
 .class-session-card { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; align-items: center; gap: 16px; }
 .class-session-date { display: grid; place-items: center; min-height: 70px; border: 1px solid #45617c; background: #152a42; }
@@ -119,6 +137,11 @@
 .belt-knot { position: absolute; z-index: 1; left: 40%; top: 3px; width: 70px; height: 52px; border-radius: 11px; background: var(--belt-color); box-shadow: inset 0 -8px 12px #0003, 0 8px 18px #0004; }
 .training-top-grid { margin-bottom: 15px; }
 .training-note-panel { margin-bottom: 15px; }
+.requirement-intro { margin: 15px 0; border-color: #3b7895; }
+.requirement-intro p { margin: 0; line-height: 1.6; }
+.daily-mission-panel { margin-top: 15px; border-color: #5f7137; background: linear-gradient(135deg, #142a3b, #1d2b2d); }
+.daily-mission-intro { margin: -8px 0 15px; }
+.training-next-panel { margin-top: 15px; }
 .requirement-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
 .requirement-card .panel-title { margin-bottom: 8px; }
 .requirement-count { display: grid; place-items: center; min-width: 26px; height: 26px; border-radius: 99px; background: #29425d; color: #c8edff; font-size: .75rem; }
@@ -379,6 +402,10 @@
   .profile-layout, .social-feed-layout { grid-template-columns: 1fr; }
   .briefing-grid, .training-tools-grid { grid-template-columns: 1fr; }
   .profile-completion-panel, .classes-hero { align-items: flex-start; flex-direction: column; }
+  .check-in-guide, .check-in-confirm, .today-class-card { align-items: flex-start; flex-direction: column; }
+  .check-in-date, .today-class-action, .check-in-confirm-actions { width: 100%; }
+  .today-class-action, .check-in-confirm-actions { justify-content: flex-start; }
+  .today-class-action > *, .check-in-confirm-actions > * { flex: 1; text-align: center; }
   .profile-completion-actions { width: 100%; min-width: 0; }
   .profile-info-grid { grid-template-columns: 1fr; }
   .next-class-content { align-items: flex-start; flex-direction: column; }
@@ -398,6 +425,7 @@
   .student-app .training-track-nav { display: grid; grid-template-columns: 1fr; }
   .student-app .training-track-nav a { text-align: center; }
   .student-app .feed-card { padding: 16px; }
+  .student-app .check-in-confirm { position: static; }
   .student-app .reaction-button { min-height: 40px; padding: 8px 9px; }
   .student-app .comment-compose { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
   .attendance-calendar { grid-template-columns: repeat(6, minmax(0, 1fr)); }

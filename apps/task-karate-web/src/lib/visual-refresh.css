@@ -40,6 +40,14 @@
 .profile-avatar { display: grid; place-items: center; width: 94px; height: 94px; border: 2px solid var(--cyan); border-radius: 28px; background: #23415f; color: #e9f8ff; font-size: 2.1rem; font-weight: 900; box-shadow: 0 12px 28px #0004; }
 .profile-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .profile-tags span { border: 1px solid #46617d; border-radius: 99px; padding: 7px 10px; color: #c9d9e6; font-size: .76rem; }
+.profile-info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin-top: 15px; }
+.guardian-list { display: grid; gap: 10px; }
+.guardian-row { display: grid; gap: 3px; padding: 12px; border: 1px solid #38516c; background: #152a42; }
+.guardian-row strong { color: #f4f8fc; }
+.guardian-row span, .guardian-row small { color: #bfd0df; font-size: .82rem; }
+.profile-contact { margin-top: 15px; }
+.profile-contact-values { display: flex; flex-wrap: wrap; gap: 10px; color: #d4e2ed; }
+.profile-contact-values span { border: 1px solid #38516c; border-radius: 99px; padding: 8px 11px; }
 .stripe-track { height: 16px; margin: 22px 0 12px; overflow: hidden; border: 1px solid #4b6681; border-radius: 99px; background: #1a3048; }
 .stripe-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #42bce9, #9be7ff); box-shadow: 0 0 16px #54c9f877; }
 .stripe-summary { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -47,6 +55,10 @@
 .stripe-summary span { color: #c0cfdd; font-size: .85rem; }
 .degree-note { display: grid; gap: 8px; margin-top: 26px; padding: 14px; border-left: 3px solid var(--gold); background: #26344a; color: #cedbe6; }
 .degree-note strong { color: #f5e5b5; }
+.next-class-panel { margin-top: 15px; }
+.next-class-content { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.next-class-content h2 { margin: 6px 0; }
+.next-class-content p { color: #c0cfdd; }
 .belt-graphic { position: relative; display: block; width: min(100%, 330px); height: 58px; margin-bottom: 18px; }
 .belt-strip { position: absolute; inset: 14px 0; border-radius: 9px; background: var(--belt-color); box-shadow: inset 0 -8px 12px #0003, 0 8px 18px #0004; }
 .belt-strip:after { content: ''; position: absolute; right: 25%; top: 0; bottom: 0; width: 7px; background: #1a2533; box-shadow: 18px 0 #f2e5c2; }
@@ -59,6 +71,14 @@
 .requirement-card ul { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
 .requirement-card li { display: flex; gap: 10px; align-items: flex-start; color: #d5e1eb; line-height: 1.45; }
 .requirement-marker { color: #64c9f1; font-size: 1.1rem; line-height: 1.1; }
+.gold-star-panel { margin-bottom: 15px; }
+.gold-star-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.gold-star-card { display: flex; gap: 11px; padding: 14px; border: 1px solid #5b4b2c; background: #2a2830; }
+.gold-star-card.awarded { border-color: #d6b257; background: #3a3220; }
+.gold-star-icon { color: #d7b454; font-size: 1.7rem; }
+.gold-star-card h2 { margin: 0 0 5px; font-size: 1rem; }
+.gold-star-card p { color: #c8d3de; font-size: .82rem; }
+.gold-star-card small { color: #e9cb75; font-size: .72rem; font-weight: 800; }
 .social-feed-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .8fr); gap: 15px; align-items: start; }
 .feed-column, .social-sidebar { display: grid; gap: 15px; }
 .post-composer textarea { display: block; width: 100%; min-height: 92px; resize: vertical; border: 1px solid #45617c; border-radius: 9px; background: #0c1b2e; color: #f4f8fc; padding: 12px; }
@@ -175,7 +195,11 @@
   .student-app .student-heading { margin-top: 12px; }
   .student-app .student-main { padding-top: 12px; }
   .profile-layout, .social-feed-layout { grid-template-columns: 1fr; }
+  .profile-info-grid { grid-template-columns: 1fr; }
+  .next-class-content { align-items: flex-start; flex-direction: column; }
+  .next-class-content .primary-button { width: 100%; text-align: center; }
   .requirement-grid { grid-template-columns: 1fr; }
+  .gold-star-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

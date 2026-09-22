@@ -22,12 +22,14 @@ public sealed class StarterStudentAccount
 public sealed record StudentAccount(int StudentId, string Username, string DisplayName, string? RankName);
 public sealed record StudentSummary(int StudentId, string DisplayName, string? RankName, string? ProfileImagePath);
 public sealed record ScheduleItem(int SessionId, DateTime SessionDate, string? StartTime, string? EndTime, string ClassName, string? Description, string? Location, bool Cancelled);
-public sealed record StudentProfile(int StudentId, string DisplayName, string? Bio, string? FavoriteTechnique, string? ProfileImagePath, string? RankName, string? JoinDate, int TotalClasses, int ClassesThisMonth, int UnreadMessages, int AchievementCount, IReadOnlyList<string> AttendanceDates, int ClassesIntoStripe, int ClassesPerStripe, int ClassesToNextStripe, string NextMilestone);
+public sealed record GuardianItem(string Name, string Relationship, string? Phone, string? Email);
+public sealed record StudentProfile(int StudentId, string DisplayName, string? Bio, string? FavoriteTechnique, string? ProfileImagePath, string? RankName, string? JoinDate, int TotalClasses, int ClassesThisMonth, int UnreadMessages, int AchievementCount, IReadOnlyList<string> AttendanceDates, int ClassesIntoStripe, int ClassesPerStripe, int ClassesToNextStripe, string NextMilestone, string? AgeGroup, DateTime? BirthDate, string? Email, string? Phone, string? UniformSize, string? BeltSize, IReadOnlyList<GuardianItem> Guardians);
 public sealed record FriendshipItem(int StudentId, string DisplayName, string? RankName, string Status, bool Incoming);
 public sealed record MessageItem(long MessageId, int SenderId, string SenderName, int RecipientId, string RecipientName, string MessageText, DateTime CreatedAt, bool IsRead);
 public sealed record AchievementItem(string Name, string? Description, string? IconName, DateTime? AwardedAt);
 public sealed record NewsItem(long Id, string Title, string Body, DateTime PublishedAt);
 public sealed record FeedItem(long PostId, int AuthorId, string AuthorName, string? RankName, string Text, string PostType, DateTime CreatedAt);
+public sealed record GoldStarEventItem(long EventId, string Name, string Description, DateTime? EventDate, bool Awarded);
 
 public sealed class StudentExperienceService
 {
@@ -59,6 +61,8 @@ CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY AUTOINCREMENT, use
 CREATE TABLE IF NOT EXISTS instructors (instructor_id INTEGER PRIMARY KEY AUTOINCREMENT, display_name TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1);
 CREATE TABLE IF NOT EXISTS ranks (rank_id INTEGER PRIMARY KEY AUTOINCREMENT, rank_name TEXT NOT NULL UNIQUE, rank_order INTEGER NOT NULL UNIQUE, display_color TEXT, active INTEGER NOT NULL DEFAULT 1);
 CREATE TABLE IF NOT EXISTS students (student_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, middle_name TEXT, last_name TEXT NOT NULL, preferred_name TEXT, birth_date TEXT, email TEXT, phone TEXT, start_date TEXT, active INTEGER NOT NULL DEFAULT 1, archived_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS guardians (guardian_id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, email TEXT, phone TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS student_guardians (student_id INTEGER NOT NULL, guardian_id INTEGER NOT NULL, relationship TEXT NOT NULL DEFAULT 'Guardian', is_primary INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(student_id, guardian_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(guardian_id) REFERENCES guardians(guardian_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_profiles (student_id INTEGER PRIMARY KEY, display_name TEXT, bio TEXT, profile_image_path TEXT, favorite_technique TEXT, profile_visible INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_rank_history (student_rank_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, rank_id INTEGER NOT NULL, awarded_date TEXT NOT NULL, awarded_by_user_id INTEGER, notes TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(rank_id) REFERENCES ranks(rank_id));
 CREATE TABLE IF NOT EXISTS classes (class_id INTEGER PRIMARY KEY AUTOINCREMENT, class_name TEXT NOT NULL, description TEXT, active INTEGER NOT NULL DEFAULT 1);
@@ -67,6 +71,8 @@ CREATE TABLE IF NOT EXISTS class_sessions (session_id INTEGER PRIMARY KEY AUTOIN
 CREATE TABLE IF NOT EXISTS attendance (attendance_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL, student_id INTEGER NOT NULL, check_in_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, check_out_time TEXT, status TEXT NOT NULL DEFAULT 'present', checked_in_by_user_id INTEGER, notes TEXT, FOREIGN KEY(session_id) REFERENCES class_sessions(session_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, UNIQUE(session_id, student_id));
 CREATE TABLE IF NOT EXISTS achievements (achievement_id INTEGER PRIMARY KEY AUTOINCREMENT, achievement_name TEXT NOT NULL UNIQUE, description TEXT, icon_name TEXT, active INTEGER NOT NULL DEFAULT 1);
 CREATE TABLE IF NOT EXISTS student_achievements (student_id INTEGER NOT NULL, achievement_id INTEGER NOT NULL, awarded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(student_id, achievement_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(achievement_id) REFERENCES achievements(achievement_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS gold_star_events (event_id INTEGER PRIMARY KEY AUTOINCREMENT, event_name TEXT NOT NULL UNIQUE, description TEXT NOT NULL, event_date TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS student_gold_stars (student_id INTEGER NOT NULL, event_id INTEGER NOT NULL, awarded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, note TEXT, PRIMARY KEY(student_id, event_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(event_id) REFERENCES gold_star_events(event_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS posts (post_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, user_id INTEGER, post_text TEXT NOT NULL, post_type TEXT NOT NULL DEFAULT 'student', moderation_status TEXT NOT NULL DEFAULT 'approved', visible INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 CREATE TABLE IF NOT EXISTS student_accounts (student_id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE COLLATE NOCASE, password_hash TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_disclaimer_acceptances (acceptance_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, disclaimer_version TEXT NOT NULL, accepted_at TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
@@ -79,11 +85,117 @@ CREATE INDEX IF NOT EXISTS ix_messages_thread ON student_messages(sender_id, rec
 CREATE INDEX IF NOT EXISTS ix_posts_news ON posts(post_type, visible, moderation_status, created_at);
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
+        await EnsureLegacyStudentColumnsAsync(connection, cancellationToken);
         await ImportDevelopmentDataAsync(connection, cancellationToken);
+        await SeedDevelopmentGoldStarEventsAsync(connection, cancellationToken);
         await MaterializeUpcomingSessionsAsync(connection, cancellationToken);
         await SeedDemoDataAsync(connection, cancellationToken);
         await EnsureBootstrapAccountAsync(connection, cancellationToken);
         Interlocked.Exchange(ref _ready, 1);
+    }
+
+    private async Task SeedDevelopmentGoldStarEventsAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        if (!_options.ImportDemoStudents) return;
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"
+INSERT OR IGNORE INTO gold_star_events(event_name, description, event_date) VALUES
+    ('Tunnel Hike', 'A special gold-star event for students who take on the studio tunnel hike.', date('now', '-30 days')),
+    ('1,000 Kick Challenge', 'Complete the studio 1,000-kick challenge with focus and good technique.', date('now', '-14 days')),
+    ('Torchlight Parade', 'Students attending the Task Karate Torchlight Parade appearance can earn a gold star.', date('now', '+3 days'));
+
+INSERT OR IGNORE INTO achievements(achievement_name, description, icon_name) VALUES
+    ('First Class!', 'You completed your very first class at TASK.', 'star'),
+    ('Warmup Warrior', 'Ready to go on time for warmups all month.', 'flame'),
+    ('Form Explorer', 'You began learning a new form and can perform the opening section.', 'compass'),
+    ('Community Spark', 'You showed up for a special event that brought the dojo together.', 'spark');
+
+INSERT OR IGNORE INTO student_gold_stars(student_id, event_id, note)
+SELECT student.student_id, event.event_id, 'Development-only sample award.'
+FROM students student CROSS JOIN gold_star_events event
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson'
+  AND event.event_name IN ('Tunnel Hike', '1,000 Kick Challenge');
+
+INSERT OR IGNORE INTO student_gold_stars(student_id, event_id, note)
+SELECT student.student_id, event.event_id, 'Development-only sample award.'
+FROM students student CROSS JOIN gold_star_events event
+WHERE student.first_name = 'Logan' AND student.last_name = 'Perez'
+  AND event.event_name = 'Torchlight Parade';
+
+INSERT OR IGNORE INTO student_achievements(student_id, achievement_id, awarded_at)
+SELECT student.student_id, achievement.achievement_id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-60 days')
+FROM students student CROSS JOIN achievements achievement
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson'
+  AND achievement.achievement_name IN ('First Class!', 'Warmup Warrior');
+
+INSERT OR IGNORE INTO student_achievements(student_id, achievement_id, awarded_at)
+SELECT student.student_id, achievement.achievement_id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-25 days')
+FROM students student CROSS JOIN achievements achievement
+WHERE student.first_name = 'Emma' AND student.last_name = 'Thompson'
+  AND achievement.achievement_name = 'Community Spark';
+
+INSERT OR IGNORE INTO student_achievements(student_id, achievement_id, awarded_at)
+SELECT student.student_id, achievement.achievement_id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-45 days')
+FROM students student CROSS JOIN achievements achievement
+WHERE student.first_name = 'Logan' AND student.last_name = 'Perez'
+  AND achievement.achievement_name = 'Form Explorer';
+
+INSERT OR IGNORE INTO student_friendships(student_id, friend_id, status, requested_by, created_at, updated_at)
+SELECT emma.student_id, logan.student_id, 'accepted', emma.student_id,
+       strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-21 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-21 days')
+FROM students emma CROSS JOIN students logan
+WHERE emma.first_name = 'Emma' AND emma.last_name = 'Thompson'
+  AND logan.first_name = 'Logan' AND logan.last_name = 'Perez';
+
+INSERT OR IGNORE INTO student_friendships(student_id, friend_id, status, requested_by, created_at, updated_at)
+SELECT emma.student_id, naomi.student_id, 'accepted', naomi.student_id,
+       strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-16 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-16 days')
+FROM students emma CROSS JOIN students naomi
+WHERE emma.first_name = 'Emma' AND emma.last_name = 'Thompson'
+  AND naomi.first_name = 'Naomi' AND naomi.last_name = 'Wu';
+
+INSERT OR IGNORE INTO student_friendships(student_id, friend_id, status, requested_by, created_at, updated_at)
+SELECT emma.student_id, brohan.student_id, 'pending', emma.student_id,
+       strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 days')
+FROM students emma CROSS JOIN students brohan
+WHERE emma.first_name = 'Emma' AND emma.last_name = 'Thompson'
+  AND brohan.first_name = 'Brohan' AND brohan.last_name = 'the Flex Monk';
+
+INSERT INTO student_messages(sender_id, recipient_id, message_text, created_at)
+SELECT emma.student_id, logan.student_id, 'Are you going to the Torchlight Parade practice?', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-4 days')
+FROM students emma CROSS JOIN students logan
+WHERE emma.first_name = 'Emma' AND emma.last_name = 'Thompson'
+  AND logan.first_name = 'Logan' AND logan.last_name = 'Perez'
+  AND NOT EXISTS (SELECT 1 FROM student_messages WHERE message_text = 'Are you going to the Torchlight Parade practice?');
+
+INSERT INTO student_messages(sender_id, recipient_id, message_text, created_at)
+SELECT logan.student_id, emma.student_id, 'Absolutely! I will see you there. Bring your loudest parade energy!', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days')
+FROM students emma CROSS JOIN students logan
+WHERE emma.first_name = 'Emma' AND emma.last_name = 'Thompson'
+  AND logan.first_name = 'Logan' AND logan.last_name = 'Perez'
+  AND NOT EXISTS (SELECT 1 FROM student_messages WHERE message_text = 'Absolutely! I will see you there. Bring your loudest parade energy!');
+
+INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at)
+SELECT logan.student_id, 'Torchlight Parade practice is looking great. See everyone Thursday!', 'student', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 hours')
+FROM students logan
+WHERE logan.first_name = 'Logan' AND logan.last_name = 'Perez'
+  AND NOT EXISTS (SELECT 1 FROM posts WHERE post_text = 'Torchlight Parade practice is looking great. See everyone Thursday!');
+
+INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at)
+SELECT naomi.student_id, 'Purple Belt form practice after class today. Small improvements add up!', 'student', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-5 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-5 hours')
+FROM students naomi
+WHERE naomi.first_name = 'Naomi' AND naomi.last_name = 'Wu'
+  AND NOT EXISTS (SELECT 1 FROM posts WHERE post_text = 'Purple Belt form practice after class today. Small improvements add up!');
+
+INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at)
+SELECT NULL, 'Torchlight Parade Gold Star Event — Students who attend the Task Karate parade appearance this Thursday will receive a Gold Star on their student profile.', 'news', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 day'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 day')
+WHERE NOT EXISTS (SELECT 1 FROM posts WHERE post_text = 'Torchlight Parade Gold Star Event — Students who attend the Task Karate parade appearance this Thursday will receive a Gold Star on their student profile.');
+
+INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at)
+SELECT NULL, 'Belt Testing Focus This Week — Open Training to review your next-rank requirements, stripe progress, and practice assignments before your next class.', 'news', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days')
+WHERE NOT EXISTS (SELECT 1 FROM posts WHERE post_text = 'Belt Testing Focus This Week — Open Training to review your next-rank requirements, stripe progress, and practice assignments before your next class.');
+";
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private async Task ImportDevelopmentDataAsync(SqliteConnection connection, CancellationToken cancellationToken)
@@ -143,6 +255,7 @@ CREATE INDEX IF NOT EXISTS ix_posts_news ON posts(post_type, visible, moderation
             var fullName = item.GetProperty("name").GetString() ?? "Demo Student"; var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries); if (parts.Length < 2) continue;
             await using var find = connection.CreateCommand(); find.CommandText = "SELECT student_id FROM students WHERE first_name = $first AND last_name = $last LIMIT 1"; find.Parameters.AddWithValue("$first", parts[0]); find.Parameters.AddWithValue("$last", parts[1]); var value = await find.ExecuteScalarAsync(cancellationToken); int studentId;
             if (value is not null) studentId = Convert.ToInt32(value, CultureInfo.InvariantCulture); else { await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT INTO students(first_name, last_name, preferred_name, start_date, active) VALUES ($first, $last, $preferred, $join, 1); SELECT last_insert_rowid();"; insert.Parameters.AddWithValue("$first", parts[0]); insert.Parameters.AddWithValue("$last", parts[1]); insert.Parameters.AddWithValue("$preferred", item.TryGetProperty("displayName", out var display) ? display.GetString() ?? fullName : fullName); insert.Parameters.AddWithValue("$join", item.TryGetProperty("joinDate", out var join) ? join.GetString() ?? DateTime.UtcNow.ToString("yyyy-MM-dd") : DateTime.UtcNow.ToString("yyyy-MM-dd")); studentId = Convert.ToInt32(await insert.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture); }
+            await using var details = connection.CreateCommand(); details.CommandText = "UPDATE students SET age_group = COALESCE($ageGroup, age_group), uniform_size = COALESCE($uniform, uniform_size), belt_size = COALESCE($belt, belt_size), birth_date = COALESCE($birth, birth_date) WHERE student_id = $id"; details.Parameters.AddWithValue("$id", studentId); details.Parameters.AddWithValue("$ageGroup", item.TryGetProperty("ageGroup", out var existingAgeGroup) ? existingAgeGroup.GetString() ?? (object)DBNull.Value : DBNull.Value); details.Parameters.AddWithValue("$uniform", item.TryGetProperty("uniformSize", out var existingUniform) ? existingUniform.GetString() ?? (object)DBNull.Value : DBNull.Value); details.Parameters.AddWithValue("$belt", item.TryGetProperty("beltSize", out var existingBelt) ? existingBelt.GetString() ?? (object)DBNull.Value : DBNull.Value); details.Parameters.AddWithValue("$birth", item.TryGetProperty("birthday", out var existingBirth) ? existingBirth.GetString() ?? (object)DBNull.Value : DBNull.Value); await details.ExecuteNonQueryAsync(cancellationToken);
             await using var profile = connection.CreateCommand(); profile.CommandText = "INSERT OR IGNORE INTO student_profiles(student_id, display_name, bio, favorite_technique) VALUES ($id, $name, 'Development-only imported demo profile.', $technique)"; profile.Parameters.AddWithValue("$id", studentId); profile.Parameters.AddWithValue("$name", item.TryGetProperty("displayName", out var profileName) ? profileName.GetString() ?? fullName : fullName); profile.Parameters.AddWithValue("$technique", item.TryGetProperty("funStats", out var stats) && stats.TryGetProperty("favoriteTechnique", out var technique) ? technique.GetString() ?? (object)DBNull.Value : DBNull.Value); await profile.ExecuteNonQueryAsync(cancellationToken);
             if (item.TryGetProperty("rank", out var rankProperty)) await AddRankHistoryAsync(connection, studentId, rankProperty.GetString(), cancellationToken);
         }
@@ -267,7 +380,10 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         var classesIntoStripe = classesPerStripe == 0 ? 0 : classesSinceRank % classesPerStripe;
         var classesToNextStripe = classesPerStripe == 0 ? 0 : classesPerStripe - classesIntoStripe;
         var nextMilestone = classesPerStripe == 0 ? "Next degree · instructor tracked" : "Next stripe";
-        return new(profileId, displayName, bio, favoriteTechnique, image, rank, joinDate, totalClasses, classesThisMonth, unread, achievements, dates, classesIntoStripe, classesPerStripe, classesToNextStripe, nextMilestone);
+        string? ageGroup; DateTime? birthDate; string? email; string? phone; string? uniformSize; string? beltSize;
+        await using (var details = connection.CreateCommand()) { details.CommandText = "SELECT age_group, birth_date, email, phone, uniform_size, belt_size FROM students WHERE student_id = $id"; details.Parameters.AddWithValue("$id", studentId); await using var detailsReader = await details.ExecuteReaderAsync(cancellationToken); await detailsReader.ReadAsync(cancellationToken); ageGroup = detailsReader.IsDBNull(0) ? null : detailsReader.GetString(0); birthDate = detailsReader.IsDBNull(1) || !DateTime.TryParse(detailsReader.GetString(1), CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedBirthDate) ? null : parsedBirthDate; email = detailsReader.IsDBNull(2) ? null : detailsReader.GetString(2); phone = detailsReader.IsDBNull(3) ? null : detailsReader.GetString(3); uniformSize = detailsReader.IsDBNull(4) ? null : detailsReader.GetString(4); beltSize = detailsReader.IsDBNull(5) ? null : detailsReader.GetString(5); }
+        var guardians = new List<GuardianItem>(); await using (var guardianCommand = connection.CreateCommand()) { guardianCommand.CommandText = "SELECT g.first_name, g.last_name, sg.relationship, g.phone, g.email FROM student_guardians sg JOIN guardians g ON g.guardian_id = sg.guardian_id WHERE sg.student_id = $id AND g.active = 1 ORDER BY sg.is_primary DESC, g.last_name, g.first_name"; guardianCommand.Parameters.AddWithValue("$id", studentId); await using var guardianReader = await guardianCommand.ExecuteReaderAsync(cancellationToken); while (await guardianReader.ReadAsync(cancellationToken)) guardians.Add(new($"{guardianReader.GetString(0)} {guardianReader.GetString(1)}", guardianReader.GetString(2), guardianReader.IsDBNull(3) ? null : guardianReader.GetString(3), guardianReader.IsDBNull(4) ? null : guardianReader.GetString(4))); }
+        return new(profileId, displayName, bio, favoriteTechnique, image, rank, joinDate, totalClasses, classesThisMonth, unread, achievements, dates, classesIntoStripe, classesPerStripe, classesToNextStripe, nextMilestone, ageGroup, birthDate, email, phone, uniformSize, beltSize, guardians);
     }
 
     public async Task<(bool Success, bool Duplicate)> CheckInAsync(int studentId, int sessionId, CancellationToken cancellationToken = default)
@@ -313,6 +429,18 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO student_messages(sender_id, recipient_id, message_text, created_at) VALUES ($sender, $recipient, $text, $now)"; command.Parameters.AddWithValue("$sender", senderId); command.Parameters.AddWithValue("$recipient", recipientId); command.Parameters.AddWithValue("$text", text.Trim()); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken); await using var idCommand = connection.CreateCommand(); idCommand.CommandText = "SELECT last_insert_rowid()"; return Convert.ToInt64(await idCommand.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
     }
 
+    private static async Task EnsureLegacyStudentColumnsAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        foreach (var column in new[] { (Name: "age_group", Definition: "TEXT"), (Name: "uniform_size", Definition: "TEXT"), (Name: "belt_size", Definition: "TEXT") })
+        {
+            await using var check = connection.CreateCommand(); check.CommandText = "SELECT COUNT(1) FROM pragma_table_info('students') WHERE name = $name"; check.Parameters.AddWithValue("$name", column.Name);
+            if (Convert.ToInt32(await check.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0)
+            {
+                await using var alter = connection.CreateCommand(); alter.CommandText = $"ALTER TABLE students ADD COLUMN {column.Name} {column.Definition}"; await alter.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
+    }
+
     public async Task<IReadOnlyList<FeedItem>> GetFeedAsync(int studentId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
@@ -335,6 +463,11 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
     public async Task<IReadOnlyList<AchievementItem>> GetAchievementsAsync(int studentId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT a.achievement_name, a.description, a.icon_name, sa.awarded_at FROM student_achievements sa JOIN achievements a ON a.achievement_id = sa.achievement_id WHERE sa.student_id = $id ORDER BY sa.awarded_at DESC"; command.Parameters.AddWithValue("$id", studentId); var list = new List<AchievementItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetString(0), reader.IsDBNull(1) ? null : reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2), reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture))); return list;
+    }
+
+    public async Task<IReadOnlyList<GoldStarEventItem>> GetGoldStarEventsAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT e.event_id, e.event_name, e.description, e.event_date, EXISTS (SELECT 1 FROM student_gold_stars g WHERE g.event_id = e.event_id AND g.student_id = $student) FROM gold_star_events e WHERE e.active = 1 ORDER BY e.event_date IS NULL, e.event_date, e.event_name"; command.Parameters.AddWithValue("$student", studentId); var list = new List<GoldStarEventItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), reader.GetBoolean(4))); return list;
     }
 
     public async Task<IReadOnlyList<NewsItem>> GetNewsAsync(CancellationToken cancellationToken = default)

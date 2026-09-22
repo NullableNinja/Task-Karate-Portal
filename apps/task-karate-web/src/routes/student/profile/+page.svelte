@@ -34,6 +34,11 @@
           <div class="record-list"><div><span>Total classes</span><strong>{profile.totalClasses}</strong></div><div><span>Current stripe</span><strong>{profile.classesIntoStripe} / {profile.classesPerStripe || '—'}</strong></div><div><span>Next milestone</span><strong>{profile.nextMilestone}</strong></div><div><span>Classes to go</span><strong>{profile.classesToNextStripe || 'Instructor tracked'}</strong></div></div>
         </section>
       </div>
+      <div class="profile-info-grid">
+        <section class="student-panel"><div class="panel-title"><span>UNIFORM & BELT</span></div><div class="record-list"><div><span>Uniform size</span><strong>{profile.uniformSize ?? 'Not on file'}</strong></div><div><span>Belt size</span><strong>{profile.beltSize ?? 'Not on file'}</strong></div><div><span>Age group</span><strong>{profile.ageGroup ?? 'Not on file'}</strong></div><div><span>Birthday</span><strong>{profile.birthDate ? new Date(profile.birthDate).toLocaleDateString() : 'Not on file'}</strong></div></div></section>
+        <section class="student-panel"><div class="panel-title"><span>GUARDIANS</span></div>{#if profile.guardians?.length}<div class="guardian-list">{#each profile.guardians as guardian}<div class="guardian-row"><strong>{guardian.name}</strong><span>{guardian.relationship}</span>{#if guardian.phone}<small>{guardian.phone}</small>{/if}{#if guardian.email}<small>{guardian.email}</small>{/if}</div>{/each}</div>{:else}<p class="muted">No guardian record is linked in this development dataset. Staff can add one when the guardian workflow is connected.</p>{/if}</section>
+      </div>
+      {#if profile.email || profile.phone}<section class="student-panel profile-contact"><div class="panel-title"><span>CONTACT ON FILE</span></div><div class="profile-contact-values">{#if profile.email}<span>{profile.email}</span>{/if}{#if profile.phone}<span>{profile.phone}</span>{/if}</div></section>{/if}
     {/if}
   </StudentShell>
 {/if}

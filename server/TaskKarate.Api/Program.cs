@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TaskKarate.Api.Data;
@@ -25,6 +26,17 @@ builder.Services.AddIdentityCore<AppUser>(options =>
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddDataProtection();
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+builder.Services.AddAuthentication().AddCookie(StudentAuth.Scheme, options =>
+{
+    options.Cookie.Name = "task_karate_student";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
+    options.Events.OnRedirectToAccessDenied = context => { context.Response.StatusCode = 403; return Task.CompletedTask; };
+});
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "task_karate_staff";
@@ -40,6 +52,14 @@ var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<stri
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddAuthorization(options => options.AddPolicy("Staff", policy => policy.RequireRole("Administrator", "Instructor", "Staff")));
 builder.Services.AddScoped<AuditService>();
+builder.Services.Configure<StarterDatabaseOptions>(options =>
+{
+    options.Path = builder.Configuration["StarterDatabase:Path"]
+        ?? Environment.GetEnvironmentVariable("TASK_KARATE_STARTER_DB")
+        ?? Path.Combine(dataDirectory, "TaskKarate_Starter.db");
+});
+builder.Services.AddSingleton<IPasswordHasher<StarterStudentAccount>, PasswordHasher<StarterStudentAccount>>();
+builder.Services.AddSingleton<StudentExperienceService>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
@@ -70,6 +90,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await db.Database.MigrateAsync();
     await BootstrapService.SeedAsync(scope.ServiceProvider, app.Configuration, app.Environment);
+    await scope.ServiceProvider.GetRequiredService<StudentExperienceService>().EnsureReadyAsync();
 }
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok", utc = DateTime.UtcNow }));
@@ -145,6 +166,7 @@ var publicApi = app.MapGroup("/api/public");
 publicApi.MapGet("/schedule", async (ApplicationDbContext db, DateTime? from, DateTime? to) => { var start = (from ?? DateTime.UtcNow.Date).Date; var end = (to ?? start.AddDays(14)).Date.AddDays(1); return Results.Ok(await db.ClassSessions.AsNoTracking().Include(x => x.ClassTemplate).ThenInclude(x => x.ProgramArea).Where(x => !x.IsCancelled && x.SessionDateUtc >= start && x.SessionDateUtc < end).OrderBy(x => x.SessionDateUtc).ThenBy(x => x.ClassTemplate.StartTime).Select(x => new { x.Id, date = x.SessionDateUtc, className = x.ClassTemplate.Name, program = x.ClassTemplate.ProgramArea.Name, x.ClassTemplate.StartTime, x.ClassTemplate.DurationMinutes }).ToListAsync()); });
 publicApi.MapGet("/announcements", async (ApplicationDbContext db) => Results.Ok(await db.Announcements.AsNoTracking().Where(x => x.Status == "Published" && (x.ExpiresAtUtc == null || x.ExpiresAtUtc > DateTime.UtcNow)).OrderByDescending(x => x.PublishedAtUtc).Select(x => new ContentDto(x.Id, x.Title, x.Body, x.Status, x.PublishedAtUtc)).ToListAsync()));
 publicApi.MapGet("/news", async (ApplicationDbContext db) => Results.Ok(await db.NewsPosts.AsNoTracking().Where(x => x.Status == "Published").OrderByDescending(x => x.PublishedAtUtc).Select(x => new ContentDto(x.Id, x.Title, x.Body, x.Status, x.PublishedAtUtc)).ToListAsync()));
+app.MapStudentExperience();
 app.Run();
 
 static bool ValidCsrf(HttpRequest request)

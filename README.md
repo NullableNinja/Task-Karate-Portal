@@ -1,66 +1,47 @@
-# Task Karate School · Paper-Fu 2.0
+# Task Karate School
 
-This folder is the modernization branch for the Task Karate public website and student portal foundation.
+Task Karate now contains a local-first platform foundation alongside the preserved public HTML site. The new operational source of truth is:
 
-## Run locally
+`SvelteKit browser → authenticated same-origin API → EF Core / SQLite`
 
-The site uses `fetch()` for shared navigation, footer, schedules, news, and demo portal data, so open it through a local HTTP server rather than `file://`.
+The legacy JSON, browser storage, `server/desk_server.py`, and old portal routes remain for reference and public-site continuity. They are not safe for real student records and are not used by the new app.
+
+## Run the new platform
+
+PowerShell, from the repository root:
 
 ```powershell
-cd "C:\Users\Thoma\OneDrive\Web Design\Task_Karate_v4"
-python -m http.server 4173
+$env:TASK_KARATE_ADMIN_EMAIL = "admin@example.test"
+$env:TASK_KARATE_ADMIN_PASSWORD = "Use-a-local-password-with-12-or-more-chars!"
+$sdk = "$env:LOCALAPPDATA\TaskKarate\dotnet8"
+$env:DOTNET_ROOT = $sdk
+& "$sdk\dotnet.exe" restore TaskKarate.sln
+& "$sdk\dotnet.exe" run --project server\TaskKarate.Api --urls http://127.0.0.1:5167
 ```
 
-Then open [http://localhost:4173/](http://localhost:4173/).
+In another PowerShell window:
 
-Key paths:
+```powershell
+cd apps\task-karate-web
+npm ci
+npm run dev
+```
 
-- `/index.html` — public home
-- `/programs.html` — programs
-- `/schedule.html` — responsive, JSON-backed schedule
-- `/students.html` — student resources and preserved downloads
-- `/belts.html` — public belt testing requirements and downloads
-- `/rules.html` — public Task Karate rules
-- `/news.html` — historical/demo news archive
-- `/about.html` — school and instructor story
-- `/contact.html` — trial/contact flow with a safe demo state
-- `/admin/index.html` — local staff workspace demo for moderation, notes, Gold Stars, and consent status
-- `/checkin.html` — legacy-compatible entry route for the supervised student portal selector
-- `/portal/login.html` — student portal selector, PIN, and profile-access acknowledgment
-- `/portal/index.html` — Student Hub home/community feed
-- `/portal/training.html`, `/portal/progress.html`, `/portal/messages.html`, `/portal/events.html`, `/portal/profile.html`, `/portal/waivers.html` — direct portal routes
+Open [http://localhost:5173](http://localhost:5173). The staff sign-in is at `/staff/signin`; the public schedule is at `/`.
 
-## Configuration
+The API creates `server/TaskKarate.Api/App_Data/task-karate.db` through EF Core migrations. Database, WAL/SHM files, local settings, and credentials are ignored by Git. The first administrator is created only when `TASK_KARATE_ADMIN_EMAIL` and `TASK_KARATE_ADMIN_PASSWORD` (or matching .NET user secrets) are present; there is no default credential.
 
-Edit `data/site.json` for school identity and contact details. Leave `siteUrl` empty until the production domain is verified. The new pages use relative links and do not require a repository-name base path.
+## Verification
 
-Public class times live in `data/schedules.json`; the historical Kids and Teens/Adults PDF exports are in `files/schedules/`. The admin demo can download the current JSON, but it does not publish changes to a server. News is managed from `news/posts-index.json` and the associated post JSON files. Do not add capacity/countdown values unless the school has an authoritative live source.
+```powershell
+$sdk = "$env:LOCALAPPDATA\TaskKarate\dotnet8"; $env:DOTNET_ROOT = $sdk
+& "$sdk\dotnet.exe" restore
+& "$sdk\dotnet.exe" build
+& "$sdk\dotnet.exe" test
+cd apps\task-karate-web
+npm ci
+npm run check
+npm run build
+```
 
-The Student Hub restores the strongest SvelteKit-era ideas—searchable roster access, profile facts, belt/stripe progression, community feed, instructor notes, student directory, private-looking threads, Gold Stars, achievements, assignments, rank progression, and a journey timeline—while keeping the seed data clearly labeled. The integrated class list is generated from `data/schedules.json` and the selected student's belt/age-group fields.
-
-The public `/schedule.html` page is the separate attendance module. After a student opens the portal, the schedule shows that student's eligible classes for the current day. They can choose one or more classes and record attendance. The action is attendance only; it is not enrollment, capacity booking, or portal authentication. With `server/desk_server.py` running, attendance is written to the local SQLite API. On static hosting, the existing desk adapter falls back to browser-local persistence, so it works only on that browser/device and cannot synchronize across machines.
-
-For a persistent desk deployment, run `python server/desk_server.py`. It uses a local SQLite file and exposes roster/check-in endpoints. Without that service, the check-in UI falls back to browser IndexedDB. See `docs/LOCAL_DESK_HOSTING.md`. Neither mode is a secure internet-facing student backend.
-
-The exact student rules and belt requirements are public and do not require portal sign-in.
-
-## Content and assets
-
-The original high-resolution images remain in place. The modernization adds responsive dimensions and lazy loading to the new pages, while preserving the older v4 CSS/JS and belt HTML as historical compatibility material. Original v2 PDFs were copied into `files/forms/` and `files/testing/` without overwriting the source archive.
-
-The current news JSON contains historical/demo test entries. Confirm editorial content before publishing it as current news.
-
-## Portal security boundary
-
-The Student Portal is a frontend prototype. Its login sets a local demo session and loads synthetic data; it is not authentication and must not be used for real student records. The companion admin page and family acknowledgment workflow are likewise local-only. The acknowledgment is not legal advice or a liability shield. Production requires attorney-reviewed policy language, verified guardian consent, server-side authorization between students/guardians/instructors, validation, CSRF protection, rate limiting, moderation, privacy controls, audit history, and safe message handling. See `docs/PORTAL_SAFETY_AND_CONSENT.md`.
-
-## Deployment checklist
-
-1. Verify the production domain and set `data/site.json.siteUrl`.
-2. Generate a sitemap from that verified origin; the included historical sitemap is intentionally not treated as authoritative.
-3. Confirm contact details, schedule, program language, and news with staff.
-4. Replace the demo portal adapter with a secure backend/auth provider.
-5. Run responsive and keyboard QA at 320, 375, 390, 768, 1024, and 1440px on the deployed host.
-6. Add an image build step for AVIF/WebP and `srcset` variants when the hosting pipeline is selected.
-
-See `docs/DESIGN_ARCHAEOLOGY.md` and `docs/MODERNIZATION_PLAN.md` for the evidence, preserved functionality, retired behavior, architecture decision, and known limitations.
+See [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md) for migrations, bootstrap, backup/restore, and LAN-supervision guidance. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md), [docs/SECURITY_BOUNDARY.md](docs/SECURITY_BOUNDARY.md), and [docs/LEGACY_RETIREMENT_PLAN.md](docs/LEGACY_RETIREMENT_PLAN.md).

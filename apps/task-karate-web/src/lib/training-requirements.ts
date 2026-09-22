@@ -63,6 +63,15 @@ export const trainingPlans: Record<string, TrainingPlan> = {
   ] }
 };
 
+export const kidsTrainingPlans: Record<string, TrainingPlan> = {
+  'Purple Belt': { rank: 'Purple Belt', color: '#9569c3', promotionGuide: 'Kids track · show control, confidence, and a strong understanding of the dojo rules before testing.', sections: [
+    { category: 'Ready to learn', items: ['Arrive ready, listen for the full instruction, and demonstrate a respectful attitude.', 'Use safe control with a partner and stop immediately when asked.'] },
+    { category: 'Core karate', items: ['Chun Bi, front stance, back stance, and fighting stance', 'Front-leg snap front kick, front-leg round kick, and front-leg side kick', 'Rear-hand punch, double punch, and ridge-hand motion'] },
+    { category: 'Self-defense and forms', items: ['Front choke response with safe distance and a clear voice', 'Wrist-grab releases with balance and awareness', 'Palgue 7 opening sequence and one-step front-kick defense'] },
+    { category: 'Kids confidence challenge', items: ['Explain one way karate helps you make a good choice outside class.', 'Complete the combination with control, focus, and a strong finish.'] }
+  ] }
+};
+
 export function nextRank(current: string | null | undefined) {
   if (!current) return 'White Belt';
   const index = beltOrder.findIndex((rank) => rank.toLowerCase() === current.toLowerCase());

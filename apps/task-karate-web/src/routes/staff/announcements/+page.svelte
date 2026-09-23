@@ -3,10 +3,10 @@
   import { api } from '$lib/api';
   import type { Content } from '$lib/types';
   let items: Content[] = []; let title = ''; let body = ''; let error = ''; let notice = ''; let loading = true; let saving = false; let publishingId = ''; let statusFilter = 'All';
-  async function load() { loading = true; try { items = await api<Content[]>('/api/announcements'); } catch (e) { error = e instanceof Error ? e.message : 'Could not load announcements.'; } finally { loading = false; } }
+  async function load() { loading = true; try { items = await api<Content[]>('/api/portal-admin/announcements'); } catch (e) { error = e instanceof Error ? e.message : 'Could not load announcements.'; } finally { loading = false; } }
   $: visibleItems = items.filter((item) => statusFilter === 'All' || item.status === statusFilter);
-  async function create() { saving = true; error = ''; try { await api('/api/announcements', { method: 'POST', body: JSON.stringify({ title: title.trim(), body: body.trim() }) }); title = ''; body = ''; notice = 'Draft saved.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not save announcement.'; } finally { saving = false; } }
-  async function publish(id: string) { publishingId = id; error = ''; try { await api(`/api/announcements/${id}/publish`, { method: 'POST' }); notice = 'Announcement published.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not publish announcement.'; } finally { publishingId = ''; } }
+  async function create() { saving = true; error = ''; try { await api('/api/portal-admin/announcements', { method: 'POST', body: JSON.stringify({ title: title.trim(), body: body.trim() }) }); title = ''; body = ''; notice = 'Draft saved in the canonical portal database.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not save announcement.'; } finally { saving = false; } }
+  async function publish(id: string) { publishingId = id; error = ''; try { await api(`/api/portal-admin/announcements/${id}/publish`, { method: 'POST' }); notice = 'Announcement published.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not publish announcement.'; } finally { publishingId = ''; } }
   onMount(load);
 </script>
 <svelte:head><title>Staff · Announcements | Task Karate</title></svelte:head>

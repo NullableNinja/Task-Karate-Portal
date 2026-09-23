@@ -64,7 +64,7 @@ $env:TASK_KARATE_STARTER_DB = "C:\Users\Thoma\OneDrive\Web Design\Task-Karate-Sc
 
 On startup, missing legacy tables and rows are imported into `task-karate.db` with conflict-safe inserts. The old file is not used as a second active database and is not modified. Back up both files before first use. After the import has been verified, remove `TASK_KARATE_STARTER_DB` and the development import switches for normal/production launches; the runtime file is then the only database the application reads.
 
-This import is intentionally a transition tool. It does not continuously synchronize two databases, and it does not yet eliminate every duplicate historical model. Make changes through the API/admin UI, not by editing either SQLite file directly.
+This import is intentionally a one-time transition tool. It does not continuously synchronize two databases. After the first verified migration, the active staff and student screens use the portal tables in the runtime file as their canonical operational model; the `platform_*` tables are retained for Identity and compatibility. Make changes through the API/admin UI, not by editing either SQLite file directly.
 
 To create a local student login without committing a password, set all three variables before starting the API:
 

@@ -8,7 +8,7 @@ The legacy JSON, browser storage, `server/desk_server.py`, and old portal routes
 
 The student-facing milestone has two live experiences: `/schedule` for the database-backed class schedule and check-in, and `/student` for authenticated student profiles, status, social, achievements, training tracks, and personal classes. Public news belongs to the future public website (`Task-Karate-Web`) and is exposed by the portal only through its authenticated/public-content API boundary; it is not part of the private student navigation.
 
-The portal now uses one physical runtime database: `server/TaskKarate.Api/App_Data/task-karate.db` by default. The EF/Identity tables are namespaced as `platform_*`, while the existing portal tables retain their legacy names during the transition. If `TASK_KARATE_STARTER_DB` points to the old standalone starter file, startup imports missing legacy tables and rows into the runtime database. That variable is a migration source, not a second active production database. The source file is never opened by the browser.
+The portal now uses one physical runtime database: `server/TaskKarate.Api/App_Data/task-karate.db` by default. The active operational workflows use the canonical portal tables in that file for students, guardians, programs, class templates, sessions, enrollments, attendance, social activity, and published content. EF/Identity tables remain namespaced as `platform_*` for authentication and compatibility. If `TASK_KARATE_STARTER_DB` points to the old standalone starter file, startup imports missing legacy tables and rows into the runtime database. That variable is a migration source, not a second active production database. The source file is never opened by the browser.
 
 ## Run the new platform
 
@@ -35,7 +35,7 @@ Open [http://localhost:5173](http://localhost:5173). The student schedule is at 
 
 The API creates `server/TaskKarate.Api/App_Data/task-karate.db` through EF Core migrations. Database, WAL/SHM files, local settings, and credentials are ignored by Git. The first administrator is created only when `TASK_KARATE_ADMIN_EMAIL` and `TASK_KARATE_ADMIN_PASSWORD` (or matching .NET user secrets) are present; there is no default credential.
 
-For production, treat this as a single-server application: keep the database on the same mini PC/VPS as the API, behind HTTPS and a reverse proxy. Do not place the database in OneDrive, a shared network folder, a public web directory, or a synchronized cloud folder. See [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md) for the migration and mini-PC deployment sequence. The physical database consolidation is complete; the remaining production phase is the deliberate consolidation of duplicate legacy and EF business models into one logical schema without losing history.
+For production, treat this as a single-server application: keep the database on the same mini PC/VPS as the API, behind HTTPS and a reverse proxy. Do not place the database in OneDrive, a shared network folder, a public web directory, or a synchronized cloud folder. See [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md) for the migration and mini-PC deployment sequence. The runtime cutover is complete for active portal workflows; the `platform_*` EF model remains as an intentional authentication/compatibility boundary until it can be retired in a later schema migration.
 
 ## Verification
 

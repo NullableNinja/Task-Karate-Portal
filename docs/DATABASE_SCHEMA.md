@@ -12,4 +12,4 @@ Identity is supplied by ASP.NET Core Identity tables (`AspNetUsers`, `AspNetRole
 
 Useful indexes include active student/name, guardian email, class-session date/template, active enrollment, attendance session/student and student, rank history, published content status/date, and audit entity/date. Deactivation is preferred over deleting people or templates. Foreign keys are explicit and required relationships use cascading behavior only for join rows.
 
-The initial EF migration is in `server/TaskKarate.Api/Data/Migrations`. Apply it with `dotnet ef database update` or let the API apply pending migrations at startup in local development.
+The initial EF migration is in `server/TaskKarate.Api/Data/Migrations`. Apply it with `dotnet ef database update` or let the API apply pending migrations at startup in local development. The active portal workflow also maintains its canonical operational tables (`portal_programs`, `portal_class_templates`, `portal_enrollments`, and `portal_content`) in the same runtime file; these are deliberately separate from the `platform_*` Identity compatibility namespace.

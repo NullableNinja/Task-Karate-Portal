@@ -186,8 +186,8 @@ staff.MapPost("/news/{id:guid}/publish", async (Guid id, ApplicationDbContext db
 
 var publicApi = app.MapGroup("/api/public");
 publicApi.MapGet("/schedule", async (ApplicationDbContext db, DateTime? from, DateTime? to) => { var start = (from ?? DateTime.UtcNow.Date).Date; var end = (to ?? start.AddDays(14)).Date.AddDays(1); return Results.Ok(await db.ClassSessions.AsNoTracking().Include(x => x.ClassTemplate).ThenInclude(x => x.ProgramArea).Where(x => !x.IsCancelled && x.SessionDateUtc >= start && x.SessionDateUtc < end).OrderBy(x => x.SessionDateUtc).ThenBy(x => x.ClassTemplate.StartTime).Select(x => new { x.Id, date = x.SessionDateUtc, className = x.ClassTemplate.Name, program = x.ClassTemplate.ProgramArea.Name, x.ClassTemplate.StartTime, x.ClassTemplate.DurationMinutes }).ToListAsync()); });
-publicApi.MapGet("/announcements", async (ApplicationDbContext db) => Results.Ok(await db.Announcements.AsNoTracking().Where(x => x.Status == "Published" && (x.ExpiresAtUtc == null || x.ExpiresAtUtc > DateTime.UtcNow)).OrderByDescending(x => x.PublishedAtUtc).Select(x => new ContentDto(x.Id, x.Title, x.Body, x.Status, x.PublishedAtUtc)).ToListAsync()));
-publicApi.MapGet("/news", async (ApplicationDbContext db) => Results.Ok(await db.NewsPosts.AsNoTracking().Where(x => x.Status == "Published").OrderByDescending(x => x.PublishedAtUtc).Select(x => new ContentDto(x.Id, x.Title, x.Body, x.Status, x.PublishedAtUtc)).ToListAsync()));
+publicApi.MapGet("/announcements", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalContentAsync("announcement", false, ct)));
+publicApi.MapGet("/news", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalContentAsync("news", false, ct)));
 app.MapStudentExperience();
 app.MapPortalAdmin();
 app.Run();

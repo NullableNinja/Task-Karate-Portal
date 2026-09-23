@@ -111,6 +111,53 @@ public static class PortalAdminEndpoints
             if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["guardian"] = ["First name and last name are required."] });
             if (!await service.UpdatePortalGuardianAsync(guardianId, request, ct)) return Results.NotFound(); await audit.RecordAsync(context, "Update", "PortalGuardian", Guid.Empty, new { legacyId = guardianId, linkedStudents = request.StudentIds?.Count ?? 0 }); return Results.NoContent();
         });
+        admin.MapGet("/programs", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalProgramsAsync(ct)));
+        admin.MapPost("/programs", async (PortalProgramWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Name)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["Program name is required."] });
+            try { var id = await service.CreatePortalProgramAsync(request.Name, request.Description, ct); await audit.RecordAsync(context, "Create", "PortalProgram", Guid.Empty, new { legacyId = id }); return Results.Created($"/api/portal-admin/programs/{id}", new { id }); }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 19) { return Results.Conflict(new { title = "Program already exists" }); }
+        });
+        admin.MapPost("/class-templates", async (PortalClassTemplateWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (request.ClassType is not ("Class" or "Seminar" or "Private lesson")) return Results.ValidationProblem(new Dictionary<string, string[]> { ["classType"] = ["Choose Class, Seminar, or Private lesson."] });
+            var id = await service.CreatePortalClassTemplateAsync(request, ct); if (id is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["template"] = ["Program, name, day, time, and duration must be valid."] });
+            await audit.RecordAsync(context, "Create", "PortalClassTemplate", Guid.Empty, new { legacyId = id.Value, request.ClassType }); return Results.Created($"/api/portal-admin/class-templates/{id.Value}", new { id = id.Value });
+        });
+        admin.MapGet("/sessions", async (DateTime? date, StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalSessionsAsync((date ?? DateTime.UtcNow).Date, ct)));
+        admin.MapPost("/sessions", async (PortalClassSessionWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var id = await service.CreatePortalSessionAsync(request, ct); if (id is null) return Results.Conflict(new { title = "Session could not be created", detail = "Check the template, date, assignment, or whether that class occurrence already exists." });
+            await audit.RecordAsync(context, "Create", "PortalClassSession", Guid.Empty, new { legacyId = id.Value }); return Results.Created($"/api/portal-admin/sessions/{id.Value}", new { id = id.Value });
+        });
+        admin.MapGet("/enrollments", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalEnrollmentsAsync(ct)));
+        admin.MapPost("/enrollments", async (PortalEnrollmentWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var id = await service.AddPortalEnrollmentAsync(request, ct); if (id is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["enrollment"] = ["Choose an active student and an active recurring class."] });
+            await audit.RecordAsync(context, "Create", "PortalEnrollment", Guid.Empty, new { legacyId = id.Value }); return Results.Created($"/api/portal-admin/enrollments/{id.Value}", new { id = id.Value });
+        });
+        admin.MapDelete("/enrollments/{enrollmentId:int}", async (int enrollmentId, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.RemovePortalEnrollmentAsync(enrollmentId, ct)) return Results.NotFound(); await audit.RecordAsync(context, "Deactivate", "PortalEnrollment", Guid.Empty, new { legacyId = enrollmentId }); return Results.NoContent();
+        });
+        admin.MapGet("/announcements", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalContentAsync("announcement", true, ct)));
+        admin.MapPost("/announcements", async (PortalContentWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Body)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Title and body are required."] }); var id = await service.CreatePortalContentAsync("announcement", request, ct); await audit.RecordAsync(context, "Create", "PortalAnnouncement", Guid.Empty, new { legacyId = id }); return Results.Created($"/api/portal-admin/announcements/{id}", new { id });
+        });
+        admin.MapPost("/announcements/{contentId:long}/publish", async (long contentId, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.PublishPortalContentAsync("announcement", contentId, ct)) return Results.NotFound(); await audit.RecordAsync(context, "Publish", "PortalAnnouncement", Guid.Empty, new { legacyId = contentId }); return Results.NoContent();
+        });
+        admin.MapGet("/news", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalContentAsync("news", true, ct)));
+        admin.MapPost("/news", async (PortalContentWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Body)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Title and body are required."] }); var id = await service.CreatePortalContentAsync("news", request, ct); await audit.RecordAsync(context, "Create", "PortalNews", Guid.Empty, new { legacyId = id }); return Results.Created($"/api/portal-admin/news/{id}", new { id });
+        });
+        admin.MapPost("/news/{contentId:long}/publish", async (long contentId, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.PublishPortalContentAsync("news", contentId, ct)) return Results.NotFound(); await audit.RecordAsync(context, "Publish", "PortalNews", Guid.Empty, new { legacyId = contentId }); return Results.NoContent();
+        });
         admin.MapGet("/gold-star-events", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGoldStarEventsAsync(ct)));
         admin.MapPost("/gold-star-events", async (PortalGoldStarEventRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
         {
@@ -154,3 +201,4 @@ public sealed record PortalAwardRequest(int StudentId, string? Note);
 public sealed record PortalStudentPinRequest(string Pin, string ConfirmPin);
 public sealed record PortalAttendanceRequest(int StudentId, int SessionId, bool Helper = false);
 public sealed record StaffSocialPostRequest(string Text);
+public sealed record PortalProgramWriteRequest(string Name, string? Description);

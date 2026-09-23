@@ -74,6 +74,15 @@ public sealed record PortalStudentWriteRequest(string FirstName, string LastName
 public sealed record PortalAdminGuardianStudent(int StudentId, string Name, string Relationship);
 public sealed record PortalAdminGuardian(int GuardianId, string FirstName, string LastName, string? Email, string? Phone, bool IsActive, IReadOnlyList<PortalAdminGuardianStudent> Students);
 public sealed record PortalGuardianWriteRequest(string FirstName, string LastName, string? Email, string? Phone, IReadOnlyList<int>? StudentIds);
+public sealed record PortalProgramItem(int ProgramId, string Name, string? Description, IReadOnlyList<PortalClassTemplateItem> Templates);
+public sealed record PortalClassTemplateItem(int TemplateId, string Name, string DayOfWeek, string StartTime, int DurationMinutes, string? BeltScope, string ClassType, bool AppointmentOnly, int ProgramId);
+public sealed record PortalClassSessionItem(int SessionId, int ClassTemplateId, string Name, string StartTime, int DurationMinutes, DateTime SessionDateUtc, bool IsCancelled, string ClassType, int? AssignedStudentId, string? Location);
+public sealed record PortalEnrollmentItem(int EnrollmentId, int StudentId, string StudentName, int ClassTemplateId, string ClassName, bool IsActive);
+public sealed record PortalClassTemplateWriteRequest(int ProgramId, string Name, string DayOfWeek, string StartTime, int DurationMinutes, string? BeltScope, string ClassType = "Class", bool AppointmentOnly = false);
+public sealed record PortalClassSessionWriteRequest(int ClassTemplateId, DateTime SessionDateUtc, string? Notes, int? AssignedStudentId = null);
+public sealed record PortalEnrollmentWriteRequest(int StudentId, int ClassTemplateId);
+public sealed record PortalContentItem(long Id, string Title, string Body, string Status, DateTime? PublishedAtUtc, DateTime? ExpiresAtUtc, string Kind);
+public sealed record PortalContentWriteRequest(string Title, string Body, DateTime? ExpiresAtUtc = null);
 
 public sealed class StudentExperienceService
 {
@@ -113,7 +122,7 @@ CREATE TABLE IF NOT EXISTS student_profiles (student_id INTEGER PRIMARY KEY, dis
 CREATE TABLE IF NOT EXISTS student_rank_history (student_rank_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, rank_id INTEGER NOT NULL, awarded_date TEXT NOT NULL, awarded_by_user_id INTEGER, notes TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(rank_id) REFERENCES ranks(rank_id));
 CREATE TABLE IF NOT EXISTS classes (class_id INTEGER PRIMARY KEY AUTOINCREMENT, class_name TEXT NOT NULL, description TEXT, active INTEGER NOT NULL DEFAULT 1);
 CREATE TABLE IF NOT EXISTS class_schedule (schedule_id INTEGER PRIMARY KEY AUTOINCREMENT, class_id INTEGER NOT NULL, day_of_week INTEGER NOT NULL, start_time TEXT NOT NULL, end_time TEXT, instructor_id INTEGER, location_name TEXT, active INTEGER NOT NULL DEFAULT 1, FOREIGN KEY(class_id) REFERENCES classes(class_id));
-CREATE TABLE IF NOT EXISTS class_sessions (session_id INTEGER PRIMARY KEY AUTOINCREMENT, class_id INTEGER NOT NULL, schedule_id INTEGER, session_date TEXT NOT NULL, start_time TEXT, end_time TEXT, instructor_id INTEGER, location_name TEXT, cancelled INTEGER NOT NULL DEFAULT 0, cancellation_reason TEXT, notes TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(class_id) REFERENCES classes(class_id), UNIQUE(class_id, session_date, start_time));
+CREATE TABLE IF NOT EXISTS class_sessions (session_id INTEGER PRIMARY KEY AUTOINCREMENT, class_id INTEGER NOT NULL, schedule_id INTEGER, session_date TEXT NOT NULL, start_time TEXT, end_time TEXT, instructor_id INTEGER, location_name TEXT, cancelled INTEGER NOT NULL DEFAULT 0, cancellation_reason TEXT, notes TEXT, assigned_student_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(class_id) REFERENCES classes(class_id), UNIQUE(class_id, session_date, start_time));
 CREATE TABLE IF NOT EXISTS attendance (attendance_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL, student_id INTEGER NOT NULL, check_in_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, check_out_time TEXT, status TEXT NOT NULL DEFAULT 'present', checked_in_by_user_id INTEGER, notes TEXT, FOREIGN KEY(session_id) REFERENCES class_sessions(session_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, UNIQUE(session_id, student_id));
 CREATE TABLE IF NOT EXISTS achievements (achievement_id INTEGER PRIMARY KEY AUTOINCREMENT, achievement_name TEXT NOT NULL UNIQUE, description TEXT, icon_name TEXT, active INTEGER NOT NULL DEFAULT 1);
 CREATE TABLE IF NOT EXISTS student_achievements (student_id INTEGER NOT NULL, achievement_id INTEGER NOT NULL, awarded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(student_id, achievement_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(achievement_id) REFERENCES achievements(achievement_id) ON DELETE CASCADE);
@@ -134,6 +143,10 @@ CREATE TABLE IF NOT EXISTS student_practice_logs (practice_log_id INTEGER PRIMAR
 CREATE TABLE IF NOT EXISTS student_goals (goal_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, title TEXT NOT NULL, target_date TEXT, completed INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, completed_at TEXT, UNIQUE(student_id, title), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS post_bookmarks (post_id INTEGER NOT NULL, student_id INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(post_id, student_id), FOREIGN KEY(post_id) REFERENCES posts(post_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS staff_helper_signups (signup_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL, staff_user_id TEXT NOT NULL, staff_display_name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(session_id, staff_user_id), FOREIGN KEY(session_id) REFERENCES class_sessions(session_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS portal_programs (program_id INTEGER PRIMARY KEY AUTOINCREMENT, program_name TEXT NOT NULL UNIQUE COLLATE NOCASE, description TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS portal_class_templates (template_id INTEGER PRIMARY KEY AUTOINCREMENT, program_id INTEGER NOT NULL, class_id INTEGER NOT NULL UNIQUE, template_name TEXT NOT NULL, day_of_week INTEGER NOT NULL, start_time TEXT NOT NULL, duration_minutes INTEGER NOT NULL, belt_scope TEXT, class_type TEXT NOT NULL DEFAULT 'Class', appointment_only INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(program_id) REFERENCES portal_programs(program_id), FOREIGN KEY(class_id) REFERENCES classes(class_id));
+CREATE TABLE IF NOT EXISTS portal_enrollments (enrollment_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, template_id INTEGER NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(student_id, template_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(template_id) REFERENCES portal_class_templates(template_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS portal_content (content_id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'Draft', published_at TEXT, expires_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, CHECK(kind IN ('news', 'announcement')));
 CREATE INDEX IF NOT EXISTS ix_student_accounts_username ON student_accounts(username);
 CREATE INDEX IF NOT EXISTS ix_class_sessions_date ON class_sessions(session_date, cancelled);
 CREATE INDEX IF NOT EXISTS ix_attendance_student ON attendance(student_id, session_id);
@@ -147,13 +160,18 @@ CREATE INDEX IF NOT EXISTS ix_goals_student ON student_goals(student_id, complet
 CREATE INDEX IF NOT EXISTS ix_daily_missions_student_date ON student_daily_missions(student_id, mission_date, completed);
 CREATE INDEX IF NOT EXISTS ix_post_bookmarks_student ON post_bookmarks(student_id, created_at);
 CREATE INDEX IF NOT EXISTS ix_staff_helper_signups_session ON staff_helper_signups(session_id, created_at);
+CREATE INDEX IF NOT EXISTS ix_portal_class_templates_program ON portal_class_templates(program_id, active);
+CREATE INDEX IF NOT EXISTS ix_portal_enrollments_template ON portal_enrollments(template_id, active);
+CREATE INDEX IF NOT EXISTS ix_portal_content_kind_status ON portal_content(kind, status, published_at);
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureLegacyStudentColumnsAsync(connection, cancellationToken);
+        await EnsureLegacyClassSessionColumnsAsync(connection, cancellationToken);
         await EnsureStudentAccountColumnsAsync(connection, cancellationToken);
         await EnsureLegacyReactionSchemaAsync(connection, cancellationToken);
         await ImportDevelopmentDataAsync(connection, cancellationToken);
         await NormalizeLegacyDataAsync(connection, cancellationToken);
+        await EnsureCanonicalClassCatalogAsync(connection, cancellationToken);
         await SeedDevelopmentGoldStarEventsAsync(connection, cancellationToken);
         await MaterializeUpcomingSessionsAsync(connection, cancellationToken);
         await SeedDemoDataAsync(connection, cancellationToken);
@@ -281,6 +299,70 @@ GROUP BY post_id, student_id;
 DROP TABLE post_reactions_legacy;
 CREATE INDEX IF NOT EXISTS ix_post_reactions_post ON post_reactions(post_id, reaction_code);";
         await migrate.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task EnsureCanonicalClassCatalogAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        await using var classes = connection.CreateCommand();
+        classes.CommandText = "SELECT class_id, class_name, description FROM classes WHERE active = 1 ORDER BY class_id";
+        var rows = new List<(int Id, string Name, string? Description)>();
+        await using (var reader = await classes.ExecuteReaderAsync(cancellationToken))
+        {
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                rows.Add((reader.GetInt32(0), reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2)));
+            }
+        }
+
+        foreach (var row in rows)
+        {
+            var separator = row.Name.IndexOf('—');
+            var programName = separator > 0 ? row.Name[..separator].Trim() : "Task Karate";
+            if (string.IsNullOrWhiteSpace(programName)) programName = "Task Karate";
+
+            await using var program = connection.CreateCommand();
+            program.CommandText = "INSERT OR IGNORE INTO portal_programs(program_name, description) VALUES ($name, $description)";
+            program.Parameters.AddWithValue("$name", programName);
+            program.Parameters.AddWithValue("$description", (object?)row.Description ?? DBNull.Value);
+            await program.ExecuteNonQueryAsync(cancellationToken);
+
+            await using var schedule = connection.CreateCommand();
+            schedule.CommandText = "SELECT day_of_week, start_time, end_time FROM class_schedule WHERE class_id = $class AND active = 1 ORDER BY schedule_id LIMIT 1";
+            schedule.Parameters.AddWithValue("$class", row.Id);
+            await using var scheduleReader = await schedule.ExecuteReaderAsync(cancellationToken);
+            var day = 1;
+            var start = "17:00";
+            var duration = 60;
+            if (await scheduleReader.ReadAsync(cancellationToken))
+            {
+                day = scheduleReader.GetInt32(0);
+                start = scheduleReader.GetString(1);
+                var end = scheduleReader.IsDBNull(2) ? null : scheduleReader.GetString(2);
+                duration = CalculateDurationMinutes(start, end);
+            }
+
+            await using var template = connection.CreateCommand();
+            template.CommandText = @"
+INSERT OR IGNORE INTO portal_class_templates(program_id, class_id, template_name, day_of_week, start_time, duration_minutes, belt_scope, class_type, appointment_only)
+SELECT program_id, $class, $template, $day, $start, $duration, NULL,
+       CASE WHEN lower($template) LIKE '%seminar%' THEN 'Seminar' WHEN lower($template) LIKE '%private%' THEN 'Private lesson' ELSE 'Class' END,
+       CASE WHEN lower($template) LIKE '%private%' THEN 1 ELSE 0 END
+FROM portal_programs WHERE program_name = $program";
+            template.Parameters.AddWithValue("$class", row.Id);
+            template.Parameters.AddWithValue("$template", row.Name);
+            template.Parameters.AddWithValue("$day", day);
+            template.Parameters.AddWithValue("$start", start);
+            template.Parameters.AddWithValue("$duration", duration);
+            template.Parameters.AddWithValue("$program", programName);
+            await template.ExecuteNonQueryAsync(cancellationToken);
+        }
+    }
+
+    private static int CalculateDurationMinutes(string start, string? end)
+    {
+        if (string.IsNullOrWhiteSpace(end) || !TimeSpan.TryParse(start, CultureInfo.InvariantCulture, out var startTime) || !TimeSpan.TryParse(end, CultureInfo.InvariantCulture, out var endTime)) return 60;
+        var duration = (int)(endTime - startTime).TotalMinutes;
+        return duration > 0 && duration <= 480 ? duration : 60;
     }
 
     private async Task SeedDevelopmentGoldStarEventsAsync(SqliteConnection connection, CancellationToken cancellationToken)
@@ -827,6 +909,153 @@ ON CONFLICT(student_id) DO UPDATE SET pin_hash = excluded.pin_hash, password_has
         var list = new List<ScheduleItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt32(0), DateTime.Parse(reader.GetString(1), CultureInfo.InvariantCulture), reader.IsDBNull(2) ? null : reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetString(4), reader.IsDBNull(5) ? null : reader.GetString(5), reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetInt32(7) != 0)); return list;
     }
 
+    public async Task<IReadOnlyList<PortalProgramItem>> GetPortalProgramsAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"SELECT p.program_id, p.program_name, p.description,
+       t.template_id, t.template_name, t.day_of_week, t.start_time, t.duration_minutes,
+       t.belt_scope, t.class_type, t.appointment_only
+FROM portal_programs p
+LEFT JOIN portal_class_templates t ON t.program_id = p.program_id AND t.active = 1
+WHERE p.active = 1
+ORDER BY p.program_name COLLATE NOCASE, t.day_of_week, t.start_time, t.template_name COLLATE NOCASE";
+        var programs = new Dictionary<int, (string Name, string? Description, List<PortalClassTemplateItem> Templates)>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var programId = reader.GetInt32(0);
+            if (!programs.TryGetValue(programId, out var program))
+            {
+                program = (reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2), []);
+                programs.Add(programId, program);
+            }
+            if (!reader.IsDBNull(3))
+            {
+                var day = Enum.IsDefined(typeof(DayOfWeek), reader.GetInt32(5)) ? ((DayOfWeek)reader.GetInt32(5)).ToString() : "Monday";
+                program.Templates.Add(new(reader.GetInt32(3), reader.GetString(4), day, reader.GetString(6), reader.GetInt32(7), reader.IsDBNull(8) ? null : reader.GetString(8), reader.GetString(9), reader.GetInt32(10) != 0, programId));
+            }
+        }
+        return programs.Select(item => new PortalProgramItem(item.Key, item.Value.Name, item.Value.Description, item.Value.Templates)).ToList();
+    }
+
+    public async Task<int> CreatePortalProgramAsync(string name, string? description, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "INSERT INTO portal_programs(program_name, description) VALUES ($name, $description); SELECT last_insert_rowid();";
+        command.Parameters.AddWithValue("$name", name.Trim());
+        command.Parameters.AddWithValue("$description", (object?)NullIfBlank(description) ?? DBNull.Value);
+        return Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    public async Task<int?> CreatePortalClassTemplateAsync(PortalClassTemplateWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request.ProgramId <= 0 || string.IsNullOrWhiteSpace(request.Name) || request.DurationMinutes is < 1 or > 480) return null;
+        if (!Enum.TryParse<DayOfWeek>(request.DayOfWeek, true, out var day)) return null;
+        var start = NormalizeClock(request.StartTime);
+        if (start is null) return null;
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using var program = connection.CreateCommand();
+        program.Transaction = (SqliteTransaction)transaction;
+        program.CommandText = "SELECT program_name FROM portal_programs WHERE program_id = $id AND active = 1";
+        program.Parameters.AddWithValue("$id", request.ProgramId);
+        var programName = await program.ExecuteScalarAsync(cancellationToken) as string;
+        if (programName is null) return null;
+        await using var classInsert = connection.CreateCommand();
+        classInsert.Transaction = (SqliteTransaction)transaction;
+        classInsert.CommandText = "INSERT INTO classes(class_name, description, active) VALUES ($name, $description, 1); SELECT last_insert_rowid();";
+        classInsert.Parameters.AddWithValue("$name", request.Name.Trim());
+        classInsert.Parameters.AddWithValue("$description", "Managed in the Task Karate portal.");
+        var classId = Convert.ToInt32(await classInsert.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+        await using var schedule = connection.CreateCommand();
+        schedule.Transaction = (SqliteTransaction)transaction;
+        schedule.CommandText = "INSERT INTO class_schedule(class_id, day_of_week, start_time, end_time, location_name, active) VALUES ($class, $day, $start, $end, 'Main dojo', 1)";
+        schedule.Parameters.AddWithValue("$class", classId); schedule.Parameters.AddWithValue("$day", (int)day); schedule.Parameters.AddWithValue("$start", start); schedule.Parameters.AddWithValue("$end", AddMinutes(start, request.DurationMinutes));
+        await schedule.ExecuteNonQueryAsync(cancellationToken);
+        await using var template = connection.CreateCommand();
+        template.Transaction = (SqliteTransaction)transaction;
+        template.CommandText = @"INSERT INTO portal_class_templates(program_id, class_id, template_name, day_of_week, start_time, duration_minutes, belt_scope, class_type, appointment_only)
+VALUES ($program, $class, $name, $day, $start, $duration, $belt, $type, $appointment); SELECT last_insert_rowid();";
+        template.Parameters.AddWithValue("$program", request.ProgramId); template.Parameters.AddWithValue("$class", classId); template.Parameters.AddWithValue("$name", request.Name.Trim()); template.Parameters.AddWithValue("$day", (int)day); template.Parameters.AddWithValue("$start", start); template.Parameters.AddWithValue("$duration", request.DurationMinutes); template.Parameters.AddWithValue("$belt", (object?)NullIfBlank(request.BeltScope) ?? DBNull.Value); template.Parameters.AddWithValue("$type", request.ClassType is "Seminar" or "Private lesson" ? request.ClassType : "Class"); template.Parameters.AddWithValue("$appointment", request.AppointmentOnly ? 1 : 0);
+        var templateId = Convert.ToInt32(await template.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+        await transaction.CommitAsync(cancellationToken);
+        return templateId;
+    }
+
+    public async Task<IReadOnlyList<PortalClassSessionItem>> GetPortalSessionsAsync(DateTime date, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"SELECT s.session_id, t.template_id, c.class_name, COALESCE(s.start_time, t.start_time), t.duration_minutes, s.session_date, s.cancelled, t.class_type, s.assigned_student_id, s.location_name
+FROM class_sessions s JOIN classes c ON c.class_id = s.class_id JOIN portal_class_templates t ON t.class_id = s.class_id
+WHERE date(s.session_date) = date($date) AND c.active = 1
+ORDER BY COALESCE(s.start_time, t.start_time), s.session_id";
+        command.Parameters.AddWithValue("$date", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+        var list = new List<PortalClassSessionItem>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetString(3), reader.GetInt32(4), DateTime.Parse(reader.GetString(5), CultureInfo.InvariantCulture), reader.GetInt32(6) != 0, reader.GetString(7), reader.IsDBNull(8) ? null : reader.GetInt32(8), reader.IsDBNull(9) ? null : reader.GetString(9)));
+        return list;
+    }
+
+    public async Task<int?> CreatePortalSessionAsync(PortalClassSessionWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var template = connection.CreateCommand();
+        template.CommandText = "SELECT class_id, class_type, appointment_only FROM portal_class_templates WHERE template_id = $id AND active = 1";
+        template.Parameters.AddWithValue("$id", request.ClassTemplateId);
+        await using var reader = await template.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken)) return null;
+        var classId = reader.GetInt32(0); var classType = reader.GetString(1);
+        await reader.DisposeAsync();
+        if (classType == "Private lesson" && request.AssignedStudentId is null) return null;
+        if (request.AssignedStudentId is not null)
+        {
+            await using var student = connection.CreateCommand(); student.CommandText = "SELECT COUNT(1) FROM students WHERE student_id = $id AND active = 1 AND COALESCE(status, 'active') = 'active'"; student.Parameters.AddWithValue("$id", request.AssignedStudentId.Value);
+            if (Convert.ToInt32(await student.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) != 1) return null;
+        }
+        await using var insert = connection.CreateCommand();
+        insert.CommandText = "INSERT INTO class_sessions(class_id, session_date, start_time, end_time, location_name, cancelled, notes, assigned_student_id) SELECT class_id, $date, start_time, end_time, location_name, 0, $notes, $assignedStudent FROM class_schedule WHERE class_id = $class AND active = 1 ORDER BY schedule_id LIMIT 1; SELECT last_insert_rowid();";
+        insert.Parameters.AddWithValue("$class", classId); insert.Parameters.AddWithValue("$date", request.SessionDateUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)); insert.Parameters.AddWithValue("$notes", (object?)NullIfBlank(request.Notes) ?? DBNull.Value); insert.Parameters.AddWithValue("$assignedStudent", (object?)request.AssignedStudentId ?? DBNull.Value);
+        try { return Convert.ToInt32(await insert.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture); } catch (SqliteException ex) when (ex.SqliteErrorCode == 19) { return null; }
+    }
+
+    public async Task<IReadOnlyList<PortalEnrollmentItem>> GetPortalEnrollmentsAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = @"SELECT e.enrollment_id, e.student_id, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), e.template_id, t.template_name, e.active
+FROM portal_enrollments e JOIN students s ON s.student_id = e.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id JOIN portal_class_templates t ON t.template_id = e.template_id
+WHERE e.active = 1 ORDER BY t.template_name COLLATE NOCASE, s.last_name COLLATE NOCASE, s.first_name COLLATE NOCASE";
+        var list = new List<PortalEnrollmentItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3), reader.GetString(4), reader.GetInt32(5) != 0)); return list;
+    }
+
+    public async Task<int?> AddPortalEnrollmentAsync(PortalEnrollmentWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var check = connection.CreateCommand(); check.CommandText = "SELECT COUNT(1) FROM students WHERE student_id = $student AND active = 1 AND COALESCE(status, 'active') = 'active'; SELECT COUNT(1) FROM portal_class_templates WHERE template_id = $template AND active = 1"; check.Parameters.AddWithValue("$student", request.StudentId); check.Parameters.AddWithValue("$template", request.ClassTemplateId);
+        await using var checkReader = await check.ExecuteReaderAsync(cancellationToken); if (!await checkReader.ReadAsync(cancellationToken)) return null;
+        var studentExists = checkReader.GetInt32(0) == 1; var templateExists = await checkReader.NextResultAsync(cancellationToken) && await checkReader.ReadAsync(cancellationToken) && checkReader.GetInt32(0) == 1; await checkReader.DisposeAsync(); if (!studentExists || !templateExists) return null;
+        await using var command = connection.CreateCommand(); command.CommandText = @"INSERT INTO portal_enrollments(student_id, template_id, active) VALUES ($student, $template, 1)
+ON CONFLICT(student_id, template_id) DO UPDATE SET active = 1, updated_at = CURRENT_TIMESTAMP; SELECT enrollment_id FROM portal_enrollments WHERE student_id = $student AND template_id = $template"; command.Parameters.AddWithValue("$student", request.StudentId); command.Parameters.AddWithValue("$template", request.ClassTemplateId); try { return Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture); } catch (SqliteException ex) when (ex.SqliteErrorCode == 19) { return null; }
+    }
+
+    public async Task<bool> RemovePortalEnrollmentAsync(int enrollmentId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "UPDATE portal_enrollments SET active = 0, updated_at = CURRENT_TIMESTAMP WHERE enrollment_id = $id AND active = 1"; command.Parameters.AddWithValue("$id", enrollmentId); return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
+    }
+
+    private static string? NormalizeClock(string value)
+    {
+        if (!DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.NoCurrentDateDefault, out var parsed)) return null;
+        return parsed.ToString("HH:mm", CultureInfo.InvariantCulture);
+    }
+
+    private static string AddMinutes(string start, int minutes)
+    {
+        return (TimeSpan.Parse(start, CultureInfo.InvariantCulture) + TimeSpan.FromMinutes(minutes)).ToString(@"hh\:mm", CultureInfo.InvariantCulture);
+    }
+
     public async Task<IReadOnlyList<PortalAttendanceItem>> GetPortalAttendanceAsync(int sessionId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken);
@@ -1147,6 +1376,18 @@ WHERE s.session_id = $session AND date(s.session_date) = date('now', 'localtime'
         }
     }
 
+    private static async Task EnsureLegacyClassSessionColumnsAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        await using var check = connection.CreateCommand();
+        check.CommandText = "SELECT COUNT(1) FROM pragma_table_info('class_sessions') WHERE name = 'assigned_student_id'";
+        if (Convert.ToInt32(await check.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0)
+        {
+            await using var alter = connection.CreateCommand();
+            alter.CommandText = "ALTER TABLE class_sessions ADD COLUMN assigned_student_id INTEGER";
+            await alter.ExecuteNonQueryAsync(cancellationToken);
+        }
+    }
+
     private static async Task EnsureStudentAccountColumnsAsync(SqliteConnection connection, CancellationToken cancellationToken)
     {
         foreach (var column in new[] { (Name: "pin_hash", Definition: "TEXT"), (Name: "must_change_password", Definition: "INTEGER NOT NULL DEFAULT 0") })
@@ -1406,6 +1647,39 @@ ORDER BY p.created_at DESC LIMIT 200";
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT post_id, post_text, created_at FROM posts WHERE post_id = $id AND visible = 1 AND moderation_status = 'approved' AND post_type = 'news'"; command.Parameters.AddWithValue("$id", postId);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken); if (!await reader.ReadAsync(cancellationToken)) return null; return ToNewsItem(reader.GetInt64(0), reader.GetString(1), reader.GetString(2));
     }
+
+    public async Task<IReadOnlyList<PortalContentItem>> GetPortalContentAsync(string kind, bool includeDrafts, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT content_id, title, body, status, published_at, expires_at, kind FROM portal_content WHERE kind = $kind" + (includeDrafts ? string.Empty : " AND status = 'Published' AND (expires_at IS NULL OR datetime(expires_at) > datetime('now'))") + " ORDER BY COALESCE(published_at, updated_at) DESC, content_id DESC";
+        command.Parameters.AddWithValue("$kind", kind); var list = new List<PortalContentItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), ParseNullableDate(reader.IsDBNull(4) ? null : reader.GetString(4)), ParseNullableDate(reader.IsDBNull(5) ? null : reader.GetString(5)), reader.GetString(6)));
+        return list;
+    }
+
+    public async Task<long> CreatePortalContentAsync(string kind, PortalContentWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = "INSERT INTO portal_content(kind, title, body, status, expires_at) VALUES ($kind, $title, $body, 'Draft', $expires); SELECT last_insert_rowid();";
+        command.Parameters.AddWithValue("$kind", kind); command.Parameters.AddWithValue("$title", request.Title.Trim()); command.Parameters.AddWithValue("$body", request.Body.Trim()); command.Parameters.AddWithValue("$expires", request.ExpiresAtUtc?.ToString("O") ?? (object)DBNull.Value);
+        return Convert.ToInt64(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    public async Task<bool> PublishPortalContentAsync(string kind, long contentId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using var lookup = connection.CreateCommand(); lookup.Transaction = (SqliteTransaction)transaction; lookup.CommandText = "SELECT title, body, status FROM portal_content WHERE content_id = $id AND kind = $kind"; lookup.Parameters.AddWithValue("$id", contentId); lookup.Parameters.AddWithValue("$kind", kind);
+        await using var reader = await lookup.ExecuteReaderAsync(cancellationToken); if (!await reader.ReadAsync(cancellationToken)) return false; var title = reader.GetString(0); var body = reader.GetString(1); var wasPublished = string.Equals(reader.GetString(2), "Published", StringComparison.OrdinalIgnoreCase); await reader.DisposeAsync();
+        var now = DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture);
+        await using var update = connection.CreateCommand(); update.Transaction = (SqliteTransaction)transaction; update.CommandText = "UPDATE portal_content SET status = 'Published', published_at = COALESCE(published_at, $now), updated_at = $now WHERE content_id = $id AND kind = $kind"; update.Parameters.AddWithValue("$now", now); update.Parameters.AddWithValue("$id", contentId); update.Parameters.AddWithValue("$kind", kind); if (await update.ExecuteNonQueryAsync(cancellationToken) != 1) return false;
+        if (!wasPublished && kind == "news")
+        {
+            await using var post = connection.CreateCommand(); post.Transaction = (SqliteTransaction)transaction; post.CommandText = "INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at) VALUES (NULL, $text, 'news', 'approved', 1, $now, $now)"; post.Parameters.AddWithValue("$text", $"{title} — {body}"); post.Parameters.AddWithValue("$now", now); await post.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await transaction.CommitAsync(cancellationToken); return true;
+    }
+
+    private static DateTime? ParseNullableDate(string? value) => DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed) ? parsed : null;
 
     private static NewsItem ToNewsItem(long id, string text, string createdAt)
     {

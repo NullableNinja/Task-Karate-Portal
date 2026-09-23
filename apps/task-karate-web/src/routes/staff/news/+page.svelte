@@ -3,7 +3,7 @@
   import { api } from '$lib/api';
   import type { Content } from '$lib/types';
   let items: Content[] = []; let title = ''; let body = ''; let imageUrl = ''; let imageAlt = ''; let editorMode: 'write' | 'preview' = 'write'; let error = ''; let notice = ''; let loading = true; let saving = false; let publishingId = ''; let statusFilter = 'All';
-  async function load() { loading = true; try { items = await api<Content[]>('/api/news'); } catch (e) { error = e instanceof Error ? e.message : 'Could not load news.'; } finally { loading = false; } }
+  async function load() { loading = true; try { items = await api<Content[]>('/api/portal-admin/news'); } catch (e) { error = e instanceof Error ? e.message : 'Could not load news.'; } finally { loading = false; } }
   $: visibleItems = items.filter((item) => statusFilter === 'All' || item.status === statusFilter);
   function escapeHtml(value: string) { return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function renderMarkdown(value: string) {
@@ -17,8 +17,8 @@
   }
   function insertMarkdown(token: string) { body = `${body}${body ? '\n\n' : ''}${token}`; }
   function insertImage() { if (!/^https?:\/\//i.test(imageUrl.trim())) { error = 'Image embeds must use an https:// or http:// URL.'; return; } insertMarkdown(`![${imageAlt.trim() || 'Task Karate image'}](${imageUrl.trim()})`); imageUrl = ''; imageAlt = ''; }
-  async function create() { saving = true; error = ''; try { await api('/api/news', { method: 'POST', body: JSON.stringify({ title: title.trim(), body: body.trim() }) }); title = ''; body = ''; imageUrl = ''; imageAlt = ''; notice = 'News draft saved.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not save news.'; } finally { saving = false; } }
-  async function publish(id: string) { publishingId = id; error = ''; try { await api(`/api/news/${id}/publish`, { method: 'POST' }); notice = 'News post published.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not publish news.'; } finally { publishingId = ''; } }
+  async function create() { saving = true; error = ''; try { await api('/api/portal-admin/news', { method: 'POST', body: JSON.stringify({ title: title.trim(), body: body.trim() }) }); title = ''; body = ''; imageUrl = ''; imageAlt = ''; notice = 'News draft saved in the canonical portal database.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not save news.'; } finally { saving = false; } }
+  async function publish(id: string) { publishingId = id; error = ''; try { await api(`/api/portal-admin/news/${id}/publish`, { method: 'POST' }); notice = 'News post published.'; await load(); } catch (e) { error = e instanceof Error ? e.message : 'Could not publish news.'; } finally { publishingId = ''; } }
   onMount(load);
 </script>
 <svelte:head><title>Staff · News | Task Karate</title></svelte:head>

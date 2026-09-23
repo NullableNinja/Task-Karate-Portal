@@ -198,7 +198,48 @@ INSERT OR IGNORE INTO achievements(achievement_name, description, icon_name) VAL
     ('90-Day Rhythm', 'You attended on ninety distinct days and made training a habit.', 'calendar-star'),
     ('Warmup Warrior', 'Ready to go on time for warmups all month.', 'flame'),
     ('Form Explorer', 'You began learning a new form and can perform the opening section.', 'compass'),
-    ('Community Spark', 'You showed up for a special event that brought the dojo together.', 'spark');
+    ('Community Spark', 'You showed up for a special event that brought the dojo together.', 'spark'),
+    ('3 Classes', 'Three classes completed and the rhythm is starting.', 'three'),
+    ('5 Classes', 'Five classes completed with focus.', 'five'),
+    ('25 Classes', 'Twenty-five classes completed.', 'twenty-five'),
+    ('50 Classes', 'Fifty classes completed.', 'fifty'),
+    ('250 Classes', 'Two hundred and fifty classes completed.', 'two-fifty'),
+    ('500 Classes', 'Five hundred classes completed.', 'five-hundred'),
+    ('2,500 Classes', 'Two thousand five hundred classes completed.', 'two-five-hundred'),
+    ('5,000 Classes', 'Five thousand classes completed.', 'five-thousand'),
+    ('7-Day Rhythm', 'You trained on seven consecutive days with attendance.', 'calendar'),
+    ('14-Day Rhythm', 'You trained on fourteen consecutive days.', 'calendar'),
+    ('60-Day Rhythm', 'You built a sixty-day attendance rhythm.', 'calendar-star'),
+    ('180-Day Rhythm', 'You built a 180-day attendance rhythm.', 'calendar-star'),
+    ('Year of Consistency', 'A full year of showing up and doing the work.', 'year'),
+    ('First Practice Log', 'You recorded your first focused practice session.', 'journal'),
+    ('10 Practice Logs', 'Ten practice sessions recorded outside class.', 'journal'),
+    ('50 Practice Logs', 'Fifty practice sessions recorded.', 'journal'),
+    ('10 Practice Hours', 'Ten hours of focused practice recorded.', 'clock'),
+    ('50 Practice Hours', 'Fifty hours of focused practice recorded.', 'clock'),
+    ('First Goal', 'You set your first personal training goal.', 'target'),
+    ('Goal Getter', 'You completed a personal training goal.', 'target'),
+    ('5 Goals Completed', 'Five training goals completed.', 'target'),
+    ('10 Goals Completed', 'Ten training goals completed.', 'target'),
+    ('Early Bird', 'You arrived ready before class time all month.', 'sunrise'),
+    ('First Stripe', 'You earned your first stripe through consistent training.', 'stripe'),
+    ('Stripe Collector', 'You earned five stripes on your journey.', 'stripe'),
+    ('New Belt Day', 'You advanced to a new belt rank.', 'belt'),
+    ('Black Belt Candidate', 'Your instructor marked you ready for black belt preparation.', 'belt'),
+    ('Tunnel Hike', 'You completed the studio tunnel hike.', 'mountain'),
+    ('Torchlight Parade', 'You represented Task Karate in the torchlight parade.', 'torch'),
+    ('1,000 Kick Challenge', 'You completed the 1,000 kick challenge.', 'kick'),
+    ('Seminar Explorer', 'You participated in a special training seminar.', 'seminar'),
+    ('Private Lesson Focus', 'You completed a focused private lesson.', 'focus'),
+    ('Helping Hand', 'You helped a fellow student learn safely.', 'hand'),
+    ('Respect in Action', 'You demonstrated respect when it mattered.', 'respect'),
+    ('Leadership Moment', 'You took a positive leadership role in class.', 'leadership'),
+    ('Buddy Builder', 'You trained consistently with a partner.', 'buddy'),
+    ('IS3 Student Level 1', 'You advanced to IS3 Student Level 1.', 'is3'),
+    ('IS3 Student Level 2', 'You advanced to IS3 Student Level 2.', 'is3'),
+    ('First Stick Flow', 'You learned your first IS3 stick-flow sequence.', 'is3'),
+    ('Safe Spacing', 'You demonstrated safe training distance in IS3.', 'is3'),
+    ('Pattern Keeper', 'You held a complete IS3 pattern with control.', 'is3');
 
 INSERT OR IGNORE INTO training_missions(title, description, category) VALUES
     ('Front Kick Snap & Return', 'Chamber, snap, and rechamber with balance. Try 3 sets of 10 on each leg.', 'Karate fundamentals'),
@@ -1109,7 +1150,7 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
     {
         await using var countCommand = connection.CreateCommand(); countCommand.CommandText = "SELECT COUNT(1) FROM attendance WHERE student_id = $student AND status = 'present'"; countCommand.Parameters.AddWithValue("$student", studentId); var totalClasses = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
         var streak = await GetAttendanceStreakAsync(connection, studentId, cancellationToken);
-        var milestones = new List<(string Name, bool Qualifies)> { ("First Class!", totalClasses >= 1), ("10 Classes Strong", totalClasses >= 10), ("100 Classes", totalClasses >= 100), ("1,000 Classes", totalClasses >= 1000), ("10,000 Classes", totalClasses >= 10000), ("30-Day Rhythm", streak >= 30), ("90-Day Rhythm", streak >= 90) };
+        var milestones = new List<(string Name, bool Qualifies)> { ("First Class!", totalClasses >= 1), ("3 Classes", totalClasses >= 3), ("5 Classes", totalClasses >= 5), ("10 Classes Strong", totalClasses >= 10), ("25 Classes", totalClasses >= 25), ("50 Classes", totalClasses >= 50), ("100 Classes", totalClasses >= 100), ("250 Classes", totalClasses >= 250), ("500 Classes", totalClasses >= 500), ("1,000 Classes", totalClasses >= 1000), ("2,500 Classes", totalClasses >= 2500), ("5,000 Classes", totalClasses >= 5000), ("10,000 Classes", totalClasses >= 10000), ("7-Day Rhythm", streak >= 7), ("14-Day Rhythm", streak >= 14), ("30-Day Rhythm", streak >= 30), ("60-Day Rhythm", streak >= 60), ("90-Day Rhythm", streak >= 90), ("180-Day Rhythm", streak >= 180) };
         var awarded = 0;
         foreach (var milestone in milestones.Where(x => x.Qualifies))
         {

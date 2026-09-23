@@ -46,6 +46,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         b.Entity<GuardianStudent>().HasOne(x => x.Student).WithMany(x => x.Guardians).HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<ProgramArea>().HasIndex(x => new { x.IsActive, x.Name }).IsUnique();
         b.Entity<ClassTemplate>().HasIndex(x => new { x.IsActive, x.DayOfWeek, x.StartTime });
+        b.Entity<ClassTemplate>().Property(x => x.ClassType).HasMaxLength(40);
+        b.Entity<ClassSession>().HasOne(x => x.AssignedStudent).WithMany().HasForeignKey(x => x.AssignedStudentId).OnDelete(DeleteBehavior.SetNull);
         b.Entity<ClassSession>().HasIndex(x => x.SessionDateUtc);
         b.Entity<ClassSession>().HasIndex(x => new { x.ClassTemplateId, x.SessionDateUtc }).IsUnique();
         b.Entity<Enrollment>().HasIndex(x => new { x.StudentId, x.ClassTemplateId }).IsUnique();

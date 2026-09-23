@@ -31,6 +31,9 @@ public static class StudentExperienceEndpoints
             if (((request.StudentId is null || request.StudentId <= 0) && string.IsNullOrWhiteSpace(request.Username)) || string.IsNullOrWhiteSpace(request.Password)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["credentials"] = ["Choose a student and enter the account password."] });
             var account = request.StudentId is > 0 ? await service.AuthenticateByStudentIdAsync(request.StudentId.Value, request.Password, ct) : await service.AuthenticateAsync(request.Username!, request.Password, ct);
             if (account is null) return Results.Problem("Invalid student credentials.", statusCode: StatusCodes.Status401Unauthorized);
+            // A roster login can follow a prior student session on the same device. Clear it first
+            // so the new identity never inherits stale disclaimer/session state.
+            await context.SignOutAsync(StudentAuth.Scheme);
             var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("student_id", account.StudentId.ToString()), new Claim(ClaimTypes.Name, account.DisplayName)], StudentAuth.Scheme));
             await context.SignInAsync(StudentAuth.Scheme, principal, new AuthenticationProperties { IsPersistent = request.RememberMe, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
             return Results.Ok(new { authenticated = true, studentId = account.StudentId, displayName = account.DisplayName, rankName = account.RankName, disclaimerRequired = true });

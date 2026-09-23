@@ -69,6 +69,8 @@ public sealed class ClassTemplate : TrackedEntity
     public required string StartTime { get; set; }
     public int DurationMinutes { get; set; }
     public string? BeltScope { get; set; }
+    public string ClassType { get; set; } = "Class";
+    public bool AppointmentOnly { get; set; }
     public required Guid ProgramAreaId { get; set; }
     public ProgramArea ProgramArea { get; set; } = null!;
     public bool IsActive { get; set; } = true;
@@ -83,6 +85,8 @@ public sealed class ClassSession : TrackedEntity
     public DateTime SessionDateUtc { get; set; }
     public string? Notes { get; set; }
     public bool IsCancelled { get; set; }
+    public Guid? AssignedStudentId { get; set; }
+    public Student? AssignedStudent { get; set; }
     public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = [];
 }
 

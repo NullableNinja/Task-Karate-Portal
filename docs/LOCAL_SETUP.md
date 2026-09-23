@@ -25,6 +25,16 @@ dotnet user-secrets set "BootstrapAdmin:Password" "Use-a-local-password-with-12-
 
 The API creates roles and the administrator on startup. Staff can sign in with the configured username or email. If no username is supplied, the email becomes the username. Remove the environment variables after the first successful bootstrap if user secrets are used. Identity enforces a strong password and locks out repeated failures.
 
+If the Admin account already exists and its local test password must be changed, set the development-only reset value for one startup, then remove it before restarting:
+
+```powershell
+$env:BootstrapAdmin__ResetPassword = "Cobra Kai Never Dies!7"
+dotnet run --project server/TaskKarate.Api
+Remove-Item Env:BootstrapAdmin__ResetPassword
+```
+
+The reset value is development-only and is validated by Identity. Do not use the shorter phrase without the final digit, and do not leave the reset variable set for routine launches.
+
 Staff sign-in includes a local-use acknowledgment because this workspace can display student, guardian, attendance, and community records. The acknowledgment is enforced by the API, not merely displayed by the browser.
 
 The staff sign-in form does not persist a “keep me signed in” choice. After credentials are submitted, the required staff-use acknowledgment appears in a confirmation dialog. The resulting cookie is a session-scoped local staff session.

@@ -25,14 +25,17 @@ public static class BootstrapService
         var configuredUsername = configuration["BootstrapAdmin:Username"] ?? Environment.GetEnvironmentVariable("TASK_KARATE_ADMIN_USERNAME");
         var email = configuration["BootstrapAdmin:Email"] ?? Environment.GetEnvironmentVariable("TASK_KARATE_ADMIN_EMAIL");
         var password = configuration["BootstrapAdmin:Password"] ?? Environment.GetEnvironmentVariable("TASK_KARATE_ADMIN_PASSWORD");
+        var resetPassword = configuration["BootstrapAdmin:ResetPassword"] ?? Environment.GetEnvironmentVariable("TASK_KARATE_ADMIN_RESET_PASSWORD");
         var username = string.IsNullOrWhiteSpace(configuredUsername) ? email?.Trim() : configuredUsername.Trim();
-        if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
+        if (!string.IsNullOrWhiteSpace(username) && (!string.IsNullOrWhiteSpace(password) || !string.IsNullOrWhiteSpace(resetPassword)))
         {
+            if (!environment.IsDevelopment() && !string.IsNullOrWhiteSpace(resetPassword)) throw new InvalidOperationException("BootstrapAdmin:ResetPassword is development-only.");
             var users = services.GetRequiredService<UserManager<AppUser>>();
             var loginEmail = string.IsNullOrWhiteSpace(email) ? $"{username}@local.taskkarate.invalid" : email.Trim().ToLowerInvariant();
             var user = await users.FindByNameAsync(username) ?? await users.FindByEmailAsync(loginEmail);
             if (user is null)
             {
+                if (string.IsNullOrWhiteSpace(password)) throw new InvalidOperationException("Bootstrap admin creation requires BootstrapAdmin:Password.");
                 user = new AppUser { UserName = username.Trim(), Email = loginEmail, EmailConfirmed = true };
                 var result = await users.CreateAsync(user, password);
                 if (!result.Succeeded) throw new InvalidOperationException($"Bootstrap admin could not be created: {string.Join("; ", result.Errors.Select(x => x.Description))}");
@@ -42,6 +45,12 @@ public static class BootstrapService
                 user.UserName = username.Trim();
                 var result = await users.UpdateAsync(user);
                 if (!result.Succeeded) throw new InvalidOperationException($"Bootstrap admin username could not be updated: {string.Join("; ", result.Errors.Select(x => x.Description))}");
+            }
+            if (!string.IsNullOrWhiteSpace(resetPassword))
+            {
+                var token = await users.GeneratePasswordResetTokenAsync(user);
+                var result = await users.ResetPasswordAsync(user, token, resetPassword);
+                if (!result.Succeeded) throw new InvalidOperationException($"Bootstrap admin password reset failed: {string.Join("; ", result.Errors.Select(x => x.Description))}");
             }
             if (!await users.IsInRoleAsync(user, "Administrator")) await users.AddToRoleAsync(user, "Administrator");
         }

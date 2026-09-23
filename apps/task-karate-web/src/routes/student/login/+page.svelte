@@ -147,8 +147,7 @@
                 <div class:selected={selectedStudent?.studentId === student.studentId} class="student-option">
                   <button class="student-option-main" type="button" aria-pressed={selectedStudent?.studentId === student.studentId} on:click={() => choose(student)}>
                     <span class="student-avatar" style={`--avatar-color: ${beltColor(student.rankName)}; --avatar-text: ${avatarTextColor(student.rankName)}`}>{initials(student.displayName)}</span>
-                    <span class="student-option-copy"><strong>{student.displayName}</strong>{#if student.is3LevelName}<small>{student.is3LevelName}</small>{/if}</span>
-                    <span class:is3-marker={!student.rankName && !!student.is3LevelName} class="belt-marker"><i class="belt-marker-swatch" style={`--belt-color: ${beltColor(student.rankName)}`}></i>{profileLabel(student)}</span>
+                    <span class="student-option-copy"><strong>{student.displayName}</strong><small class="roster-rank" style={`--rank-color:${beltColor(student.rankName)}`}>{profileLabel(student)}</small></span>
                   </button>
                   {#if selectedStudent?.studentId === student.studentId}
                     <button class="enter-dojo-option" type="button" on:click={() => openDojo(student)}>Enter Dojo <span aria-hidden="true">→</span></button>
@@ -174,7 +173,7 @@
       <span class="student-avatar pin-avatar" style={`--avatar-color: ${beltColor(selectedStudent.rankName)}; --avatar-text: ${avatarTextColor(selectedStudent.rankName)}`}>{initials(selectedStudent.displayName)}</span>
       <h2 id="pin-title">Enter Your PIN</h2>
       <p class="pin-name">{selectedStudent.displayName}</p>
-      <span class:is3-marker={!selectedStudent.rankName && !!selectedStudent.is3LevelName} class="belt-marker dialog-marker"><i class="belt-marker-swatch" style={`--belt-color: ${beltColor(selectedStudent.rankName)}`}></i>{profileLabel(selectedStudent)}</span>
+      <span class="dialog-rank" style={`--rank-color:${beltColor(selectedStudent.rankName)}`}>{profileLabel(selectedStudent)}</span>
       <form on:submit|preventDefault={submit}>
         <label for="student-pin">PIN / password</label>
         <input id="student-pin" class="pin-input" type="password" bind:value={pin} autocomplete="current-password" maxlength="128" placeholder="Enter PIN or password…" required />

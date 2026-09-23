@@ -98,13 +98,25 @@ fieldset.full legend { font-weight: 700; margin-bottom: 6px; }
 .helper-day-group { display: grid; gap: 12px; }
 .helper-day-heading { display: flex; align-items: end; justify-content: space-between; gap: 14px; }
 .helper-day-heading h3 { margin: 2px 0 0; }
+.helper-day-actions { display: flex; align-items: center; gap: 10px; }
+.helper-print-heading { display: none; }
 .helper-session-list { display: grid; gap: 14px; }
 .helper-session-card { display: grid; gap: 18px; }
+.helper-session-card.needs-helper { border-color: #9a7035; box-shadow: 0 0 0 1px #9a703533, 0 12px 24px #0003; }
+.helper-session-card.covered { border-color: #327e72; }
+.helper-session-card.cancelled { opacity: .68; }
 .helper-session-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
 .helper-session-heading h3 { margin: 4px 0 2px; }
 .helper-session-heading p { margin: 0; }
 .helper-session-time { color: #72d9fa; font-weight: 900; }
 .helper-session-action { flex: 0 0 auto; }
+.helper-coverage-banner { display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 8px 11px; border-radius: 8px; background: #102a3c; color: #d9f3f8; font-size: .82rem; }
+.helper-session-card.needs-helper .helper-coverage-banner { background: #3b2d1d; color: #ffe8ad; }
+.helper-session-card.cancelled .helper-coverage-banner { background: #2b2630; color: #d4cbd9; }
+.helper-coverage-banner > span:not(.helper-coverage-dot) { color: #a9c0ce; }
+.helper-coverage-dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: #61e1c2; box-shadow: 0 0 10px #61e1c277; }
+.helper-session-card.needs-helper .helper-coverage-dot { background: #f2be4e; box-shadow: 0 0 10px #f2be4e77; }
+.helper-session-card.cancelled .helper-coverage-dot { background: #a79aad; box-shadow: none; }
 .helper-roster-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding-top: 16px; border-top: 1px solid #29445d; }
 .helper-roster-columns h4 { margin: 0 0 10px; color: #dcecf5; }
 .helper-roster-columns h4 span { color: #72d9fa; font-size: .8rem; }
@@ -131,6 +143,29 @@ fieldset.full legend { font-weight: 700; margin-bottom: 6px; }
   .staff-list-controls input, .staff-list-search { min-width: 0; }
   .helper-summary { justify-items: start; width: 100%; box-sizing: border-box; }
   .helper-session-heading, .helper-day-heading { align-items: stretch; flex-direction: column; }
+  .helper-day-actions { align-items: stretch; flex-direction: column; }
   .helper-session-action .button { width: 100%; }
   .helper-roster-columns { grid-template-columns: 1fr; }
+}
+
+@media print {
+  body { background: #fff !important; color: #111 !important; }
+  .staff-app { min-height: auto !important; padding: 0 !important; background: #fff !important; color: #111 !important; }
+  .staff-topbar, .staff-sidebar, .toolbar, .helper-toolbar, .status, .error, .helper-session-action, .print-day-button, .helper-day-heading .pill { display: none !important; }
+  .staff-main { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  .helper-days { display: block !important; }
+  .helper-day-group { display: none !important; break-inside: avoid; }
+  .helper-day-group.print-target { display: block !important; }
+  .helper-print-heading { display: block; margin: 0 0 16px; color: #111; font-size: 16pt; font-weight: 900; letter-spacing: .04em; }
+  .helper-day-heading { display: block; margin-bottom: 14px; }
+  .helper-day-heading .eyebrow { color: #333; }
+  .helper-day-heading h3 { color: #111; font-size: 17pt; }
+  .helper-session-list { gap: 10px; }
+  .helper-session-card { border: 1px solid #888 !important; background: #fff !important; color: #111 !important; box-shadow: none !important; padding: 12px !important; break-inside: avoid; }
+  .helper-session-card h3, .helper-session-card h4, .helper-session-card p, .helper-session-card .muted, .helper-session-time { color: #111 !important; }
+  .helper-coverage-banner { border: 1px solid #999; background: #f2f2f2 !important; color: #111 !important; }
+  .helper-coverage-banner > span:not(.helper-coverage-dot) { color: #333 !important; }
+  .helper-chip { border-color: #777 !important; background: #f4f4f4 !important; color: #111 !important; }
+  .helper-chip.student-helper { background: #fff4d6 !important; }
+  .helper-roster-columns { border-top-color: #999; }
 }

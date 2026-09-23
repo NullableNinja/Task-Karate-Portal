@@ -27,6 +27,7 @@ public static class StudentExperienceEndpoints
         publicApi.MapPost("/schedule/{sessionId:int}/check-in", async (int sessionId, PublicCheckInRequest request, StudentExperienceService service, CancellationToken ct) =>
         {
             if (!request.Confirmed) return Results.BadRequest(new { title = "Confirmation required", detail = "Confirm that the selected student is present before recording attendance." });
+            if (string.IsNullOrWhiteSpace(request.Pin) || !await service.VerifyStudentPinAsync(request.StudentId, request.Pin, ct)) return Results.BadRequest(new { title = "Check-in PIN required", detail = "Enter the check-in PIN assigned to this student before recording attendance." });
             var result = await service.CheckInAsync(request.StudentId, sessionId, request.Helper, ct);
             if (result.Duplicate) return Results.Conflict(new { title = "Already checked in", detail = "This student is already checked in for this class." });
             if (!result.Success) return Results.BadRequest(new { title = "Check-in not available", detail = result.Error ?? "Only an active class happening today can accept a public check-in." });
@@ -44,23 +45,32 @@ public static class StudentExperienceEndpoints
             await context.SignOutAsync(StudentAuth.Scheme);
             var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("student_id", account.StudentId.ToString()), new Claim(ClaimTypes.Name, account.DisplayName)], StudentAuth.Scheme));
             await context.SignInAsync(StudentAuth.Scheme, principal, new AuthenticationProperties { IsPersistent = request.RememberMe, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
-            return Results.Ok(new { authenticated = true, studentId = account.StudentId, displayName = account.DisplayName, rankName = account.RankName, disclaimerRequired = true });
+            return Results.Ok(new { authenticated = true, studentId = account.StudentId, displayName = account.DisplayName, rankName = account.RankName, disclaimerRequired = true, passwordChangeRequired = account.MustChangePassword });
         });
         auth.MapGet("/me", async (StudentExperienceService service, HttpContext context, CancellationToken ct) =>
         {
             var authResult = await context.AuthenticateAsync(StudentAuth.Scheme);
             if (!authResult.Succeeded || !int.TryParse(authResult.Principal?.FindFirstValue("student_id"), out var id)) return Results.Unauthorized();
-            return Results.Ok(new { authenticated = true, studentId = id, displayName = authResult.Principal?.FindFirstValue(ClaimTypes.Name), disclaimerRequired = authResult.Principal?.HasClaim(StudentAuth.DisclaimerClaim, "v1") != true });
+            var state = await service.GetStudentAccountStateAsync(id, ct);
+            return state is null ? Results.Unauthorized() : Results.Ok(new { authenticated = true, studentId = id, displayName = authResult.Principal?.FindFirstValue(ClaimTypes.Name), disclaimerRequired = authResult.Principal?.HasClaim(StudentAuth.DisclaimerClaim, "v1") != true, passwordChangeRequired = state.MustChangePassword });
         });
         auth.MapPost("/logout", async (HttpContext context) => { await context.SignOutAsync(StudentAuth.Scheme); return Results.NoContent(); });
         auth.MapPost("/password", async (StudentPasswordChangeRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
         {
-            var gate = await RequireAcknowledgedStudent(service, context, ct); if (gate.Id is null) return gate.Result!;
+            var id = await StudentAuth.GetStudentIdAsync(context); if (id is null) return Results.Unauthorized();
             var errors = StudentPasswordPolicy.Validate(request.NewPassword, request.ConfirmPassword);
             if (errors.Count > 0) return Results.ValidationProblem(errors.ToDictionary(item => item.Key, item => item.Value));
-            if (!await service.ChangeStudentPasswordAsync(gate.Id.Value, request.CurrentPassword, request.NewPassword, ct)) return Results.BadRequest(new { title = "Current password not accepted", detail = "Enter the current password for this student account and try again." });
-            await audit.RecordAsync(context, "ChangePassword", "StudentAccount", Guid.Empty, new { legacyStudentId = gate.Id.Value, via = "student" });
+            if (!await service.ChangeStudentPasswordAsync(id.Value, request.CurrentPassword, request.NewPassword, ct)) return Results.BadRequest(new { title = "Current password not accepted", detail = "Enter the current password for this student account and try again." });
+            await audit.RecordAsync(context, "ChangePassword", "StudentAccount", Guid.Empty, new { legacyStudentId = id.Value, via = "student" });
             return Results.NoContent();
+        });
+        auth.MapPost("/pin", async (StudentPinChangeRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var gate = await RequireAcknowledgedStudent(service, context, ct); if (gate.Id is null) return gate.Result!;
+            var errors = StudentPinPolicy.Validate(request.NewPin, request.ConfirmPin);
+            if (errors.Count > 0) return Results.ValidationProblem(errors.ToDictionary(item => item.Key, item => item.Value));
+            if (!await service.ChangeStudentPinAsync(gate.Id.Value, request.CurrentPin, request.NewPin, ct)) return Results.BadRequest(new { title = "Current PIN not accepted", detail = "Enter the current check-in PIN for this student account and try again." });
+            await audit.RecordAsync(context, "ChangePin", "StudentAccount", Guid.Empty, new { legacyStudentId = gate.Id.Value, via = "student" }); return Results.NoContent();
         });
 
         var student = app.MapGroup("/api/student");
@@ -152,6 +162,9 @@ public static class StudentExperienceEndpoints
     {
         var id = await StudentAuth.GetStudentIdAsync(context); if (id is null) return new(null, Results.Unauthorized());
         var authResult = await context.AuthenticateAsync(StudentAuth.Scheme);
+        var state = await service.GetStudentAccountStateAsync(id.Value, ct);
+        if (state is null) return new(null, Results.Unauthorized());
+        if (state.MustChangePassword) return new(null, Results.Json(new { title = "Password change required", passwordChangeRequired = true }, statusCode: StatusCodes.Status428PreconditionRequired));
         if (authResult.Principal?.HasClaim(StudentAuth.DisclaimerClaim, "v1") != true) return new(null, Results.Json(new { title = "Profile acknowledgment required", disclaimerRequired = true }, statusCode: StatusCodes.Status428PreconditionRequired));
         return new(id, null);
     }
@@ -161,7 +174,7 @@ public sealed record StudentGate(int? Id, IResult? Result);
 
 public sealed record StudentLoginRequest(string? Username, string Password, bool RememberMe = false, int? StudentId = null);
 public sealed record DisclaimerRequest(bool Accepted);
-public sealed record PublicCheckInRequest(int StudentId, bool Confirmed, bool Helper = false);
+public sealed record PublicCheckInRequest(int StudentId, string? Pin, bool Confirmed, bool Helper = false);
 public sealed record StudentCheckInRequest(bool Helper = false);
 public sealed record FriendResponseRequest(bool Accept);
 public sealed record MessageRequest(int RecipientId, string Message);
@@ -172,3 +185,4 @@ public sealed record PracticeLogRequest(string Skill, int Minutes, string? Refle
 public sealed record GoalRequest(string Title, DateTime? TargetDate);
 public sealed record StudentProfileUpdateRequest(string? DisplayName, string? Bio, string? FavoriteTechnique, string? Email, string? Phone, string? UniformSize, string? BeltSize);
 public sealed record StudentPasswordChangeRequest(string CurrentPassword, string NewPassword, string ConfirmPassword);
+public sealed record StudentPinChangeRequest(string CurrentPin, string NewPin, string ConfirmPin);

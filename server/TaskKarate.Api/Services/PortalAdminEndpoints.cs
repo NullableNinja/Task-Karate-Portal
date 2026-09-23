@@ -28,14 +28,21 @@ public static class PortalAdminEndpoints
             await audit.RecordAsync(context, request.Status == "deactivated" ? "Deactivate" : "SetStatus", "PortalStudent", Guid.Empty, new { legacyId = studentId, request.Status });
             return Results.NoContent();
         });
-        admin.MapPost("/students/{studentId:int}/password", async (int studentId, PortalStudentPasswordRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        admin.MapPost("/students/{studentId:int}/password/reset", async (int studentId, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
         {
-            var errors = StudentPasswordPolicy.Validate(request.Password, request.ConfirmPassword);
-            if (errors.Count > 0) return Results.ValidationProblem(errors.ToDictionary(item => item.Key, item => item.Value));
-            var result = await service.ResetStudentPasswordAsync(studentId, request.Password, ct);
+            var result = await service.ResetStudentPasswordAsync(studentId, ct);
             if (result is null) return Results.NotFound(new { title = "Student account unavailable", detail = "The student must be active before a portal password can be assigned." });
             await audit.RecordAsync(context, "ResetPassword", "StudentAccount", Guid.Empty, new { legacyStudentId = studentId, username = result.Username, via = "administrator" });
-            return Results.Ok(new { passwordChanged = true, username = result.Username });
+            return Results.Ok(new { passwordReset = true, mustChangePassword = true, username = result.Username });
+        }).RequireAuthorization(policy => policy.RequireRole("Administrator"));
+        admin.MapPost("/students/{studentId:int}/pin", async (int studentId, PortalStudentPinRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var errors = StudentPinPolicy.Validate(request.Pin, request.ConfirmPin);
+            if (errors.Count > 0) return Results.ValidationProblem(errors.ToDictionary(item => item.Key, item => item.Value));
+            var result = await service.ResetStudentPinAsync(studentId, request.Pin, ct);
+            if (result is null) return Results.NotFound(new { title = "Student account unavailable", detail = "The student must be active before a check-in PIN can be assigned." });
+            await audit.RecordAsync(context, "ResetPin", "StudentAccount", Guid.Empty, new { legacyStudentId = studentId, username = result.Username, via = "administrator" });
+            return Results.Ok(new { pinChanged = true, username = result.Username });
         }).RequireAuthorization(policy => policy.RequireRole("Administrator"));
         admin.MapGet("/attendance/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(true, ct)));
         admin.MapGet("/attendance/sessions", async (DateTime? date, StudentExperienceService service, CancellationToken ct) =>
@@ -123,6 +130,6 @@ public sealed record PortalGoldStarEventRequest(string Name, string Description,
 public sealed record PortalActiveRequest(bool Active);
 public sealed record PortalStudentStatusRequest(string Status);
 public sealed record PortalAwardRequest(int StudentId, string? Note);
-public sealed record PortalStudentPasswordRequest(string Password, string ConfirmPassword);
+public sealed record PortalStudentPinRequest(string Pin, string ConfirmPin);
 public sealed record PortalAttendanceRequest(int StudentId, int SessionId, bool Helper = false);
 public sealed record StaffSocialPostRequest(string Text);

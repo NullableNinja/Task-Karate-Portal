@@ -19,7 +19,8 @@ public sealed class StarterStudentAccount
     public int StudentId { get; init; }
 }
 
-public sealed record StudentAccount(int StudentId, string Username, string DisplayName, string? RankName);
+public sealed record StudentAccount(int StudentId, string Username, string DisplayName, string? RankName, bool MustChangePassword);
+public sealed record StudentAccountState(bool MustChangePassword, bool HasPin);
 public sealed record StudentPasswordResetResult(string Username);
 public sealed record StudentSummary(int StudentId, string DisplayName, string? RankName, string? ProfileImagePath);
 public sealed record StudentDirectoryItem(int StudentId, string DisplayName, string? RankName, string? Is3LevelName, string? ProfileImagePath);
@@ -118,7 +119,7 @@ CREATE TABLE IF NOT EXISTS training_missions (mission_id INTEGER PRIMARY KEY AUT
 CREATE TABLE IF NOT EXISTS student_mission_progress (student_id INTEGER NOT NULL, mission_id INTEGER NOT NULL, completed INTEGER NOT NULL DEFAULT 0, completed_at TEXT, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(student_id, mission_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(mission_id) REFERENCES training_missions(mission_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_daily_missions (daily_mission_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, mission_date TEXT NOT NULL, mission_key TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL, completed INTEGER NOT NULL DEFAULT 0, completed_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(student_id, mission_date, mission_key), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS posts (post_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, user_id INTEGER, post_text TEXT NOT NULL, post_type TEXT NOT NULL DEFAULT 'student', moderation_status TEXT NOT NULL DEFAULT 'approved', visible INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
-CREATE TABLE IF NOT EXISTS student_accounts (student_id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE COLLATE NOCASE, password_hash TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS student_accounts (student_id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE COLLATE NOCASE, password_hash TEXT NOT NULL, pin_hash TEXT, must_change_password INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_disclaimer_acceptances (acceptance_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, disclaimer_version TEXT NOT NULL, accepted_at TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_friendships (student_id INTEGER NOT NULL, friend_id INTEGER NOT NULL, status TEXT NOT NULL, requested_by INTEGER NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(student_id, friend_id), CHECK(student_id <> friend_id), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(friend_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_messages (message_id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER NOT NULL, recipient_id INTEGER NOT NULL, message_text TEXT NOT NULL, created_at TEXT NOT NULL, read_at TEXT, FOREIGN KEY(sender_id) REFERENCES students(student_id) ON DELETE CASCADE, FOREIGN KEY(recipient_id) REFERENCES students(student_id) ON DELETE CASCADE);
@@ -142,6 +143,7 @@ CREATE INDEX IF NOT EXISTS ix_post_bookmarks_student ON post_bookmarks(student_i
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureLegacyStudentColumnsAsync(connection, cancellationToken);
+        await EnsureStudentAccountColumnsAsync(connection, cancellationToken);
         await EnsureLegacyReactionSchemaAsync(connection, cancellationToken);
         await ImportDevelopmentDataAsync(connection, cancellationToken);
         await NormalizeLegacyDataAsync(connection, cancellationToken);
@@ -539,7 +541,7 @@ WHERE post.post_text = 'Belt Testing Focus This Week — Open Training to review
         var sourceId = item.TryGetProperty("id", out var idProperty) ? idProperty.GetString() : null;
         var username = string.IsNullOrWhiteSpace(sourceId) ? $"demo.student.{studentId}" : $"demo.{sourceId}";
         var hash = _passwordHasher.HashPassword(new StarterStudentAccount { StudentId = studentId }, demoPassword);
-        await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT OR IGNORE INTO student_accounts(student_id, username, password_hash) VALUES ($id, $username, $hash)"; insert.Parameters.AddWithValue("$id", studentId); insert.Parameters.AddWithValue("$username", username); insert.Parameters.AddWithValue("$hash", hash); await insert.ExecuteNonQueryAsync(cancellationToken);
+        await using var insert = connection.CreateCommand(); insert.CommandText = "INSERT OR IGNORE INTO student_accounts(student_id, username, password_hash, must_change_password) VALUES ($id, $username, $hash, 0)"; insert.Parameters.AddWithValue("$id", studentId); insert.Parameters.AddWithValue("$username", username); insert.Parameters.AddWithValue("$hash", hash); await insert.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private static async Task AddRankHistoryAsync(SqliteConnection connection, int studentId, string? rankName, CancellationToken cancellationToken)
@@ -594,7 +596,7 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         if (Convert.ToInt32(await exists.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 1) return;
         var hash = _passwordHasher.HashPassword(new StarterStudentAccount { StudentId = studentId }, password);
         await using var insert = connection.CreateCommand();
-        insert.CommandText = "INSERT INTO student_accounts(student_id, username, password_hash) VALUES ($id, $username, $hash)";
+        insert.CommandText = "INSERT INTO student_accounts(student_id, username, password_hash, must_change_password) VALUES ($id, $username, $hash, 0)";
         insert.Parameters.AddWithValue("$id", studentId); insert.Parameters.AddWithValue("$username", username.Trim()); insert.Parameters.AddWithValue("$hash", hash);
         await insert.ExecuteNonQueryAsync(cancellationToken);
         _logger.LogInformation("Created local student account for student id {StudentId}; credentials were read from environment only.", studentId);
@@ -612,26 +614,26 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
     {
         await using var connection = await OpenAsync(cancellationToken);
         await using var command = connection.CreateCommand();
-        command.CommandText = @"SELECT a.student_id, a.username, a.password_hash, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), (SELECT r.rank_name FROM student_rank_history h JOIN ranks r ON r.rank_id = h.rank_id WHERE h.student_id = s.student_id ORDER BY h.awarded_date DESC, h.student_rank_id DESC LIMIT 1) FROM student_accounts a JOIN students s ON s.student_id = a.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id WHERE a.username = $username COLLATE NOCASE AND a.active = 1 AND s.active = 1";
+        command.CommandText = @"SELECT a.student_id, a.username, a.password_hash, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), (SELECT r.rank_name FROM student_rank_history h JOIN ranks r ON r.rank_id = h.rank_id WHERE h.student_id = s.student_id ORDER BY h.awarded_date DESC, h.student_rank_id DESC LIMIT 1), a.must_change_password FROM student_accounts a JOIN students s ON s.student_id = a.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id WHERE a.username = $username COLLATE NOCASE AND a.active = 1 AND s.active = 1";
         command.Parameters.AddWithValue("$username", username.Trim());
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken)) return null;
         var account = new StarterStudentAccount { StudentId = reader.GetInt32(0) };
         var result = _passwordHasher.VerifyHashedPassword(account, reader.GetString(2), password);
-        return result == PasswordVerificationResult.Failed ? null : new StudentAccount(reader.GetInt32(0), reader.GetString(1), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4));
+        return result == PasswordVerificationResult.Failed ? null : new StudentAccount(reader.GetInt32(0), reader.GetString(1), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4), reader.GetInt32(5) != 0);
     }
 
     public async Task<StudentAccount?> AuthenticateByStudentIdAsync(int studentId, string password, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken);
         await using var command = connection.CreateCommand();
-        command.CommandText = @"SELECT a.student_id, a.username, a.password_hash, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), (SELECT r.rank_name FROM student_rank_history h JOIN ranks r ON r.rank_id = h.rank_id WHERE h.student_id = s.student_id ORDER BY h.awarded_date DESC, h.student_rank_id DESC LIMIT 1) FROM student_accounts a JOIN students s ON s.student_id = a.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id WHERE a.student_id = $studentId AND a.active = 1 AND s.active = 1 AND COALESCE(p.profile_visible, 1) = 1";
+        command.CommandText = @"SELECT a.student_id, a.username, a.password_hash, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), (SELECT r.rank_name FROM student_rank_history h JOIN ranks r ON r.rank_id = h.rank_id WHERE h.student_id = s.student_id ORDER BY h.awarded_date DESC, h.student_rank_id DESC LIMIT 1), a.must_change_password FROM student_accounts a JOIN students s ON s.student_id = a.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id WHERE a.student_id = $studentId AND a.active = 1 AND s.active = 1 AND COALESCE(p.profile_visible, 1) = 1";
         command.Parameters.AddWithValue("$studentId", studentId);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken)) return null;
         var account = new StarterStudentAccount { StudentId = reader.GetInt32(0) };
         var result = _passwordHasher.VerifyHashedPassword(account, reader.GetString(2), password);
-        return result == PasswordVerificationResult.Failed ? null : new StudentAccount(reader.GetInt32(0), reader.GetString(1), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4));
+        return result == PasswordVerificationResult.Failed ? null : new StudentAccount(reader.GetInt32(0), reader.GetString(1), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4), reader.GetInt32(5) != 0);
     }
 
     public async Task<bool> ChangeStudentPasswordAsync(int studentId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
@@ -649,14 +651,52 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
 
         var newHash = _passwordHasher.HashPassword(account, newPassword);
         await using var update = connection.CreateCommand();
-        update.CommandText = "UPDATE student_accounts SET password_hash = $hash, updated_at = $now WHERE student_id = $id AND active = 1";
+        update.CommandText = "UPDATE student_accounts SET password_hash = $hash, must_change_password = 0, updated_at = $now WHERE student_id = $id AND active = 1";
         update.Parameters.AddWithValue("$hash", newHash);
         update.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O"));
         update.Parameters.AddWithValue("$id", studentId);
         return await update.ExecuteNonQueryAsync(cancellationToken) == 1;
     }
 
-    public async Task<StudentPasswordResetResult?> ResetStudentPasswordAsync(int studentId, string newPassword, CancellationToken cancellationToken = default)
+    public async Task<bool> ChangeStudentPinAsync(int studentId, string currentPin, string newPin, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT pin_hash FROM student_accounts WHERE student_id = $id AND active = 1";
+        command.Parameters.AddWithValue("$id", studentId);
+        var storedHash = await command.ExecuteScalarAsync(cancellationToken) as string;
+        if (string.IsNullOrWhiteSpace(storedHash)) return false;
+        var account = new StarterStudentAccount { StudentId = studentId };
+        if (_passwordHasher.VerifyHashedPassword(account, storedHash, currentPin) == PasswordVerificationResult.Failed) return false;
+        var pinHash = _passwordHasher.HashPassword(account, newPin);
+        await using var update = connection.CreateCommand();
+        update.CommandText = "UPDATE student_accounts SET pin_hash = $hash, updated_at = $now WHERE student_id = $id AND active = 1";
+        update.Parameters.AddWithValue("$hash", pinHash); update.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); update.Parameters.AddWithValue("$id", studentId);
+        return await update.ExecuteNonQueryAsync(cancellationToken) == 1;
+    }
+
+    public async Task<bool> VerifyStudentPinAsync(int studentId, string pin, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT a.pin_hash FROM student_accounts a JOIN students s ON s.student_id = a.student_id WHERE a.student_id = $id AND a.active = 1 AND s.active = 1";
+        command.Parameters.AddWithValue("$id", studentId);
+        var storedHash = await command.ExecuteScalarAsync(cancellationToken) as string;
+        if (string.IsNullOrWhiteSpace(storedHash)) return false;
+        return _passwordHasher.VerifyHashedPassword(new StarterStudentAccount { StudentId = studentId }, storedHash, pin) != PasswordVerificationResult.Failed;
+    }
+
+    public async Task<StudentAccountState?> GetStudentAccountStateAsync(int studentId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT a.must_change_password, a.pin_hash IS NOT NULL FROM student_accounts a JOIN students s ON s.student_id = a.student_id WHERE a.student_id = $id AND a.active = 1 AND s.active = 1";
+        command.Parameters.AddWithValue("$id", studentId);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        return await reader.ReadAsync(cancellationToken) ? new StudentAccountState(reader.GetInt32(0) != 0, reader.GetBoolean(1)) : null;
+    }
+
+    public async Task<StudentPasswordResetResult?> ResetStudentPasswordAsync(int studentId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken);
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
@@ -674,12 +714,12 @@ WHERE s.student_id = $id AND s.active = 1";
         await reader.DisposeAsync();
 
         var account = new StarterStudentAccount { StudentId = studentId };
-        var hash = _passwordHasher.HashPassword(account, newPassword);
+        var hash = _passwordHasher.HashPassword(account, StudentPasswordPolicy.TemporaryPassword);
         await using var save = connection.CreateCommand();
         save.Transaction = (SqliteTransaction)transaction;
-        save.CommandText = @"INSERT INTO student_accounts(student_id, username, password_hash, active, updated_at)
-VALUES ($id, $username, $hash, 1, $now)
-ON CONFLICT(student_id) DO UPDATE SET password_hash = excluded.password_hash, active = 1, updated_at = excluded.updated_at";
+        save.CommandText = @"INSERT INTO student_accounts(student_id, username, password_hash, must_change_password, active, updated_at)
+VALUES ($id, $username, $hash, 1, 1, $now)
+ON CONFLICT(student_id) DO UPDATE SET password_hash = excluded.password_hash, must_change_password = 1, active = 1, updated_at = excluded.updated_at";
         save.Parameters.AddWithValue("$id", studentId);
         save.Parameters.AddWithValue("$username", username);
         save.Parameters.AddWithValue("$hash", hash);
@@ -687,6 +727,31 @@ ON CONFLICT(student_id) DO UPDATE SET password_hash = excluded.password_hash, ac
         await save.ExecuteNonQueryAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new StudentPasswordResetResult(username);
+    }
+
+    public async Task<StudentPasswordResetResult?> ResetStudentPinAsync(int studentId, string pin, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using var lookup = connection.CreateCommand();
+        lookup.Transaction = (SqliteTransaction)transaction;
+        lookup.CommandText = @"SELECT s.first_name, s.last_name, a.username, a.password_hash
+FROM students s LEFT JOIN student_accounts a ON a.student_id = s.student_id
+WHERE s.student_id = $id AND s.active = 1";
+        lookup.Parameters.AddWithValue("$id", studentId);
+        await using var reader = await lookup.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken)) return null;
+        var firstName = reader.GetString(0); var lastName = reader.GetString(1);
+        var username = reader.IsDBNull(2) ? BuildStudentUsername(firstName, lastName, studentId) : reader.GetString(2);
+        var passwordHash = reader.IsDBNull(3) ? _passwordHasher.HashPassword(new StarterStudentAccount { StudentId = studentId }, StudentPasswordPolicy.TemporaryPassword) : reader.GetString(3);
+        await reader.DisposeAsync();
+        var pinHash = _passwordHasher.HashPassword(new StarterStudentAccount { StudentId = studentId }, pin);
+        await using var save = connection.CreateCommand(); save.Transaction = (SqliteTransaction)transaction;
+        save.CommandText = @"INSERT INTO student_accounts(student_id, username, password_hash, pin_hash, must_change_password, active, updated_at)
+VALUES ($id, $username, $passwordHash, $pinHash, 1, 1, $now)
+ON CONFLICT(student_id) DO UPDATE SET pin_hash = excluded.pin_hash, active = 1, updated_at = excluded.updated_at";
+        save.Parameters.AddWithValue("$id", studentId); save.Parameters.AddWithValue("$username", username); save.Parameters.AddWithValue("$passwordHash", passwordHash); save.Parameters.AddWithValue("$pinHash", pinHash); save.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O"));
+        await save.ExecuteNonQueryAsync(cancellationToken); await transaction.CommitAsync(cancellationToken); return new StudentPasswordResetResult(username);
     }
 
     private static string BuildStudentUsername(string firstName, string lastName, int studentId)
@@ -960,6 +1025,18 @@ WHERE s.session_id = $session AND date(s.session_date) = date('now', 'localtime'
         {
             await using var linkAlter = connection.CreateCommand(); linkAlter.CommandText = "ALTER TABLE student_guardians ADD COLUMN is_primary INTEGER NOT NULL DEFAULT 0"; await linkAlter.ExecuteNonQueryAsync(cancellationToken);
             await using var linkCopy = connection.CreateCommand(); linkCopy.CommandText = "UPDATE student_guardians SET is_primary = is_primary_contact WHERE is_primary_contact IS NOT NULL"; await linkCopy.ExecuteNonQueryAsync(cancellationToken);
+        }
+    }
+
+    private static async Task EnsureStudentAccountColumnsAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        foreach (var column in new[] { (Name: "pin_hash", Definition: "TEXT"), (Name: "must_change_password", Definition: "INTEGER NOT NULL DEFAULT 0") })
+        {
+            await using var check = connection.CreateCommand(); check.CommandText = "SELECT COUNT(1) FROM pragma_table_info('student_accounts') WHERE name = $name"; check.Parameters.AddWithValue("$name", column.Name);
+            if (Convert.ToInt32(await check.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0)
+            {
+                await using var alter = connection.CreateCommand(); alter.CommandText = $"ALTER TABLE student_accounts ADD COLUMN {column.Name} {column.Definition}"; await alter.ExecuteNonQueryAsync(cancellationToken);
+            }
         }
     }
 

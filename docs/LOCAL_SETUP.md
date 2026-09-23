@@ -80,19 +80,36 @@ $env:TASK_KARATE_STUDENT_USERNAME = "student.demo"
 $env:TASK_KARATE_STUDENT_PASSWORD = "Use-a-long-local-password-with-12-chars!"
 ```
 
-The bootstrap account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub. The student sign-in lists active, provisioned student accounts alphabetically; selecting a profile opens the server-verified PIN/password prompt, followed by the profile acknowledgment when required.
+The bootstrap account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub. The student sign-in lists active, provisioned student accounts alphabetically; selecting a profile opens the server-verified Hub-password prompt, followed by a mandatory password-change screen for first use or after a staff reset, then the profile acknowledgment when required.
 
 Do not use a short test phrase such as `8675309` or `Cobra Kai Never Dies!` as the administrator password. The configured Identity policy requires a long password with upper/lowercase characters, a number, and a non-alphanumeric character. For a temporary local test credential, use an environment-only value such as `Cobra Kai Never Dies!7` and remove it after bootstrapping; never commit it or use it for real student records.
 
 `/schedule` is the supervised front-desk schedule. It prioritizes today's in-progress and upcoming classes, keeps future dates view-only, and uses the imported schedule database. A same-origin check-in requires a searched student selection and an explicit confirmation; it does not require the student to enter a password at the desk. Keep this page on the local dojo computer or a deliberately supervised LAN only. Do not expose it to the public internet.
 
-## Student PINs and roster status
+## Student Hub passwords and check-in PINs
 
-An authenticated student can open `Student Hub > Profile > Account PIN` and change their own credential. Student credentials are intentionally 4–6 digits for the local youth-school context; staff and administrator Identity accounts retain the stronger password policy. An Administrator can select a student in `Staff > Students`, choose `Edit profile`, and use `Reset student PIN`; the old PIN is never displayed or recoverable, and the reset is recorded in the audit log.
+The public-facing Student Hub uses two separate credentials:
+
+- The Hub password is used for internet sign-in. It follows the strong student-password policy (at least 12 characters with uppercase, lowercase, and a number).
+- The schedule check-in PIN is a separate 4–6 digit code used only at the supervised `/schedule` check-in desk. It never replaces the Hub password.
+
+For local development, the staff reset action sets a student’s Hub password to the exact temporary value `Black Belt` and marks the account as requiring a password change. The student is sent directly to the change-password screen after signing in. The same forced-change state is used when a new student account is provisioned. Because this shared temporary value is intentionally easy to communicate, it must be treated as a development/testing workflow and replaced with a unique one-time reset mechanism before exposing the portal to the public internet.
+
+An authenticated student can open `Student Hub > Profile` to change their Hub password and their own check-in PIN. An Administrator can select a student in `Staff > Students`, choose `Edit profile`, reset the Hub password, or assign a new check-in PIN. Existing secrets are never displayed or recoverable, and changes are recorded in the audit log. The public schedule check-in requires a student search, the separate PIN, and an explicit confirmation; it does not ask for the Hub password at the front desk.
 
 The staff student roster is filtered by status and paged at 25 records per page so it remains usable for a 100–250 student school. Active students are eligible for enrollment and attendance. Paused students remain in the student directory and retain their history, but are excluded from attendance pickers and class enrollment choices. Deactivated records remain available under the Deactivated filter for historical administration.
 
 In `Staff > Classes`, the recurring enrollment roster includes an explicit `Remove student from class` action. Removing a recurring enrollment does not erase attendance history. The same page is also where staff can create seminars and appointment-only private-lesson sessions.
+
+## Internet hosting architecture
+
+The website and the portal database should not be treated as the same kind of deployment:
+
+- `Task-Karate-Web` can remain a static site hosted on GitHub Pages or another static host.
+- `Task-Karate-Portal` needs the ASP.NET Core API running on a server, plus a persistent database and HTTPS. A browser cannot safely open a SQLite file directly, and GitHub Pages cannot run the API.
+- SQLite is appropriate for a single local dojo computer or a carefully managed single-server deployment with backups. For an internet-facing multi-user portal, move the production database to PostgreSQL or MySQL/MariaDB and keep the API and database on a private network where possible.
+
+Do not expose the SQLite file, the staff check-in route, or database credentials as public web files. Production deployment also requires HTTPS, secure cookie settings, restricted CORS, secret management, backups, account lockout/rate limiting, and a unique reset workflow instead of the shared `Black Belt` temporary password.
 
 ## Backup and restore
 

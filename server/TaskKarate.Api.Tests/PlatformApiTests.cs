@@ -89,17 +89,25 @@ public sealed class PlatformFactory : WebApplicationFactory<Program>
 public sealed class StudentPasswordPolicyTests
 {
     [Fact]
-    public void Rejects_non_numeric_or_mismatched_student_pins()
+    public void Rejects_short_or_weak_student_passwords_and_mismatched_confirmation()
     {
         var errors = StudentPasswordPolicy.Validate("weak", "different");
         Assert.True(errors.ContainsKey("password"));
-        Assert.Contains("Student PINs must be 4 to 6 digits.", errors["password"]);
+        Assert.Contains("Use at least 12 characters.", errors["password"]);
+        Assert.Contains("Include at least one uppercase letter.", errors["password"]);
+        Assert.Contains("Include at least one number.", errors["password"]);
         Assert.Contains("Password confirmation does not match.", errors["password"]);
     }
 
     [Fact]
     public void Accepts_a_strong_matching_password()
     {
-        Assert.Empty(StudentPasswordPolicy.Validate("4826", "4826"));
+        Assert.Empty(StudentPasswordPolicy.Validate("Better-password-123", "Better-password-123"));
+    }
+
+    [Fact]
+    public void Accepts_a_four_digit_check_in_pin()
+    {
+        Assert.Empty(StudentPinPolicy.Validate("4826", "4826"));
     }
 }

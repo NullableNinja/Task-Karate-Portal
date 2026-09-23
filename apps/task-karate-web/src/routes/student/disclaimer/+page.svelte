@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'; import { goto } from '$app/navigation'; import { api } from '$lib/api'; import { apiError, type StudentSession } from '$lib/student-session';
   let session: StudentSession | null = null; let accepted = false; let error = ''; let loading = true; let saving = false;
-  onMount(async () => { try { session = await api<StudentSession>('/api/student/auth/me'); if (!session.disclaimerRequired) await goto('/student'); } catch { await goto('/student/login'); } finally { loading = false; } });
+  onMount(async () => { try { session = await api<StudentSession>('/api/student/auth/me'); if (session.passwordChangeRequired) await goto('/student/password'); else if (!session.disclaimerRequired) await goto('/student'); } catch { await goto('/student/login'); } finally { loading = false; } });
   async function submit() { if (!accepted) return; saving = true; error = ''; try { await api('/api/student/disclaimer', { method: 'POST', body: JSON.stringify({ accepted: true }) }); await goto('/student'); } catch (e) { error = apiError(e); } finally { saving = false; } }
 </script>
 <svelte:head><title>Task Karate | Profile acknowledgment</title></svelte:head>

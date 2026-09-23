@@ -29,13 +29,34 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder b)
     {
         base.OnModelCreating(b);
-        b.Entity<AppUser>().ToTable("AspNetUsers");
-        b.Entity<Microsoft.AspNetCore.Identity.IdentityRole<Guid>>().ToTable("AspNetRoles");
-        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>().ToTable("AspNetUserRoles");
-        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserClaim<Guid>>().ToTable("AspNetUserClaims");
-        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserLogin<Guid>>().ToTable("AspNetUserLogins");
-        b.Entity<Microsoft.AspNetCore.Identity.IdentityRoleClaim<Guid>>().ToTable("AspNetRoleClaims");
-        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<Guid>>().ToTable("AspNetUserTokens");
+        // The portal service still reads the imported legacy schema directly. Keep
+        // the EF platform tables namespaced so both schemas can share one file
+        // during the production migration without table-name collisions.
+        b.Entity<AppUser>().ToTable("platform_AspNetUsers");
+        b.Entity<Microsoft.AspNetCore.Identity.IdentityRole<Guid>>().ToTable("platform_AspNetRoles");
+        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>().ToTable("platform_AspNetUserRoles");
+        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserClaim<Guid>>().ToTable("platform_AspNetUserClaims");
+        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserLogin<Guid>>().ToTable("platform_AspNetUserLogins");
+        b.Entity<Microsoft.AspNetCore.Identity.IdentityRoleClaim<Guid>>().ToTable("platform_AspNetRoleClaims");
+        b.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<Guid>>().ToTable("platform_AspNetUserTokens");
+        b.Entity<Student>().ToTable("platform_Students");
+        b.Entity<Guardian>().ToTable("platform_Guardians");
+        b.Entity<GuardianStudent>().ToTable("platform_GuardianStudents");
+        b.Entity<ProgramArea>().ToTable("platform_Programs");
+        b.Entity<ClassTemplate>().ToTable("platform_ClassTemplates");
+        b.Entity<ClassSession>().ToTable("platform_ClassSessions");
+        b.Entity<Enrollment>().ToTable("platform_Enrollments");
+        b.Entity<AttendanceRecord>().ToTable("platform_AttendanceRecords");
+        b.Entity<BeltRank>().ToTable("platform_BeltRanks");
+        b.Entity<StudentRankHistory>().ToTable("platform_StudentRankHistory");
+        b.Entity<RankRequirement>().ToTable("platform_RankRequirements");
+        b.Entity<StudentRequirementProgress>().ToTable("platform_StudentRequirementProgress");
+        b.Entity<Announcement>().ToTable("platform_Announcements");
+        b.Entity<NewsPost>().ToTable("platform_NewsPosts");
+        b.Entity<MediaAsset>().ToTable("platform_MediaAssets");
+        b.Entity<ConsentDocument>().ToTable("platform_ConsentDocuments");
+        b.Entity<ConsentAcceptance>().ToTable("platform_ConsentAcceptances");
+        b.Entity<AuditEvent>().ToTable("platform_AuditEvents");
 
         b.Entity<Student>().HasIndex(x => new { x.IsActive, x.LastName, x.FirstName });
         b.Entity<Student>().HasIndex(x => x.BeltRankId);

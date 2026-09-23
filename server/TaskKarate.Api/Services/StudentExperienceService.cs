@@ -9,6 +9,7 @@ namespace TaskKarate.Api.Services;
 public sealed class StarterDatabaseOptions
 {
     public string Path { get; set; } = string.Empty;
+    public string? LegacySourcePath { get; set; }
     public string ContentRootPath { get; set; } = string.Empty;
     public bool ImportLegacySchedules { get; set; }
     public bool ImportDemoStudents { get; set; }
@@ -98,6 +99,7 @@ public sealed class StudentExperienceService
         if (!string.IsNullOrWhiteSpace(directory)) Directory.CreateDirectory(directory);
         await using var connection = new SqliteConnection(ConnectionString);
         await connection.OpenAsync(cancellationToken);
+        await ImportLegacySourceDatabaseAsync(connection, cancellationToken);
         await using var command = connection.CreateCommand();
         command.CommandText = @"
 CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password_hash TEXT, display_name TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
@@ -158,6 +160,67 @@ CREATE INDEX IF NOT EXISTS ix_staff_helper_signups_session ON staff_helper_signu
         await EnsureBootstrapAccountAsync(connection, cancellationToken);
         Interlocked.Exchange(ref _ready, 1);
     }
+
+    private async Task ImportLegacySourceDatabaseAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_options.LegacySourcePath) || !File.Exists(_options.LegacySourcePath)) return;
+
+        var sourcePath = Path.GetFullPath(_options.LegacySourcePath);
+        var targetPath = Path.GetFullPath(DatabasePath);
+        if (string.Equals(sourcePath, targetPath, StringComparison.OrdinalIgnoreCase)) return;
+
+        await using var attach = connection.CreateCommand();
+        attach.CommandText = "ATTACH DATABASE $path AS legacy_source";
+        attach.Parameters.AddWithValue("$path", sourcePath);
+        await attach.ExecuteNonQueryAsync(cancellationToken);
+
+        try
+        {
+            await using (var disableForeignKeys = connection.CreateCommand())
+            {
+                disableForeignKeys.CommandText = "PRAGMA foreign_keys = OFF";
+                await disableForeignKeys.ExecuteNonQueryAsync(cancellationToken);
+            }
+
+            var tables = new List<(string Name, string Sql)>();
+            await using (var list = connection.CreateCommand())
+            {
+                list.CommandText = "SELECT name, sql FROM legacy_source.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND sql IS NOT NULL ORDER BY name";
+                await using var reader = await list.ExecuteReaderAsync(cancellationToken);
+                while (await reader.ReadAsync(cancellationToken)) tables.Add((reader.GetString(0), reader.GetString(1)));
+            }
+
+            foreach (var table in tables)
+            {
+                var createSql = table.Sql.Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ", StringComparison.OrdinalIgnoreCase);
+                await using var create = connection.CreateCommand();
+                create.CommandText = createSql;
+                await create.ExecuteNonQueryAsync(cancellationToken);
+            }
+
+            foreach (var table in tables)
+            {
+                var name = QuoteIdentifier(table.Name);
+                await using var copy = connection.CreateCommand();
+                copy.CommandText = $"INSERT OR IGNORE INTO {name} SELECT * FROM legacy_source.{name}";
+                await copy.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
+        finally
+        {
+            await using (var enableForeignKeys = connection.CreateCommand())
+            {
+                enableForeignKeys.CommandText = "PRAGMA foreign_keys = ON";
+                await enableForeignKeys.ExecuteNonQueryAsync(cancellationToken);
+            }
+
+            await using var detach = connection.CreateCommand();
+            detach.CommandText = "DETACH DATABASE legacy_source";
+            await detach.ExecuteNonQueryAsync(cancellationToken);
+        }
+    }
+
+    private static string QuoteIdentifier(string identifier) => $"\"{identifier.Replace("\"", "\"\"")}\"";
 
     private static async Task NormalizeLegacyDataAsync(SqliteConnection connection, CancellationToken cancellationToken)
     {

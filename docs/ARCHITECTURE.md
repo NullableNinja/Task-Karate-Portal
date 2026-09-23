@@ -2,24 +2,26 @@
 
 ## Runtime boundary
 
-The new platform has one persistence boundary:
+The new platform has one persistence boundary and one physical runtime database:
 
 ```text
 SvelteKit UI (browser)
         │ same-origin API requests, credentials: include
         ▼
 ASP.NET Core 8 Minimal API
-        ├── staff Identity cookie → EF Core platform database
-        └── student cookie → parameterized StarterDatabase service
+        ├── staff Identity cookie → EF Core platform tables
+        └── student cookie → parameterized portal tables
                               ↓
-                         SQLite (local starter DB)
+                    one local SQLite runtime file
 ```
+
+The runtime file is `server/TaskKarate.Api/App_Data/task-karate.db` unless `ConnectionStrings:TaskKarate` or `StarterDatabase:Path` explicitly overrides it. EF/Identity tables use a `platform_*` namespace so they can coexist safely with the imported portal tables. `TASK_KARATE_STARTER_DB` is an optional one-time import source for the old standalone starter file; it is not a second live database.
 
 The browser never opens SQLite and never treats localStorage or IndexedDB as a record store. API failures are shown as errors. The preserved HTML site can still read its historical JSON files, but that content is explicitly not the new platform source of truth.
 
 ## Backend
 
-`server/TaskKarate.Api` uses ASP.NET Core Minimal API, ASP.NET Core Identity with GUID users and roles, EF Core SQLite, migrations, protected cookies, and loopback-oriented local launch settings. Staff endpoints require `Administrator`, `Instructor`, or `Staff`. Student access uses a separate protected cookie and strong password hashing through the Identity password hasher. Student schedule/profile/social queries are parameterized against the supplied starter database; the browser never receives a database connection.
+`server/TaskKarate.Api` uses ASP.NET Core Minimal API, ASP.NET Core Identity with GUID users and roles, EF Core SQLite, migrations, protected cookies, and loopback-oriented local launch settings. Staff endpoints require `Administrator`, `Instructor`, or `Staff`. Student access uses a separate protected cookie and server-side password/PIN hashing. Student schedule/profile/social queries are parameterized against the same runtime database file; the browser never receives a database connection.
 
 All mutation endpoints validate input, create UTC timestamps, and record safe audit metadata. Attendance has a database uniqueness constraint on `(ClassSessionId, StudentId)`. Published public endpoints select only published content and schedule fields; no student or guardian query is reachable anonymously.
 
@@ -27,7 +29,9 @@ All mutation endpoints validate input, create UTC timestamps, and record safe au
 
 `apps/task-karate-web` is a real SvelteKit application with a dark, today-first public `/schedule` front-desk experience, server-backed student sign-in and acknowledgment, a floating student hub, social/friend/message pages, and the existing staff workflows. The public schedule reads the starter schedule database through the API, keeps future dates view-only, and uses a searched student plus explicit confirmation for today's supervised check-in. `src/lib/api.ts` attaches cookies and the CSRF header and has no persistence fallback.
 
-The student service adds only missing tables to the supplied starter database: `student_accounts`, `student_disclaimer_acceptances`, `student_friendships`, `student_messages`, practice logs, goals, and saved posts. Existing class, attendance, rank, achievement, profile, and post tables remain the source of truth. Development normalization repairs duplicate guardian seed rows and prevents an IS3 membership from being shown for a non-Teen/Adult student.
+The student service adds only missing portal tables to the runtime database: `student_accounts`, `student_disclaimer_acceptances`, `student_friendships`, `student_messages`, practice logs, goals, and saved posts. Existing class, attendance, rank, achievement, profile, and post tables remain the source of truth for the transitional portal model. Development normalization repairs duplicate guardian seed rows and prevents an IS3 membership from being shown for a non-Teen/Adult student.
+
+This is a physical consolidation, not a claim that every historical EF and portal entity is already one logical model. The `platform_*` namespace is an intentional compatibility boundary that prevents destructive table collisions while staff and student endpoints are migrated. The next production-hardening phase should replace duplicate Student/Class/Attendance representations with one canonical schema, then remove the compatibility importer after a verified cutover.
 
 ## Product boundary: public news vs. student work
 

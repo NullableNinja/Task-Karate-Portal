@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using TaskKarate.Api.Data;
 using TaskKarate.Api.Models;
@@ -10,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 var dataDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
 Directory.CreateDirectory(dataDirectory);
 var connectionString = builder.Configuration.GetConnectionString("TaskKarate") ?? $"Data Source={Path.Combine(dataDirectory, "task-karate.db")}";
+var sqliteDataSource = new SqliteConnectionStringBuilder(connectionString).DataSource;
+var platformDatabasePath = Path.IsPathRooted(sqliteDataSource) ? sqliteDataSource : Path.Combine(builder.Environment.ContentRootPath, sqliteDataSource);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddIdentityCore<AppUser>(options =>
@@ -55,8 +58,10 @@ builder.Services.AddScoped<AuditService>();
 builder.Services.Configure<StarterDatabaseOptions>(options =>
 {
     options.Path = builder.Configuration["StarterDatabase:Path"]
-        ?? Environment.GetEnvironmentVariable("TASK_KARATE_STARTER_DB")
-        ?? Path.Combine(dataDirectory, "TaskKarate_Starter.db");
+        ?? Environment.GetEnvironmentVariable("TASK_KARATE_PORTAL_DB")
+        ?? platformDatabasePath;
+    options.LegacySourcePath = builder.Configuration["StarterDatabase:LegacySourcePath"]
+        ?? Environment.GetEnvironmentVariable("TASK_KARATE_STARTER_DB");
     options.ContentRootPath = builder.Environment.ContentRootPath;
     options.ImportLegacySchedules = builder.Configuration.GetValue<bool>("StarterDatabase:ImportLegacySchedules") || Environment.GetEnvironmentVariable("TASK_KARATE_IMPORT_STARTER_SCHEDULES") is "1" or "true";
     options.ImportDemoStudents = builder.Configuration.GetValue<bool>("StarterDatabase:ImportDemoStudents") || Environment.GetEnvironmentVariable("TASK_KARATE_IMPORT_STARTER_STUDENTS") is "1" or "true";

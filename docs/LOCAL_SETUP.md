@@ -50,17 +50,23 @@ dotnet ef database update --project server\TaskKarate.Api --startup-project serv
 dotnet run --project server\TaskKarate.Api --urls http://127.0.0.1:5167
 ```
 
-The database is `server\TaskKarate.Api\App_Data\task-karate.db`; SQLite may also create `-wal` and `-shm` files. All are ignored. The development import is explicit: set `Seed:ImportLegacySchedules` or `Seed:ImportDemoStudents` to `true` in a local settings/user-secret configuration, and never enable demo import for a production database. Legacy schedules are imported as unverified templates; demo students are synthetic.
+The runtime database is `server\TaskKarate.Api\App_Data\task-karate.db`; SQLite may also create `-wal` and `-shm` files. All are ignored. Both the EF/Identity platform tables and the portal/student tables live in this one file. The EF tables use a `platform_*` namespace during the transition so the two historical schemas do not collide.
+
+The development schedule/student seed switches are explicit: set `Seed:ImportLegacySchedules` or `Seed:ImportDemoStudents` to `true` in a local settings/user-secret configuration, and never enable demo import for a production database. Legacy schedules are imported as unverified templates; demo students are synthetic.
 
 ## Student schedule and profile database
 
-The student experience reads the local starter database through the API. Point it at the supplied file with an environment variable in the API PowerShell window:
+The student experience reads the same runtime database file as the staff/EF endpoints. During migration, point the API at the old supplied file as an import source:
 
 ```powershell
 $env:TASK_KARATE_STARTER_DB = "C:\Users\Thoma\OneDrive\Web Design\Task-Karate-School\TaskKarate_Starter.db"
 ```
 
-On first API startup the service creates only its missing support tables (`student_accounts`, disclaimer acknowledgments, friendships, and messages). It does not import social data or rewrite existing schedule records. Back up the original file before first use. To create a local student login without committing a password, set all three variables before starting the API:
+On startup, missing legacy tables and rows are imported into `task-karate.db` with conflict-safe inserts. The old file is not used as a second active database and is not modified. Back up both files before first use. After the import has been verified, remove `TASK_KARATE_STARTER_DB` and the development import switches for normal/production launches; the runtime file is then the only database the application reads.
+
+This import is intentionally a transition tool. It does not continuously synchronize two databases, and it does not yet eliminate every duplicate historical model. Make changes through the API/admin UI, not by editing either SQLite file directly.
+
+To create a local student login without committing a password, set all three variables before starting the API:
 
 The supplied file currently contains the schema but may contain no student or session rows yet. In that case `/schedule` correctly reports that no sessions are published until staff or an explicit development seed creates them; the application does not invent live student records.
 
@@ -88,7 +94,7 @@ Do not use a short test phrase such as `8675309` or `Cobra Kai Never Dies!` as t
 
 ## Student PINs
 
-The public-facing Student Hub uses two separate credentials:
+The public-facing Student Hub uses one shared student credential:
 
 - Students use one server-verified 4–6 digit PIN for both internet Hub sign-in and supervised `/schedule` class check-in.
 - The PIN is never returned to the browser or stored in plaintext. Staff can assign a new PIN from `Staff > Students`; students can change their own PIN from `Student Hub > Profile`.
@@ -103,23 +109,37 @@ In `Staff > Classes`, the recurring enrollment roster includes an explicit `Remo
 
 ## Internet hosting architecture
 
-The website and the portal database should not be treated as the same kind of deployment:
+The website and the portal API/database should not be treated as the same kind of deployment:
 
 - `Task-Karate-Web` can remain a static site hosted on GitHub Pages or another static host.
-- `Task-Karate-Portal` needs the ASP.NET Core API running on a server, plus a persistent database and HTTPS. A browser cannot safely open a SQLite file directly, and GitHub Pages cannot run the API.
-- SQLite is appropriate for a single local dojo computer or a carefully managed single-server deployment with backups. For an internet-facing multi-user portal, move the production database to PostgreSQL or MySQL/MariaDB and keep the API and database on a private network where possible.
+- `Task-Karate-Portal` needs the ASP.NET Core API running on a server, plus a persistent database and HTTPS. A browser cannot safely open a SQLite file directly, and GitHub Pages or ordinary static Yahoo hosting cannot run the API.
+- A mini PC at the dojo is a viable first production server if it has reliable power/internet, automatic updates, a UPS, a firewall, HTTPS reverse proxy, and tested backups. Keep the SQLite file on that machine's local SSD and expose only HTTPS; never expose port 5167 or the database file directly.
+- SQLite is appropriate for one API process on one carefully managed server with backups. If usage grows to multiple API instances, frequent concurrent writes, or high availability requirements, migrate the same logical data to PostgreSQL or MySQL/MariaDB and keep the database on a private network.
+
+### Mini-PC production checklist
+
+1. Install a supported Windows or Ubuntu release, the .NET 8 ASP.NET Core runtime, and the production build of the SvelteKit app.
+2. Copy the verified shared database to a local, non-synchronized data directory on the mini PC. Do not run it from OneDrive, Dropbox, a NAS share, or a web-hosting directory.
+3. Run the API as a service (Windows Service/IIS or systemd) under a restricted account. Store production secrets outside Git and outside the static site.
+4. Put IIS, Caddy, or Nginx in front of the API and frontend. Terminate TLS on port 443 and proxy internally to the API; do not port-forward the development port.
+5. Use a subdomain such as `portal.taskkarateschool.com`. Keep the domain/DNS with the current registrar/host if it supports DNS records, or move only DNS to a provider that does.
+6. Allow only 80/443 at the router, restrict staff-only operations through authentication and role checks, and keep the supervised schedule/check-in workflow protected.
+7. Configure nightly encrypted backups, retain multiple generations, and test restoring a copy on a separate machine before calling the deployment production-ready.
+8. Monitor disk space, service health, certificate expiry, failed logins, and backup success. Document a manual fallback for class attendance if the mini PC or internet connection is unavailable.
 
 Do not expose the SQLite file, the staff check-in route, or database credentials as public web files. Production deployment also requires HTTPS, secure cookie settings, restricted CORS, secret management, backups, account lockout/rate limiting, and a plan for safely issuing replacement PINs.
 
 ## Backup and restore
 
-Each day, while the API is stopped (or after a SQLite checkpoint), copy the database to a separate encrypted drive/location:
+Each day, while the API is stopped (or after a SQLite checkpoint), copy the one shared database to a separate encrypted drive/location. Include the `-wal` and `-shm` files if they exist, or use SQLite's backup API/checkpoint process so the copy is consistent:
 
 ```powershell
 $source = "server\TaskKarate.Api\App_Data\task-karate.db"
 $destination = "E:\EncryptedBackups\TaskKarate\task-karate-$(Get-Date -Format yyyy-MM-dd).db"
 Copy-Item $source $destination
 ```
+
+Do not back up the old `TASK_KARATE_STARTER_DB` source as if it were still live. Keep the pre-migration copy only as a recovery/archive artifact until the cutover has been accepted.
 
 Use BitLocker or an equivalent encrypted location, restrict access, and retain several dated copies. To test restore, copy a backup to a temporary path, change `ConnectionStrings:TaskKarate` in a local ignored settings file to that path, start the API with test credentials, sign in, and verify student/session/attendance counts. Never test a restore by overwriting the live database.
 

@@ -88,6 +88,31 @@ fieldset.full legend { font-weight: 700; margin-bottom: 6px; }
 .workflow-actions { display: flex; align-items: center; gap: 14px; }
 .attendance-submit { min-width: 190px; }
 .empty-state { border-left: 4px solid #d9a245 !important; }
+.helper-summary { display: grid; justify-items: end; gap: 2px; min-width: 150px; padding: 14px 18px; border: 1px solid #3b5972; border-radius: 12px; background: #10243b; }
+.helper-summary strong { color: #f7fbff; font-size: 1.6rem; }
+.helper-summary span { color: #b8cad8; font-size: .78rem; }
+.helper-toolbar { display: flex; align-items: end; gap: 18px; flex-wrap: wrap; }
+.helper-toolbar label { display: grid; gap: 5px; min-width: 220px; font-weight: 800; }
+.helper-toolbar p { flex: 1 1 300px; margin: 0; }
+.helper-days { display: grid; gap: 28px; }
+.helper-day-group { display: grid; gap: 12px; }
+.helper-day-heading { display: flex; align-items: end; justify-content: space-between; gap: 14px; }
+.helper-day-heading h3 { margin: 2px 0 0; }
+.helper-session-list { display: grid; gap: 14px; }
+.helper-session-card { display: grid; gap: 18px; }
+.helper-session-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.helper-session-heading h3 { margin: 4px 0 2px; }
+.helper-session-heading p { margin: 0; }
+.helper-session-time { color: #72d9fa; font-weight: 900; }
+.helper-session-action { flex: 0 0 auto; }
+.helper-roster-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding-top: 16px; border-top: 1px solid #29445d; }
+.helper-roster-columns h4 { margin: 0 0 10px; color: #dcecf5; }
+.helper-roster-columns h4 span { color: #72d9fa; font-size: .8rem; }
+.helper-chip-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.helper-chip { display: inline-flex; align-items: center; gap: 4px; padding: 7px 10px; border: 1px solid #46647b; border-radius: 999px; background: #18334e; color: #e8f3f8; font-size: .84rem; }
+.helper-chip.current-helper { border-color: #68d8f4; background: #1d5870; color: #fff; }
+.helper-chip.student-helper { border-color: #8b6d3b; background: #3b301d; color: #ffe9a6; }
+.helper-chip small { color: inherit; font-size: .72rem; }
 .staff-social-list { display: grid; gap: 18px; }
 .staff-social-card.removed { opacity: .78; border-color: #815269; }
 .staff-social-card textarea { width: 100%; box-sizing: border-box; margin: 10px 0; }
@@ -104,4 +129,8 @@ fieldset.full legend { font-weight: 700; margin-bottom: 6px; }
   .app-nav a { flex: none; }
   .staff-list-controls, .date-toolbar { align-items: stretch; flex-direction: column; }
   .staff-list-controls input, .staff-list-search { min-width: 0; }
+  .helper-summary { justify-items: start; width: 100%; box-sizing: border-box; }
+  .helper-session-heading, .helper-day-heading { align-items: stretch; flex-direction: column; }
+  .helper-session-action .button { width: 100%; }
+  .helper-roster-columns { grid-template-columns: 1fr; }
 }

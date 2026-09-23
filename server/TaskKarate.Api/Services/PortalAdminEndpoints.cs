@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace TaskKarate.Api.Services;
 
 public static class PortalAdminEndpoints
@@ -59,6 +61,32 @@ public static class PortalAdminEndpoints
             if (!result.Success) return Results.ValidationProblem(new Dictionary<string, string[]> { ["attendance"] = [result.Error ?? "Choose a current, non-cancelled session and an eligible student."] });
             await audit.RecordAsync(context, "CheckIn", "PortalAttendance", Guid.Empty, new { request.StudentId, request.SessionId, request.Helper });
             return Results.Created($"/api/portal-admin/attendance?sessionId={request.SessionId}", new { checkedIn = true, helper = result.HelperRecorded });
+        });
+        admin.MapGet("/helpers", async (DateTime? from, DateTime? to, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
+        {
+            var start = (from ?? DateTime.UtcNow.Date).Date;
+            var end = (to ?? start.AddDays(14)).Date;
+            if (end <= start) end = start.AddDays(14);
+            if (end > start.AddDays(60)) end = start.AddDays(60);
+            var staffUserId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Results.Ok(await service.GetStaffHelperRosterAsync(start, end, staffUserId, ct));
+        });
+        admin.MapPost("/helpers/{sessionId:int}/signup", async (int sessionId, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var staffUserId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(staffUserId)) return Results.Unauthorized();
+            var displayName = context.User.Identity?.Name ?? "Staff volunteer";
+            if (!await service.AddStaffHelperSignupAsync(sessionId, staffUserId, displayName, ct)) return Results.Conflict(new { title = "Helper signup already exists", detail = "You are already listed as a helper for this class, or the class is no longer available for signup." });
+            await audit.RecordAsync(context, "Signup", "StaffHelper", Guid.Empty, new { sessionId });
+            return Results.Ok(new { signedUp = true });
+        });
+        admin.MapDelete("/helpers/{sessionId:int}/signup", async (int sessionId, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var staffUserId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(staffUserId)) return Results.Unauthorized();
+            if (!await service.RemoveStaffHelperSignupAsync(sessionId, staffUserId, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, "RemoveSignup", "StaffHelper", Guid.Empty, new { sessionId });
+            return Results.NoContent();
         });
         admin.MapGet("/social/feed", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetStaffSocialFeedAsync(ct)));
         admin.MapPut("/social/posts/{postId:long}", async (long postId, StaffSocialPostRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>

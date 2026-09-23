@@ -66,6 +66,8 @@ public sealed record PortalAdminStudent(
     string Status);
 public sealed record PortalAdminGoldStarEvent(long EventId, string Name, string Description, DateTime? EventDate, bool IsActive, int AwardCount);
 public sealed record PortalAdminAchievement(string Name, string Description, string IconName, int AwardCount);
+public sealed record StaffHelperSignupItem(string StaffUserId, string DisplayName, DateTime SignedUpAt, bool IsCurrentStaff);
+public sealed record StaffHelperRosterItem(int SessionId, DateTime SessionDate, string? StartTime, string? EndTime, string ClassName, string? Location, bool Cancelled, IReadOnlyList<StaffHelperSignupItem> StaffHelpers, IReadOnlyList<PortalAttendanceItem> StudentHelpers);
 public sealed record PortalStudentWriteRequest(string FirstName, string LastName, string? PreferredName, string AgeGroup, DateTime? JoinDate, string? UniformSize, string? BeltSize, string? Bio, string? FavoriteTechnique);
 public sealed record PortalAdminGuardianStudent(int StudentId, string Name, string Relationship);
 public sealed record PortalAdminGuardian(int GuardianId, string FirstName, string LastName, string? Email, string? Phone, bool IsActive, IReadOnlyList<PortalAdminGuardianStudent> Students);
@@ -128,6 +130,7 @@ CREATE TABLE IF NOT EXISTS post_comments (comment_id INTEGER PRIMARY KEY AUTOINC
 CREATE TABLE IF NOT EXISTS student_practice_logs (practice_log_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, skill TEXT NOT NULL, minutes INTEGER NOT NULL, reflection TEXT, logged_at TEXT NOT NULL, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS student_goals (goal_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER NOT NULL, title TEXT NOT NULL, target_date TEXT, completed INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, completed_at TEXT, UNIQUE(student_id, title), FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS post_bookmarks (post_id INTEGER NOT NULL, student_id INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(post_id, student_id), FOREIGN KEY(post_id) REFERENCES posts(post_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS staff_helper_signups (signup_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL, staff_user_id TEXT NOT NULL, staff_display_name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(session_id, staff_user_id), FOREIGN KEY(session_id) REFERENCES class_sessions(session_id) ON DELETE CASCADE);
 CREATE INDEX IF NOT EXISTS ix_student_accounts_username ON student_accounts(username);
 CREATE INDEX IF NOT EXISTS ix_class_sessions_date ON class_sessions(session_date, cancelled);
 CREATE INDEX IF NOT EXISTS ix_attendance_student ON attendance(student_id, session_id);
@@ -140,6 +143,7 @@ CREATE INDEX IF NOT EXISTS ix_practice_logs_student ON student_practice_logs(stu
 CREATE INDEX IF NOT EXISTS ix_goals_student ON student_goals(student_id, completed, target_date);
 CREATE INDEX IF NOT EXISTS ix_daily_missions_student_date ON student_daily_missions(student_id, mission_date, completed);
 CREATE INDEX IF NOT EXISTS ix_post_bookmarks_student ON post_bookmarks(student_id, created_at);
+CREATE INDEX IF NOT EXISTS ix_staff_helper_signups_session ON staff_helper_signups(session_id, created_at);
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureLegacyStudentColumnsAsync(connection, cancellationToken);
@@ -813,6 +817,99 @@ WHERE a.session_id = $session AND a.status IN ('present', 'helper') ORDER BY s.l
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetInt32(1), reader.GetString(2), DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), reader.IsDBNull(4) ? null : reader.GetString(4), reader.GetString(5)));
         return list;
+    }
+
+    public async Task<IReadOnlyList<StaffHelperRosterItem>> GetStaffHelperRosterAsync(DateTime from, DateTime to, string? currentStaffUserId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        var sessions = new List<StaffHelperRosterItem>();
+        await using (var sessionCommand = connection.CreateCommand())
+        {
+            sessionCommand.CommandText = @"SELECT s.session_id, s.session_date, s.start_time, s.end_time, c.class_name, s.location_name, s.cancelled
+FROM class_sessions s JOIN classes c ON c.class_id = s.class_id
+WHERE date(s.session_date) >= date($from) AND date(s.session_date) < date($to) AND c.active = 1
+ORDER BY date(s.session_date), COALESCE(s.start_time, ''), s.session_id";
+            sessionCommand.Parameters.AddWithValue("$from", from.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            sessionCommand.Parameters.AddWithValue("$to", to.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            await using var reader = await sessionCommand.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                sessions.Add(new(
+                    reader.GetInt32(0),
+                    DateTime.Parse(reader.GetString(1), CultureInfo.InvariantCulture),
+                    reader.IsDBNull(2) ? null : reader.GetString(2),
+                    reader.IsDBNull(3) ? null : reader.GetString(3),
+                    reader.GetString(4),
+                    reader.IsDBNull(5) ? null : reader.GetString(5),
+                    reader.GetInt32(6) != 0,
+                    [],
+                    []));
+            }
+        }
+
+        if (sessions.Count == 0) return sessions;
+        var staffBySession = sessions.ToDictionary(item => item.SessionId, _ => new List<StaffHelperSignupItem>());
+        await using (var helperCommand = connection.CreateCommand())
+        {
+            helperCommand.CommandText = @"SELECT h.session_id, h.staff_user_id, h.staff_display_name, h.created_at
+FROM staff_helper_signups h JOIN class_sessions s ON s.session_id = h.session_id
+WHERE date(s.session_date) >= date($from) AND date(s.session_date) < date($to)
+ORDER BY h.created_at, h.staff_display_name";
+            helperCommand.Parameters.AddWithValue("$from", from.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            helperCommand.Parameters.AddWithValue("$to", to.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            await using var reader = await helperCommand.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var sessionId = reader.GetInt32(0);
+                if (staffBySession.ContainsKey(sessionId))
+                {
+                    var staffUserId = reader.GetString(1);
+                    staffBySession[sessionId].Add(new(staffUserId, reader.GetString(2), DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), string.Equals(staffUserId, currentStaffUserId, StringComparison.OrdinalIgnoreCase)));
+                }
+            }
+        }
+
+        var studentsBySession = sessions.ToDictionary(item => item.SessionId, _ => new List<PortalAttendanceItem>());
+        await using (var studentCommand = connection.CreateCommand())
+        {
+            studentCommand.CommandText = @"SELECT a.session_id, a.attendance_id, a.student_id, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), a.check_in_time, a.notes
+FROM attendance a JOIN class_sessions cs ON cs.session_id = a.session_id JOIN students s ON s.student_id = a.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id
+WHERE a.status = 'helper' AND date(cs.session_date) >= date($from) AND date(cs.session_date) < date($to)
+ORDER BY a.check_in_time, s.last_name, s.first_name";
+            studentCommand.Parameters.AddWithValue("$from", from.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            studentCommand.Parameters.AddWithValue("$to", to.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            await using var reader = await studentCommand.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var sessionId = reader.GetInt32(0);
+                if (studentsBySession.ContainsKey(sessionId)) studentsBySession[sessionId].Add(new(reader.GetInt64(1), reader.GetInt32(2), reader.GetString(3), DateTime.Parse(reader.GetString(4), CultureInfo.InvariantCulture), reader.IsDBNull(5) ? null : reader.GetString(5), "helper"));
+            }
+        }
+
+        return sessions.Select(item => item with { StaffHelpers = staffBySession[item.SessionId], StudentHelpers = studentsBySession[item.SessionId] }).ToList();
+    }
+
+    public async Task<bool> AddStaffHelperSignupAsync(int sessionId, string staffUserId, string displayName, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"INSERT OR IGNORE INTO staff_helper_signups(session_id, staff_user_id, staff_display_name)
+SELECT $session, $user, $name
+WHERE EXISTS (SELECT 1 FROM class_sessions s JOIN classes c ON c.class_id = s.class_id WHERE s.session_id = $session AND c.active = 1 AND s.cancelled = 0 AND date(s.session_date) >= date('now', 'localtime'))";
+        command.Parameters.AddWithValue("$session", sessionId);
+        command.Parameters.AddWithValue("$user", staffUserId);
+        command.Parameters.AddWithValue("$name", displayName);
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
+    }
+
+    public async Task<bool> RemoveStaffHelperSignupAsync(int sessionId, string staffUserId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "DELETE FROM staff_helper_signups WHERE session_id = $session AND staff_user_id = $user";
+        command.Parameters.AddWithValue("$session", sessionId);
+        command.Parameters.AddWithValue("$user", staffUserId);
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
     }
 
     public async Task<IReadOnlyList<int>> GetAttendanceSessionIdsAsync(int studentId, DateTime from, DateTime to, CancellationToken cancellationToken = default)

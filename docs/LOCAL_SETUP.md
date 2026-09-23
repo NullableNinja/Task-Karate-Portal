@@ -101,6 +101,8 @@ The staff student roster is filtered by status and paged at 25 records per page 
 
 In `Staff > Classes`, the recurring enrollment roster includes an explicit `Remove student from class` action. Removing a recurring enrollment does not erase attendance history. The same page is also where staff can create seminars and appointment-only private-lesson sessions.
 
+`Staff > Helper roster` is the pre-class coverage board. Staff can volunteer themselves for today’s or a future dated session, remove their own signup, and see both staff volunteers and student helpers who were actually checked in. A volunteer signup is not attendance and does not replace the normal check-in process.
+
 ## Internet hosting architecture
 
 The website and the portal database should not be treated as the same kind of deployment:

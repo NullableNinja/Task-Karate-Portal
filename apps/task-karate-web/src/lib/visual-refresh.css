@@ -546,3 +546,9 @@
 .schedule-live-page .outline-button:hover, .schedule-live-page .outline-button:focus-visible { background: #123b55; }
 .schedule-live-page .schedule-hero h1 { color: #f5f7fb; }
 .schedule-live-page .schedule-hero p { color: #a5bad1; }
+
+.birthday-toast { position: fixed; top: 22px; left: 50%; z-index: 25; transform: translateX(-50%); border: 1px solid #f1d27b; border-radius: 999px; background: #28233aee; color: #fff3bf; padding: 12px 19px; box-shadow: 0 12px 30px #0008, 0 0 24px #d8b45d44; font-weight: 850; }
+.birthday-confetti { position: fixed; inset: 0; z-index: 24; overflow: hidden; pointer-events: none; }
+.birthday-confetti span { position: absolute; top: -18px; left: var(--confetti-x); width: 9px; height: 16px; border-radius: 2px; background: var(--confetti-color); opacity: 0; transform: rotate(var(--confetti-rotation)); animation: birthday-confetti-fall 3.4s cubic-bezier(.2,.75,.35,1) var(--confetti-delay) forwards; }
+@keyframes birthday-confetti-fall { 0% { opacity: 0; transform: translate3d(0, -16px, 0) rotate(var(--confetti-rotation)); } 12% { opacity: 1; } 100% { opacity: 0; transform: translate3d(8vw, 105vh, 0) rotate(calc(var(--confetti-rotation) + 620deg)); } }
+@media (prefers-reduced-motion: reduce) { .birthday-confetti { display: none; } .birthday-toast { transition: none; } }

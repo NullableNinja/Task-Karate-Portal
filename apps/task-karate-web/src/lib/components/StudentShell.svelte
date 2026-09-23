@@ -8,6 +8,7 @@
   let error = '';
   let currentProfile: { rankName?: string | null; programs?: { programCode: string; levelName?: string | null }[] } | null = null;
   let scrollPercent = 0;
+  let birthdayCelebration = false;
   const tabs = [
     { id: 'status', label: 'Status', href: '/student' },
     { id: 'social', label: 'Social', href: '/student/social' },
@@ -33,7 +34,36 @@
   ];
   $: scrollBelt = scrollBelts[Math.min(scrollBelts.length - 1, Math.floor((scrollPercent / 100) * scrollBelts.length))];
   function updateScrollProgress() { const maximum = document.documentElement.scrollHeight - window.innerHeight; scrollPercent = maximum > 0 ? Math.round((window.scrollY / maximum) * 100) : 0; }
-  onMount(() => { api<typeof currentProfile>('/api/student/profile').then((profile) => { currentProfile = profile; }).catch(() => undefined); updateScrollProgress(); window.addEventListener('scroll', updateScrollProgress, { passive: true }); window.addEventListener('resize', updateScrollProgress); return () => { window.removeEventListener('scroll', updateScrollProgress); window.removeEventListener('resize', updateScrollProgress); }; });
+  function launchBirthdayConfetti() {
+    if (typeof document === 'undefined') return;
+    const container = document.createElement('div');
+    container.className = 'birthday-confetti';
+    container.setAttribute('aria-hidden', 'true');
+    const colors = ['#f5f7fb', '#38bdf8', '#d8b45d', '#4eaa79', '#9671cb', '#df6470'];
+    for (let index = 0; index < 34; index += 1) {
+      const piece = document.createElement('span');
+      piece.style.setProperty('--confetti-x', `${Math.round(Math.random() * 100)}vw`);
+      piece.style.setProperty('--confetti-delay', `${(Math.random() * 0.55).toFixed(2)}s`);
+      piece.style.setProperty('--confetti-color', colors[index % colors.length]);
+      piece.style.setProperty('--confetti-rotation', `${Math.round(Math.random() * 360)}deg`);
+      container.appendChild(piece);
+    }
+    document.body.appendChild(container);
+    window.setTimeout(() => container.remove(), 4200);
+  }
+  onMount(() => {
+    api<typeof currentProfile>('/api/student/profile').then((profile) => { currentProfile = profile; }).catch(() => undefined);
+    if (session.birthdayWeek) {
+      const celebrationKey = `task-karate-birthday-${session.loginId ?? session.studentId}`;
+      if (!sessionStorage.getItem(celebrationKey)) {
+        sessionStorage.setItem(celebrationKey, 'shown');
+        birthdayCelebration = true;
+        launchBirthdayConfetti();
+        window.setTimeout(() => { birthdayCelebration = false; }, 5200);
+      }
+    }
+    updateScrollProgress(); window.addEventListener('scroll', updateScrollProgress, { passive: true }); window.addEventListener('resize', updateScrollProgress); return () => { window.removeEventListener('scroll', updateScrollProgress); window.removeEventListener('resize', updateScrollProgress); };
+  });
 </script>
 
 <svelte:head><meta name="theme-color" content="#081526" /></svelte:head>
@@ -50,6 +80,7 @@
   </nav>
   <button class="floating-logout" type="button" on:click={logout}><span aria-hidden="true">⏻</span> Log out</button>
   {#if error}<div class="student-toast error" role="alert">{error}</div>{/if}
+  {#if birthdayCelebration}<div class="birthday-toast" role="status">Happy birthday week, {session.displayName ?? 'student'}! 🎉</div>{/if}
   <main id="student-content" class="student-main"><slot /></main>
   <div class="scroll-rank-indicator" role="progressbar" aria-label={`Page progress · ${scrollBelt.name}`} aria-valuemin="0" aria-valuemax="100" aria-valuenow={scrollPercent} style={`--scroll-progress:${scrollPercent}%;--scroll-color:${scrollBelt.color}`}><span class="scroll-rank-fill"></span></div>
 </div>

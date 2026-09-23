@@ -98,11 +98,11 @@
     signingIn = true;
     error = '';
     try {
-      const result = await api<{ disclaimerRequired: boolean; passwordChangeRequired: boolean }>('/api/student/auth/login', {
+      const result = await api<{ disclaimerRequired: boolean }>('/api/student/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ studentId: selectedStudent.studentId, password: pin, rememberMe: remember })
+        body: JSON.stringify({ studentId: selectedStudent.studentId, pin, rememberMe: remember })
       });
-      await goto(result.passwordChangeRequired ? '/student/password' : result.disclaimerRequired ? '/student/disclaimer' : '/student');
+      await goto(result.disclaimerRequired ? '/student/disclaimer' : '/student');
     } catch (e) {
       error = apiError(e, 'That PIN or password was not accepted.');
     } finally {
@@ -126,7 +126,7 @@
     <a class="brand" href="/schedule"><span class="brand-mark">TK</span><span><strong>TASK KARATE</strong><small>STUDENT HUB</small></span></a>
     <span class="student-eyebrow">SECURE STUDENT ACCESS</span>
     <h1 id="dojo-title">Enter the dojo.</h1>
-    <p class="lead">Choose your student profile, then enter the password issued by Task Karate staff.</p>
+    <p class="lead">Choose your student profile, then enter the 4–6 digit PIN issued by Task Karate staff.</p>
 
     {#if error && !showPin}<div class="error" role="alert">{error}</div>{/if}
 
@@ -171,12 +171,12 @@
   <div class="login-overlay" role="presentation">
     <div class="pin-dialog" role="dialog" aria-modal="true" aria-labelledby="pin-title" tabindex="-1">
       <span class="student-avatar pin-avatar" style={`--avatar-color: ${beltColor(selectedStudent.rankName)}; --avatar-text: ${avatarTextColor(selectedStudent.rankName)}`}>{initials(selectedStudent.displayName)}</span>
-      <h2 id="pin-title">Enter Your Password</h2>
+      <h2 id="pin-title">Enter Your PIN</h2>
       <p class="pin-name">{selectedStudent.displayName}</p>
       <span class="dialog-rank" style={`--rank-color:${beltColor(selectedStudent.rankName)}`}>{profileLabel(selectedStudent)}</span>
       <form on:submit|preventDefault={submit}>
-        <label for="student-pin">Password</label>
-        <input id="student-pin" class="pin-input" type="password" bind:value={pin} autocomplete="current-password" maxlength="128" placeholder="Enter your password…" required />
+        <label for="student-pin">Student PIN</label>
+        <input id="student-pin" class="pin-input" type="password" bind:value={pin} inputmode="numeric" autocomplete="current-password" minlength="4" maxlength="6" pattern="[0-9][0-9][0-9][0-9][0-9]?[0-9]?" placeholder="Enter your PIN…" required />
         {#if error}<div class="error" role="alert">{error}</div>{/if}
         <div class="pin-actions"><button class="outline-button" type="button" on:click={cancelPin}>Cancel</button><button class="primary-button" disabled={signingIn}>{signingIn ? 'Checking…' : 'Enter Dojo'}</button></div>
       </form>

@@ -30,20 +30,13 @@ public static class PortalAdminEndpoints
             await audit.RecordAsync(context, request.Status == "deactivated" ? "Deactivate" : "SetStatus", "PortalStudent", Guid.Empty, new { legacyId = studentId, request.Status });
             return Results.NoContent();
         });
-        admin.MapPost("/students/{studentId:int}/password/reset", async (int studentId, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
-        {
-            var result = await service.ResetStudentPasswordAsync(studentId, ct);
-            if (result is null) return Results.NotFound(new { title = "Student account unavailable", detail = "The student must be active before a portal password can be assigned." });
-            await audit.RecordAsync(context, "ResetPassword", "StudentAccount", Guid.Empty, new { legacyStudentId = studentId, username = result.Username, via = "administrator" });
-            return Results.Ok(new { passwordReset = true, mustChangePassword = true, username = result.Username });
-        }).RequireAuthorization(policy => policy.RequireRole("Administrator"));
         admin.MapPost("/students/{studentId:int}/pin", async (int studentId, PortalStudentPinRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
         {
             var errors = StudentPinPolicy.Validate(request.Pin, request.ConfirmPin);
             if (errors.Count > 0) return Results.ValidationProblem(errors.ToDictionary(item => item.Key, item => item.Value));
             var result = await service.ResetStudentPinAsync(studentId, request.Pin, ct);
-            if (result is null) return Results.NotFound(new { title = "Student account unavailable", detail = "The student must be active before a check-in PIN can be assigned." });
-            await audit.RecordAsync(context, "ResetPin", "StudentAccount", Guid.Empty, new { legacyStudentId = studentId, username = result.Username, via = "administrator" });
+            if (result is null) return Results.NotFound(new { title = "Student account unavailable", detail = "The student must be active before a student PIN can be assigned." });
+            await audit.RecordAsync(context, "SetStudentPin", "StudentAccount", Guid.Empty, new { legacyStudentId = studentId, username = result.Username, via = "administrator" });
             return Results.Ok(new { pinChanged = true, username = result.Username });
         }).RequireAuthorization(policy => policy.RequireRole("Administrator"));
         admin.MapGet("/attendance/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(true, ct)));

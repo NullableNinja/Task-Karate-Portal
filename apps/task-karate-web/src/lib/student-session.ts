@@ -1,15 +1,11 @@
 import { goto } from '$app/navigation';
 import { api } from '$lib/api';
 
-export type StudentSession = { authenticated: boolean; studentId: number; displayName?: string; disclaimerRequired: boolean; passwordChangeRequired: boolean };
+export type StudentSession = { authenticated: boolean; studentId: number; displayName?: string; disclaimerRequired: boolean; birthdayWeek?: boolean; loginId?: string | null };
 
 export async function requireStudent(): Promise<StudentSession | null> {
   try {
     const session = await api<StudentSession>('/api/student/auth/me');
-    if (session.passwordChangeRequired) {
-      await goto('/student/password');
-      return null;
-    }
     if (session.disclaimerRequired) {
       await goto('/student/disclaimer');
       return null;

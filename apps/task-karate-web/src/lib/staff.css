@@ -1,0 +1,21 @@
+.staff-header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.app-nav a { min-height: 42px; display: inline-flex; align-items: center; }
+.app-nav a:focus-visible, .staff-header-actions button:focus-visible, .staff-header-actions a:focus-visible { outline: 3px solid #3b756f; outline-offset: 2px; }
+.staff-list-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.staff-list-controls input, .staff-list-search { min-width: 220px; }
+.table-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.table-subtext { display: block; color: #647379; font-size: .78rem; margin-top: 3px; }
+.pill.inactive { background: #f8e7e5; color: #8d3025; }
+.date-toolbar { display: flex; justify-content: space-between; align-items: end; gap: 18px; }
+.date-toolbar label { display: grid; gap: 5px; font-weight: 700; }
+.content-preview { min-height: 180px; border: 1px dashed #bfd3d0; border-radius: 10px; background: #f7fbfa; padding: 18px; }
+.content-preview h3 { margin: 12px 0 8px; }
+.content-preview p { white-space: pre-wrap; color: #42545a; }
+@media (max-width: 700px) {
+  .staff-header-actions { margin-top: 16px; }
+  .staff-header-actions > * { flex: 1; text-align: center; }
+  .app-nav { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .app-nav a { flex: none; }
+  .staff-list-controls, .date-toolbar { align-items: stretch; flex-direction: column; }
+  .staff-list-controls input, .staff-list-search { min-width: 0; }
+}

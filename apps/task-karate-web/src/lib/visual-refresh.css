@@ -456,6 +456,8 @@
 
 /* Student roster entry keeps the v3 dojo flow while sending real credentials to the API. */
 .roster-auth-stage { position: relative; isolation: isolate; align-items: start; overflow: hidden; padding-top: clamp(28px, 6vh, 72px); }
+.skip-link { position: fixed; left: 12px; top: -80px; z-index: 100; border: 1px solid #8de4ff; border-radius: 8px; background: #071321; color: #fff; padding: 10px 14px; font-weight: 800; text-decoration: none; transition: top .18s ease; }
+.skip-link:focus { top: 12px; }
 .roster-frame { position: relative; z-index: 2; width: min(960px, 100%); padding: clamp(42px, 5vw, 72px); }
 .roster-frame .lead { max-width: 650px; }
 .auth-orbs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }

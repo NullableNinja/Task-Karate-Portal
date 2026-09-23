@@ -37,10 +37,16 @@ public static class BootstrapService
             if (!await users.IsInRoleAsync(user, "Administrator")) await users.AddToRoleAsync(user, "Administrator");
         }
 
-        if (environment.IsDevelopment() && configuration.GetValue<bool>("Seed:ImportLegacySchedules"))
+        if (environment.IsDevelopment() && IsEnabled(configuration, "Seed:ImportLegacySchedules"))
             await ImportLegacySchedulesAsync(db, environment.ContentRootPath);
-        if (environment.IsDevelopment() && configuration.GetValue<bool>("Seed:ImportDemoStudents"))
+        if (environment.IsDevelopment() && IsEnabled(configuration, "Seed:ImportDemoStudents"))
             await ImportDemoStudentsAsync(db, environment.ContentRootPath);
+    }
+
+    private static bool IsEnabled(IConfiguration configuration, string key)
+    {
+        var value = configuration[key] ?? Environment.GetEnvironmentVariable(key.Replace(':', '_')) ?? Environment.GetEnvironmentVariable(key.Replace(":", "__", StringComparison.Ordinal));
+        return value is not null && (value.Equals("1", StringComparison.OrdinalIgnoreCase) || value.Equals("true", StringComparison.OrdinalIgnoreCase) || value.Equals("yes", StringComparison.OrdinalIgnoreCase));
     }
 
     private static async Task ImportLegacySchedulesAsync(ApplicationDbContext db, string root)

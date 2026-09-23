@@ -41,6 +41,25 @@ public sealed record TimelineItem(string Type, string Title, string Description,
 public sealed record GoldStarEventItem(long EventId, string Name, string Description, DateTime? EventDate, bool Awarded, bool Interested);
 public sealed record PracticeLogItem(long PracticeLogId, string Skill, int Minutes, string? Reflection, DateTime LoggedAt);
 public sealed record GoalItem(long GoalId, string Title, DateTime? TargetDate, bool Completed, DateTime CreatedAt, DateTime? CompletedAt);
+public sealed record PortalAdminStudent(
+    int StudentId,
+    string DisplayName,
+    string? RankName,
+    string? AgeGroup,
+    bool IsActive,
+    string? JoinDate,
+    string? UniformSize,
+    string? BeltSize,
+    string? Bio,
+    string? FavoriteTechnique,
+    int TotalClasses,
+    int AttendanceStreak,
+    int AchievementCount,
+    int GoldStarCount,
+    IReadOnlyList<string> Programs);
+public sealed record PortalAdminGoldStarEvent(long EventId, string Name, string Description, DateTime? EventDate, bool IsActive, int AwardCount);
+public sealed record PortalAdminAchievement(string Name, string Description, string IconName, int AwardCount);
+public sealed record PortalStudentWriteRequest(string FirstName, string LastName, string? PreferredName, string AgeGroup, DateTime? JoinDate, string? UniformSize, string? BeltSize, string? Bio, string? FavoriteTechnique);
 
 public sealed class StudentExperienceService
 {
@@ -168,6 +187,12 @@ INSERT OR IGNORE INTO gold_star_events(event_name, description, event_date) VALU
 
 INSERT OR IGNORE INTO achievements(achievement_name, description, icon_name) VALUES
     ('First Class!', 'You completed your very first class at TASK.', 'star'),
+    ('10 Classes Strong', 'You completed ten classes and built a real training rhythm.', 'ten'),
+    ('100 Classes', 'One hundred classes completed. That is serious consistency.', 'hundred'),
+    ('1,000 Classes', 'One thousand classes completed. A true dojo milestone.', 'thousand'),
+    ('10,000 Classes', 'Ten thousand classes completed. An extraordinary lifetime achievement.', 'ten-thousand'),
+    ('30-Day Rhythm', 'You attended on thirty distinct days and kept showing up.', 'calendar'),
+    ('90-Day Rhythm', 'You attended on ninety distinct days and made training a habit.', 'calendar-star'),
     ('Warmup Warrior', 'Ready to go on time for warmups all month.', 'flame'),
     ('Form Explorer', 'You began learning a new form and can perform the opening section.', 'compass'),
     ('Community Spark', 'You showed up for a special event that brought the dojo together.', 'spark');
@@ -646,7 +671,7 @@ WHERE student_id = $id;";
     public async Task<(bool Success, bool Duplicate)> CheckInAsync(int studentId, int sessionId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken); await using var exists = connection.CreateCommand(); exists.CommandText = "SELECT COUNT(1) FROM class_sessions s JOIN students st ON st.student_id = $student WHERE s.session_id = $session AND date(s.session_date) = date('now', 'localtime') AND s.cancelled = 0 AND st.active = 1"; exists.Parameters.AddWithValue("$student", studentId); exists.Parameters.AddWithValue("$session", sessionId); if (Convert.ToInt32(await exists.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0) return (false, false);
-        await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO attendance(session_id, student_id, check_in_time, status) VALUES ($session, $student, $now, 'present')"; command.Parameters.AddWithValue("$session", sessionId); command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); try { await command.ExecuteNonQueryAsync(cancellationToken); return (true, false); } catch (SqliteException ex) when (ex.SqliteErrorCode == 19) { return (false, true); }
+        await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO attendance(session_id, student_id, check_in_time, status) VALUES ($session, $student, $now, 'present')"; command.Parameters.AddWithValue("$session", sessionId); command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); try { await command.ExecuteNonQueryAsync(cancellationToken); await AwardAutomaticMilestonesAsync(connection, studentId, cancellationToken); return (true, false); } catch (SqliteException ex) when (ex.SqliteErrorCode == 19) { return (false, true); }
     }
 
     public async Task<IReadOnlyList<StudentSummary>> SearchStudentsAsync(int currentStudentId, string query, CancellationToken cancellationToken = default)
@@ -715,7 +740,7 @@ LEFT JOIN students s ON s.student_id = p.student_id
 LEFT JOIN student_profiles sp ON sp.student_id = p.student_id
 LEFT JOIN student_rank_history h ON h.student_id = p.student_id AND h.student_rank_id = (SELECT MAX(h2.student_rank_id) FROM student_rank_history h2 WHERE h2.student_id = p.student_id)
 LEFT JOIN ranks r ON r.rank_id = h.rank_id
-WHERE p.visible = 1 AND p.moderation_status = 'approved' AND p.post_type = 'student' AND (p.student_id = $id OR EXISTS (SELECT 1 FROM student_friendships f WHERE f.status = 'accepted' AND ((f.student_id = $id AND f.friend_id = p.student_id) OR (f.friend_id = $id AND f.student_id = p.student_id))))
+WHERE p.visible = 1 AND p.moderation_status = 'approved' AND (p.post_type = 'news' OR (p.post_type = 'student' AND (p.student_id = $id OR EXISTS (SELECT 1 FROM student_friendships f WHERE f.status = 'accepted' AND ((f.student_id = $id AND f.friend_id = p.student_id) OR (f.friend_id = $id AND f.student_id = p.student_id))))))
 ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", studentId);
         var rows = new List<(long Id, int AuthorId, string AuthorName, string? RankName, string Text, string Type, DateTime CreatedAt, int CommentCount)>();
         await using (var reader = await command.ExecuteReaderAsync(cancellationToken)) while (await reader.ReadAsync(cancellationToken)) rows.Add((reader.GetInt64(0), reader.GetInt32(1), reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetString(4), reader.GetString(5), DateTime.Parse(reader.GetString(6), CultureInfo.InvariantCulture), reader.GetInt32(7)));
@@ -874,13 +899,13 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
 
     public async Task<IReadOnlyList<GoldStarEventItem>> GetGoldStarEventsAsync(int studentId, CancellationToken cancellationToken = default)
     {
-        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT e.event_id, e.event_name, e.description, e.event_date, EXISTS (SELECT 1 FROM student_gold_stars g WHERE g.event_id = e.event_id AND g.student_id = $student), EXISTS (SELECT 1 FROM student_event_interests i WHERE i.event_id = e.event_id AND i.student_id = $student AND i.status = 'interested') FROM gold_star_events e WHERE e.active = 1 ORDER BY e.event_date IS NULL, e.event_date, e.event_name"; command.Parameters.AddWithValue("$student", studentId); var list = new List<GoldStarEventItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), reader.GetBoolean(4), reader.GetBoolean(5))); return list;
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT e.event_id, e.event_name, e.description, e.event_date, 1, 0 FROM gold_star_events e JOIN student_gold_stars g ON g.event_id = e.event_id AND g.student_id = $student WHERE e.active = 1 ORDER BY g.awarded_at DESC, e.event_name"; command.Parameters.AddWithValue("$student", studentId); var list = new List<GoldStarEventItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), true, false)); return list;
     }
 
     public async Task<GoldStarEventItem?> GetGoldStarEventAsync(int studentId, long eventId, CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT e.event_id, e.event_name, e.description, e.event_date, EXISTS (SELECT 1 FROM student_gold_stars g WHERE g.event_id = e.event_id AND g.student_id = $student), EXISTS (SELECT 1 FROM student_event_interests i WHERE i.event_id = e.event_id AND i.student_id = $student AND i.status = 'interested') FROM gold_star_events e WHERE e.event_id = $event AND e.active = 1";
+        command.CommandText = "SELECT e.event_id, e.event_name, e.description, e.event_date, 1, 0 FROM gold_star_events e JOIN student_gold_stars g ON g.event_id = e.event_id AND g.student_id = $student WHERE e.event_id = $event AND e.active = 1";
         command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$event", eventId);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken)) return null;
@@ -913,5 +938,125 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
         return separator > 0
             ? new(id, text[..separator], text[(separator + 3)..], DateTime.Parse(createdAt, CultureInfo.InvariantCulture))
             : new(id, "Dojo news", text, DateTime.Parse(createdAt, CultureInfo.InvariantCulture));
+    }
+
+    public async Task<int> CreatePortalStudentAsync(PortalStudentWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO students(first_name, last_name, preferred_name, age_group, start_date, uniform_size, belt_size, active) VALUES ($first, $last, $preferred, $age, $join, $uniform, $belt, 1); SELECT last_insert_rowid();"; command.Parameters.AddWithValue("$first", request.FirstName.Trim()); command.Parameters.AddWithValue("$last", request.LastName.Trim()); command.Parameters.AddWithValue("$preferred", (object?)NullIfBlank(request.PreferredName) ?? DBNull.Value); command.Parameters.AddWithValue("$age", request.AgeGroup.Trim()); command.Parameters.AddWithValue("$join", (request.JoinDate ?? DateTime.UtcNow.Date).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)); command.Parameters.AddWithValue("$uniform", (object?)NullIfBlank(request.UniformSize) ?? DBNull.Value); command.Parameters.AddWithValue("$belt", (object?)NullIfBlank(request.BeltSize) ?? DBNull.Value); var id = Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture); await using var profile = connection.CreateCommand(); profile.CommandText = "INSERT INTO student_profiles(student_id, display_name, bio, favorite_technique, profile_visible) VALUES ($id, $display, $bio, $technique, 1)"; profile.Parameters.AddWithValue("$id", id); profile.Parameters.AddWithValue("$display", (object?)NullIfBlank(request.PreferredName) ?? $"{request.FirstName.Trim()} {request.LastName.Trim()}"); profile.Parameters.AddWithValue("$bio", (object?)NullIfBlank(request.Bio) ?? DBNull.Value); profile.Parameters.AddWithValue("$technique", (object?)NullIfBlank(request.FavoriteTechnique) ?? DBNull.Value); await profile.ExecuteNonQueryAsync(cancellationToken); return id;
+    }
+
+    public async Task<bool> UpdatePortalStudentAsync(int studentId, PortalStudentWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "UPDATE students SET first_name = $first, last_name = $last, preferred_name = $preferred, age_group = $age, start_date = $join, uniform_size = $uniform, belt_size = $belt, updated_at = $now WHERE student_id = $id"; command.Parameters.AddWithValue("$first", request.FirstName.Trim()); command.Parameters.AddWithValue("$last", request.LastName.Trim()); command.Parameters.AddWithValue("$preferred", (object?)NullIfBlank(request.PreferredName) ?? DBNull.Value); command.Parameters.AddWithValue("$age", request.AgeGroup.Trim()); command.Parameters.AddWithValue("$join", (request.JoinDate ?? DateTime.UtcNow.Date).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)); command.Parameters.AddWithValue("$uniform", (object?)NullIfBlank(request.UniformSize) ?? DBNull.Value); command.Parameters.AddWithValue("$belt", (object?)NullIfBlank(request.BeltSize) ?? DBNull.Value); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); command.Parameters.AddWithValue("$id", studentId); if (await command.ExecuteNonQueryAsync(cancellationToken) == 0) return false; await using var profile = connection.CreateCommand(); profile.CommandText = "INSERT INTO student_profiles(student_id, display_name, bio, favorite_technique, profile_visible) VALUES ($id, $display, $bio, $technique, 1) ON CONFLICT(student_id) DO UPDATE SET display_name = excluded.display_name, bio = excluded.bio, favorite_technique = excluded.favorite_technique, updated_at = excluded.updated_at"; profile.Parameters.AddWithValue("$id", studentId); profile.Parameters.AddWithValue("$display", (object?)NullIfBlank(request.PreferredName) ?? $"{request.FirstName.Trim()} {request.LastName.Trim()}"); profile.Parameters.AddWithValue("$bio", (object?)NullIfBlank(request.Bio) ?? DBNull.Value); profile.Parameters.AddWithValue("$technique", (object?)NullIfBlank(request.FavoriteTechnique) ?? DBNull.Value); profile.Parameters.AddWithValue("$updated_at", DateTime.UtcNow.ToString("O")); await profile.ExecuteNonQueryAsync(cancellationToken); return true;
+    }
+
+    public async Task<bool> SetPortalStudentActiveAsync(int studentId, bool active, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "UPDATE students SET active = $active, archived_at = CASE WHEN $active = 1 THEN NULL ELSE $now END, updated_at = $now WHERE student_id = $id"; command.Parameters.AddWithValue("$active", active ? 1 : 0); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); command.Parameters.AddWithValue("$id", studentId); return await command.ExecuteNonQueryAsync(cancellationToken) > 0;
+    }
+
+    public async Task<IReadOnlyList<PortalAdminStudent>> GetPortalAdminStudentsAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT s.student_id, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), (SELECT r.rank_name FROM student_rank_history h JOIN ranks r ON r.rank_id = h.rank_id WHERE h.student_id = s.student_id ORDER BY h.awarded_date DESC, h.student_rank_id DESC LIMIT 1), s.age_group, s.active, s.start_date, s.uniform_size, s.belt_size, p.bio, p.favorite_technique, (SELECT COUNT(1) FROM attendance a WHERE a.student_id = s.student_id AND a.status = 'present'), (SELECT COUNT(1) FROM student_achievements a WHERE a.student_id = s.student_id), (SELECT COUNT(1) FROM student_gold_stars g WHERE g.student_id = s.student_id), COALESCE((SELECT group_concat(m.program_name, ', ') FROM student_program_memberships m WHERE m.student_id = s.student_id AND m.active = 1), '') FROM students s LEFT JOIN student_profiles p ON p.student_id = s.student_id ORDER BY 2";
+        var list = new List<PortalAdminStudent>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var studentId = reader.GetInt32(0);
+            IReadOnlyList<string> programs = reader.IsDBNull(13) ? Array.Empty<string>() : reader.GetString(13).Split(", ", StringSplitOptions.RemoveEmptyEntries);
+            list.Add(new(
+                studentId,
+                reader.GetString(1),
+                reader.IsDBNull(2) ? null : reader.GetString(2),
+                reader.IsDBNull(3) ? null : reader.GetString(3),
+                reader.GetInt32(4) != 0,
+                reader.IsDBNull(5) ? null : reader.GetString(5),
+                reader.IsDBNull(6) ? null : reader.GetString(6),
+                reader.IsDBNull(7) ? null : reader.GetString(7),
+                reader.IsDBNull(8) ? null : reader.GetString(8),
+                reader.IsDBNull(9) ? null : reader.GetString(9),
+                reader.GetInt32(10),
+                await GetAttendanceStreakAsync(connection, studentId, cancellationToken),
+                reader.GetInt32(11),
+                reader.GetInt32(12),
+                programs));
+        }
+        return list;
+    }
+
+    public async Task<IReadOnlyList<PortalAdminGoldStarEvent>> GetPortalAdminGoldStarEventsAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT e.event_id, e.event_name, e.description, e.event_date, e.active, (SELECT COUNT(1) FROM student_gold_stars g WHERE g.event_id = e.event_id) FROM gold_star_events e ORDER BY e.active DESC, e.event_date IS NULL, e.event_date, e.event_name";
+        var list = new List<PortalAdminGoldStarEvent>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), reader.GetInt32(4) != 0, reader.GetInt32(5)));
+        return list;
+    }
+
+    public async Task<long> CreateGoldStarEventAsync(string name, string description, DateTime? eventDate, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "INSERT INTO gold_star_events(event_name, description, event_date, active) VALUES ($name, $description, $date, 1); SELECT last_insert_rowid();";
+        command.Parameters.AddWithValue("$name", name.Trim()); command.Parameters.AddWithValue("$description", description.Trim()); command.Parameters.AddWithValue("$date", eventDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? (object)DBNull.Value);
+        return Convert.ToInt64(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    public async Task<bool> SetGoldStarEventActiveAsync(long eventId, bool active, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "UPDATE gold_star_events SET active = $active WHERE event_id = $event"; command.Parameters.AddWithValue("$active", active ? 1 : 0); command.Parameters.AddWithValue("$event", eventId); return await command.ExecuteNonQueryAsync(cancellationToken) > 0;
+    }
+
+    public async Task<bool> AwardGoldStarAsync(int studentId, long eventId, string? note, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var check = connection.CreateCommand(); check.CommandText = "SELECT COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), e.event_name FROM students s LEFT JOIN student_profiles p ON p.student_id = s.student_id CROSS JOIN gold_star_events e WHERE s.student_id = $student AND s.active = 1 AND e.event_id = $event"; check.Parameters.AddWithValue("$student", studentId); check.Parameters.AddWithValue("$event", eventId);
+        await using var reader = await check.ExecuteReaderAsync(cancellationToken); if (!await reader.ReadAsync(cancellationToken)) return false; var studentName = reader.GetString(0); var eventName = reader.GetString(1);
+        await reader.DisposeAsync();
+        await using var award = connection.CreateCommand(); award.CommandText = "INSERT OR IGNORE INTO student_gold_stars(student_id, event_id, note, awarded_at) VALUES ($student, $event, $note, $now)"; award.Parameters.AddWithValue("$student", studentId); award.Parameters.AddWithValue("$event", eventId); award.Parameters.AddWithValue("$note", (object?)note?.Trim() ?? DBNull.Value); award.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); var changed = await award.ExecuteNonQueryAsync(cancellationToken) > 0;
+        if (changed) await AddNewsPostAsync(connection, $"Gold Star earned — {studentName}", $"{studentName} received a Gold Star for {eventName}.", cancellationToken);
+        return changed;
+    }
+
+    public async Task<bool> RemoveGoldStarAsync(int studentId, long eventId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "DELETE FROM student_gold_stars WHERE student_id = $student AND event_id = $event"; command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$event", eventId); return await command.ExecuteNonQueryAsync(cancellationToken) > 0;
+    }
+
+    public async Task<IReadOnlyList<PortalAdminAchievement>> GetPortalAdminAchievementsAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT a.achievement_name, COALESCE(a.description, ''), COALESCE(a.icon_name, 'star'), (SELECT COUNT(1) FROM student_achievements sa WHERE sa.achievement_id = a.achievement_id) FROM achievements a WHERE a.active = 1 ORDER BY a.achievement_id"; var list = new List<PortalAdminAchievement>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetInt32(3))); return list;
+    }
+
+    public async Task<int> RecalculateAutomaticMilestonesAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand(); command.CommandText = "SELECT student_id FROM students WHERE active = 1"; var ids = new List<int>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) ids.Add(reader.GetInt32(0)); var awarded = 0; foreach (var id in ids) awarded += await AwardAutomaticMilestonesAsync(connection, id, cancellationToken); return awarded;
+    }
+
+    private static async Task<int> AwardAutomaticMilestonesAsync(SqliteConnection connection, int studentId, CancellationToken cancellationToken)
+    {
+        await using var countCommand = connection.CreateCommand(); countCommand.CommandText = "SELECT COUNT(1) FROM attendance WHERE student_id = $student AND status = 'present'"; countCommand.Parameters.AddWithValue("$student", studentId); var totalClasses = Convert.ToInt32(await countCommand.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+        var streak = await GetAttendanceStreakAsync(connection, studentId, cancellationToken);
+        var milestones = new List<(string Name, bool Qualifies)> { ("First Class!", totalClasses >= 1), ("10 Classes Strong", totalClasses >= 10), ("100 Classes", totalClasses >= 100), ("1,000 Classes", totalClasses >= 1000), ("10,000 Classes", totalClasses >= 10000), ("30-Day Rhythm", streak >= 30), ("90-Day Rhythm", streak >= 90) };
+        var awarded = 0;
+        foreach (var milestone in milestones.Where(x => x.Qualifies))
+        {
+            await using var command = connection.CreateCommand(); command.CommandText = "INSERT OR IGNORE INTO student_achievements(student_id, achievement_id, awarded_at) SELECT $student, achievement_id, $now FROM achievements WHERE achievement_name = $name"; command.Parameters.AddWithValue("$student", studentId); command.Parameters.AddWithValue("$name", milestone.Name); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); if (await command.ExecuteNonQueryAsync(cancellationToken) > 0) { awarded++; await AddNewsPostAsync(connection, $"Milestone unlocked — {milestone.Name}", $"A training milestone was automatically awarded after attendance criteria were met.", cancellationToken); }
+        }
+        return awarded;
+    }
+
+    private static async Task<int> GetAttendanceStreakAsync(SqliteConnection connection, int studentId, CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand(); command.CommandText = "SELECT DISTINCT date(check_in_time) FROM attendance WHERE student_id = $student AND status = 'present' ORDER BY date(check_in_time) DESC"; command.Parameters.AddWithValue("$student", studentId); var dates = new List<DateOnly>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) if (DateOnly.TryParse(reader.GetString(0), out var date)) dates.Add(date); if (dates.Count == 0) return 0; var streak = 1; for (var index = 1; index < dates.Count; index++) { if (dates[index - 1].DayNumber - dates[index].DayNumber != 1) break; streak++; } return streak;
+    }
+
+    private static async Task AddNewsPostAsync(SqliteConnection connection, string title, string body, CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at) VALUES (NULL, $text, 'news', 'approved', 1, $now, $now)"; command.Parameters.AddWithValue("$text", $"{title} — {body}"); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken);
     }
 }

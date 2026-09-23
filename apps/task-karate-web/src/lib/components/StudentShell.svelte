@@ -37,6 +37,7 @@
 
 <svelte:head><meta name="theme-color" content="#081526" /></svelte:head>
 <div class="student-app">
+  <a class="skip-link" href="#student-content">Skip to content</a>
   <div class="portal-orbs" aria-hidden="true"><span class="portal-orb orb-a"></span><span class="portal-orb orb-b"></span><span class="portal-orb orb-c"></span><span class="portal-orb orb-d"></span><span class="portal-orb orb-e"></span><span class="portal-orb orb-f"></span><span class="portal-orb orb-g"></span><span class="portal-orb orb-h"></span></div>
   <header class="student-topbar">
     <a class="brand" href="/schedule" aria-label="Task Karate schedule"><span class="brand-mark">TK</span><span><strong>TASK KARATE</strong><small>STUDENT HUB</small></span></a>
@@ -48,6 +49,6 @@
   </nav>
   <button class="floating-logout" type="button" on:click={logout}><span aria-hidden="true">⏻</span> Log out</button>
   {#if error}<div class="student-toast error" role="alert">{error}</div>{/if}
-  <main class="student-main"><slot /></main>
+  <main id="student-content" class="student-main"><slot /></main>
   <div class="scroll-rank-indicator" role="progressbar" aria-label={`Page progress · ${scrollBelt.name}`} aria-valuemin="0" aria-valuemax="100" aria-valuenow={scrollPercent} style={`--scroll-progress:${scrollPercent}%;--scroll-color:${scrollBelt.color}`}><span class="scroll-rank-fill"></span></div>
 </div>

@@ -170,6 +170,7 @@ publicApi.MapGet("/schedule", async (ApplicationDbContext db, DateTime? from, Da
 publicApi.MapGet("/announcements", async (ApplicationDbContext db) => Results.Ok(await db.Announcements.AsNoTracking().Where(x => x.Status == "Published" && (x.ExpiresAtUtc == null || x.ExpiresAtUtc > DateTime.UtcNow)).OrderByDescending(x => x.PublishedAtUtc).Select(x => new ContentDto(x.Id, x.Title, x.Body, x.Status, x.PublishedAtUtc)).ToListAsync()));
 publicApi.MapGet("/news", async (ApplicationDbContext db) => Results.Ok(await db.NewsPosts.AsNoTracking().Where(x => x.Status == "Published").OrderByDescending(x => x.PublishedAtUtc).Select(x => new ContentDto(x.Id, x.Title, x.Body, x.Status, x.PublishedAtUtc)).ToListAsync()));
 app.MapStudentExperience();
+app.MapPortalAdmin();
 app.Run();
 
 static bool ValidCsrf(HttpRequest request)

@@ -1,0 +1,62 @@
+namespace TaskKarate.Api.Services;
+
+public static class PortalAdminEndpoints
+{
+    public static void MapPortalAdmin(this WebApplication app)
+    {
+        var admin = app.MapGroup("/api/portal-admin").RequireAuthorization("Staff");
+
+        admin.MapGet("/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(ct)));
+        admin.MapPost("/students", async (PortalStudentWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName) || string.IsNullOrWhiteSpace(request.AgeGroup)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["student"] = ["First name, last name, and age group are required."] });
+            var id = await service.CreatePortalStudentAsync(request, ct); await audit.RecordAsync(context, "Create", "PortalStudent", Guid.Empty, new { legacyId = id }); return Results.Created($"/api/portal-admin/students/{id}", new { id });
+        });
+        admin.MapPut("/students/{studentId:int}", async (int studentId, PortalStudentWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName) || string.IsNullOrWhiteSpace(request.AgeGroup)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["student"] = ["Student details are invalid."] });
+            if (!await service.UpdatePortalStudentAsync(studentId, request, ct)) return Results.NotFound(); await audit.RecordAsync(context, "Update", "PortalStudent", Guid.Empty, new { legacyId = studentId }); return Results.NoContent();
+        });
+        admin.MapPost("/students/{studentId:int}/active", async (int studentId, PortalActiveRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.SetPortalStudentActiveAsync(studentId, request.Active, ct)) return Results.NotFound(); await audit.RecordAsync(context, request.Active ? "Activate" : "Deactivate", "PortalStudent", Guid.Empty, new { legacyId = studentId }); return Results.NoContent();
+        });
+        admin.MapGet("/gold-star-events", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGoldStarEventsAsync(ct)));
+        admin.MapPost("/gold-star-events", async (PortalGoldStarEventRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Trim().Length > 160 || string.IsNullOrWhiteSpace(request.Description) || request.Description.Trim().Length > 2000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["event"] = ["A name and description are required."] });
+            var id = await service.CreateGoldStarEventAsync(request.Name, request.Description, request.EventDate, ct);
+            await audit.RecordAsync(context, "Create", "GoldStarEvent", Guid.Empty, new { legacyId = id, request.Name });
+            return Results.Created($"/api/portal-admin/gold-star-events/{id}", new { id });
+        });
+        admin.MapPost("/gold-star-events/{eventId:long}/active", async (long eventId, PortalActiveRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.SetGoldStarEventActiveAsync(eventId, request.Active, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, request.Active ? "Activate" : "Deactivate", "GoldStarEvent", Guid.Empty, new { legacyId = eventId });
+            return Results.NoContent();
+        });
+        admin.MapPost("/gold-star-events/{eventId:long}/award", async (long eventId, PortalAwardRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.AwardGoldStarAsync(request.StudentId, eventId, request.Note, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, "Award", "GoldStar", Guid.Empty, new { request.StudentId, eventId });
+            return Results.Ok(new { awarded = true });
+        });
+        admin.MapPost("/gold-star-events/{eventId:long}/remove", async (long eventId, PortalAwardRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.RemoveGoldStarAsync(request.StudentId, eventId, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, "Remove", "GoldStar", Guid.Empty, new { request.StudentId, eventId });
+            return Results.NoContent();
+        });
+        admin.MapGet("/achievements", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminAchievementsAsync(ct)));
+        admin.MapPost("/milestones/recalculate", async (StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var awarded = await service.RecalculateAutomaticMilestonesAsync(ct);
+            await audit.RecordAsync(context, "Recalculate", "AutomaticMilestones", Guid.Empty, new { awarded });
+            return Results.Ok(new { awarded });
+        });
+    }
+}
+
+public sealed record PortalGoldStarEventRequest(string Name, string Description, DateTime? EventDate);
+public sealed record PortalActiveRequest(bool Active);
+public sealed record PortalAwardRequest(int StudentId, string? Note);

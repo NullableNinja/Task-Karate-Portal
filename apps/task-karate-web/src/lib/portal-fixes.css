@@ -1,0 +1,6 @@
+.success-notice { margin: 12px 0; padding: 12px 14px; border: 1px solid #42c7aa; border-radius: 8px; background: #0c564b; color: #d8fff5; }
+.metric-link { display: block; border: 1px solid var(--line); background: #0d192cdd; padding: 17px 16px; text-decoration: none; color: inherit; transition: transform .18s ease, border-color .18s ease; }
+.metric-link:hover, .metric-link:focus-visible { border-color: var(--cyan); transform: translateY(-2px); }
+.search-message { margin: 8px 0 14px; }
+.floating-nav a:focus-visible, .floating-logout:focus-visible, .student-identity-link:focus-visible { outline: 3px solid #b7eaff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .skip-link, .metric-link { transition: none; } }

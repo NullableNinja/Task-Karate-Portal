@@ -60,6 +60,9 @@ public sealed record PortalAdminStudent(
 public sealed record PortalAdminGoldStarEvent(long EventId, string Name, string Description, DateTime? EventDate, bool IsActive, int AwardCount);
 public sealed record PortalAdminAchievement(string Name, string Description, string IconName, int AwardCount);
 public sealed record PortalStudentWriteRequest(string FirstName, string LastName, string? PreferredName, string AgeGroup, DateTime? JoinDate, string? UniformSize, string? BeltSize, string? Bio, string? FavoriteTechnique);
+public sealed record PortalAdminGuardianStudent(int StudentId, string Name, string Relationship);
+public sealed record PortalAdminGuardian(int GuardianId, string FirstName, string LastName, string? Email, string? Phone, bool IsActive, IReadOnlyList<PortalAdminGuardianStudent> Students);
+public sealed record PortalGuardianWriteRequest(string FirstName, string LastName, string? Email, string? Phone, IReadOnlyList<int>? StudentIds);
 
 public sealed class StudentExperienceService
 {
@@ -995,6 +998,71 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), reader.GetInt32(4) != 0, reader.GetInt32(5)));
         return list;
+    }
+
+    public async Task<IReadOnlyList<PortalAdminGuardian>> GetPortalAdminGuardiansAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT g.guardian_id, g.first_name, g.last_name, g.email, g.phone, g.active, s.student_id, TRIM(s.first_name || ' ' || s.last_name), sg.relationship FROM guardians g LEFT JOIN student_guardians sg ON sg.guardian_id = g.guardian_id LEFT JOIN students s ON s.student_id = sg.student_id WHERE g.active = 1 ORDER BY g.last_name, g.first_name, s.last_name, s.first_name";
+        var guardians = new Dictionary<int, (string FirstName, string LastName, string? Email, string? Phone, bool IsActive, List<PortalAdminGuardianStudent> Students)>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var guardianId = reader.GetInt32(0);
+            if (!guardians.TryGetValue(guardianId, out var guardian))
+            {
+                guardian = (reader.GetString(1), reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4), reader.GetInt32(5) != 0, new List<PortalAdminGuardianStudent>());
+                guardians.Add(guardianId, guardian);
+            }
+
+            if (!reader.IsDBNull(6) && !guardian.Students.Any(student => student.StudentId == reader.GetInt32(6)))
+                guardian.Students.Add(new(reader.GetInt32(6), reader.GetString(7), reader.IsDBNull(8) ? "Guardian" : reader.GetString(8)));
+        }
+
+        return guardians.Select(pair => new PortalAdminGuardian(pair.Key, pair.Value.FirstName, pair.Value.LastName, pair.Value.Email, pair.Value.Phone, pair.Value.IsActive, pair.Value.Students)).ToList();
+    }
+
+    public async Task<IReadOnlyList<PortalAdminGuardianStudent>> GetPortalAdminGuardianStudentsAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT student_id, TRIM(first_name || ' ' || last_name) FROM students WHERE active = 1 ORDER BY last_name, first_name";
+        var students = new List<PortalAdminGuardianStudent>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) students.Add(new(reader.GetInt32(0), reader.GetString(1), "Guardian"));
+        return students;
+    }
+
+    public async Task<int> CreatePortalGuardianAsync(PortalGuardianWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "INSERT INTO guardians(first_name, last_name, email, phone, active, updated_at) VALUES ($first, $last, $email, $phone, 1, $now); SELECT last_insert_rowid();";
+        command.Parameters.AddWithValue("$first", request.FirstName.Trim()); command.Parameters.AddWithValue("$last", request.LastName.Trim()); command.Parameters.AddWithValue("$email", (object?)NullIfBlank(request.Email) ?? DBNull.Value); command.Parameters.AddWithValue("$phone", (object?)NullIfBlank(request.Phone) ?? DBNull.Value); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O"));
+        var guardianId = Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+        await ReplaceGuardianLinksAsync(connection, guardianId, request.StudentIds, cancellationToken);
+        return guardianId;
+    }
+
+    public async Task<bool> UpdatePortalGuardianAsync(int guardianId, PortalGuardianWriteRequest request, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE guardians SET first_name = $first, last_name = $last, email = $email, phone = $phone, updated_at = $now WHERE guardian_id = $id";
+        command.Parameters.AddWithValue("$first", request.FirstName.Trim()); command.Parameters.AddWithValue("$last", request.LastName.Trim()); command.Parameters.AddWithValue("$email", (object?)NullIfBlank(request.Email) ?? DBNull.Value); command.Parameters.AddWithValue("$phone", (object?)NullIfBlank(request.Phone) ?? DBNull.Value); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); command.Parameters.AddWithValue("$id", guardianId);
+        if (await command.ExecuteNonQueryAsync(cancellationToken) == 0) return false;
+        await ReplaceGuardianLinksAsync(connection, guardianId, request.StudentIds, cancellationToken);
+        return true;
+    }
+
+    private static async Task ReplaceGuardianLinksAsync(SqliteConnection connection, int guardianId, IReadOnlyList<int>? studentIds, CancellationToken cancellationToken)
+    {
+        await using var delete = connection.CreateCommand(); delete.CommandText = "DELETE FROM student_guardians WHERE guardian_id = $guardian"; delete.Parameters.AddWithValue("$guardian", guardianId); await delete.ExecuteNonQueryAsync(cancellationToken);
+        foreach (var studentId in (studentIds ?? Array.Empty<int>()).Distinct())
+        {
+            await using var link = connection.CreateCommand(); link.CommandText = "INSERT OR IGNORE INTO student_guardians(student_id, guardian_id, relationship, is_primary) SELECT $student, $guardian, 'Guardian', CASE WHEN NOT EXISTS (SELECT 1 FROM student_guardians WHERE student_id = $student) THEN 1 ELSE 0 END FROM students WHERE student_id = $student AND active = 1"; link.Parameters.AddWithValue("$student", studentId); link.Parameters.AddWithValue("$guardian", guardianId); await link.ExecuteNonQueryAsync(cancellationToken);
+        }
     }
 
     public async Task<long> CreateGoldStarEventAsync(string name, string description, DateTime? eventDate, CancellationToken cancellationToken = default)

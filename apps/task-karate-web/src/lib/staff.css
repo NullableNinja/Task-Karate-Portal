@@ -11,6 +11,10 @@
 .content-preview { min-height: 180px; border: 1px dashed #bfd3d0; border-radius: 10px; background: #f7fbfa; padding: 18px; }
 .content-preview h3 { margin: 12px 0 8px; }
 .content-preview p { white-space: pre-wrap; color: #42545a; }
+.student-link-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px 14px; max-height: 220px; overflow: auto; padding: 10px; border: 1px solid #d6e2e0; border-radius: 10px; background: #fbfdfc; }
+.student-link-grid .check-row { min-height: 40px; }
+fieldset.full { border: 0; padding: 0; margin: 0; }
+fieldset.full legend { font-weight: 700; margin-bottom: 6px; }
 @media (max-width: 700px) {
   .staff-header-actions { margin-top: 16px; }
   .staff-header-actions > * { flex: 1; text-align: center; }

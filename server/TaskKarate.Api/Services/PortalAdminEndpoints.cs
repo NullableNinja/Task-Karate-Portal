@@ -21,6 +21,18 @@ public static class PortalAdminEndpoints
         {
             if (!await service.SetPortalStudentActiveAsync(studentId, request.Active, ct)) return Results.NotFound(); await audit.RecordAsync(context, request.Active ? "Activate" : "Deactivate", "PortalStudent", Guid.Empty, new { legacyId = studentId }); return Results.NoContent();
         });
+        admin.MapGet("/guardians", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGuardiansAsync(ct)));
+        admin.MapGet("/guardian-students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGuardianStudentsAsync(ct)));
+        admin.MapPost("/guardians", async (PortalGuardianWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["guardian"] = ["First name and last name are required."] });
+            var id = await service.CreatePortalGuardianAsync(request, ct); await audit.RecordAsync(context, "Create", "PortalGuardian", Guid.Empty, new { legacyId = id, linkedStudents = request.StudentIds?.Count ?? 0 }); return Results.Created($"/api/portal-admin/guardians/{id}", new { id });
+        });
+        admin.MapPut("/guardians/{guardianId:int}", async (int guardianId, PortalGuardianWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["guardian"] = ["First name and last name are required."] });
+            if (!await service.UpdatePortalGuardianAsync(guardianId, request, ct)) return Results.NotFound(); await audit.RecordAsync(context, "Update", "PortalGuardian", Guid.Empty, new { legacyId = guardianId, linkedStudents = request.StudentIds?.Count ?? 0 }); return Results.NoContent();
+        });
         admin.MapGet("/gold-star-events", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGoldStarEventsAsync(ct)));
         admin.MapPost("/gold-star-events", async (PortalGoldStarEventRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
         {

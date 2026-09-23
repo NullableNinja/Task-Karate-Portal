@@ -6,7 +6,7 @@ public static class PortalAdminEndpoints
     {
         var admin = app.MapGroup("/api/portal-admin").RequireAuthorization("Staff");
 
-        admin.MapGet("/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(ct)));
+        admin.MapGet("/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(false, ct)));
         admin.MapPost("/students", async (PortalStudentWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName) || string.IsNullOrWhiteSpace(request.AgeGroup)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["student"] = ["First name, last name, and age group are required."] });
@@ -21,6 +21,13 @@ public static class PortalAdminEndpoints
         {
             if (!await service.SetPortalStudentActiveAsync(studentId, request.Active, ct)) return Results.NotFound(); await audit.RecordAsync(context, request.Active ? "Activate" : "Deactivate", "PortalStudent", Guid.Empty, new { legacyId = studentId }); return Results.NoContent();
         });
+        admin.MapPost("/students/{studentId:int}/status", async (int studentId, PortalStudentStatusRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (request.Status is not ("active" or "paused" or "deactivated")) return Results.ValidationProblem(new Dictionary<string, string[]> { ["status"] = ["Status must be active, paused, or deactivated."] });
+            if (!await service.SetPortalStudentStatusAsync(studentId, request.Status, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, request.Status == "deactivated" ? "Deactivate" : "SetStatus", "PortalStudent", Guid.Empty, new { legacyId = studentId, request.Status });
+            return Results.NoContent();
+        });
         admin.MapPost("/students/{studentId:int}/password", async (int studentId, PortalStudentPasswordRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
         {
             var errors = StudentPasswordPolicy.Validate(request.Password, request.ConfirmPassword);
@@ -30,7 +37,7 @@ public static class PortalAdminEndpoints
             await audit.RecordAsync(context, "ResetPassword", "StudentAccount", Guid.Empty, new { legacyStudentId = studentId, username = result.Username, via = "administrator" });
             return Results.Ok(new { passwordChanged = true, username = result.Username });
         }).RequireAuthorization(policy => policy.RequireRole("Administrator"));
-        admin.MapGet("/attendance/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(ct)));
+        admin.MapGet("/attendance/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(true, ct)));
         admin.MapGet("/attendance/sessions", async (DateTime? date, StudentExperienceService service, CancellationToken ct) =>
         {
             var day = (date ?? DateTime.UtcNow).Date;
@@ -114,6 +121,7 @@ public static class PortalAdminEndpoints
 
 public sealed record PortalGoldStarEventRequest(string Name, string Description, DateTime? EventDate);
 public sealed record PortalActiveRequest(bool Active);
+public sealed record PortalStudentStatusRequest(string Status);
 public sealed record PortalAwardRequest(int StudentId, string? Note);
 public sealed record PortalStudentPasswordRequest(string Password, string ConfirmPassword);
 public sealed record PortalAttendanceRequest(int StudentId, int SessionId, bool Helper = false);

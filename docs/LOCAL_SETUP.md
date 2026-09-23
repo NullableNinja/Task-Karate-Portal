@@ -86,9 +86,13 @@ Do not use a short test phrase such as `8675309` or `Cobra Kai Never Dies!` as t
 
 `/schedule` is the supervised front-desk schedule. It prioritizes today's in-progress and upcoming classes, keeps future dates view-only, and uses the imported schedule database. A same-origin check-in requires a searched student selection and an explicit confirmation; it does not require the student to enter a password at the desk. Keep this page on the local dojo computer or a deliberately supervised LAN only. Do not expose it to the public internet.
 
-## Student password changes
+## Student PINs and roster status
 
-An authenticated student can open `Student Hub > Profile > Account password` and change their own password. The current password is required, and the new password must be at least 12 characters with uppercase, lowercase, and a number. An Administrator can select a student in `Staff > Students`, choose `Edit profile`, and use `Reset student password`; the old password is never displayed or recoverable, and the reset is recorded in the audit log. Share an administrator-assigned password with the student through a supervised channel.
+An authenticated student can open `Student Hub > Profile > Account PIN` and change their own credential. Student credentials are intentionally 4–6 digits for the local youth-school context; staff and administrator Identity accounts retain the stronger password policy. An Administrator can select a student in `Staff > Students`, choose `Edit profile`, and use `Reset student PIN`; the old PIN is never displayed or recoverable, and the reset is recorded in the audit log.
+
+The staff student roster is filtered by status and paged at 25 records per page so it remains usable for a 100–250 student school. Active students are eligible for enrollment and attendance. Paused students remain in the student directory and retain their history, but are excluded from attendance pickers and class enrollment choices. Deactivated records remain available under the Deactivated filter for historical administration.
+
+In `Staff > Classes`, the recurring enrollment roster includes an explicit `Remove student from class` action. Removing a recurring enrollment does not erase attendance history. The same page is also where staff can create seminars and appointment-only private-lesson sessions.
 
 ## Backup and restore
 

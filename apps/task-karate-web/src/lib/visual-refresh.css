@@ -535,3 +535,14 @@
   .training-rank-summary { grid-template-columns: 1fr auto 1fr; }
   .training-rank-summary .text-link { grid-column: 1 / -1; }
 }
+
+/* The live front-desk schedule uses the same dark operational language as the student hub. */
+.schedule-live-page { background: radial-gradient(circle at 82% 10%, #17445d 0, transparent 28%), linear-gradient(135deg, #071321, #102842); color: #edf4ff; }
+.schedule-live-page .schedule-header { border-bottom-color: #32465c; }
+.schedule-live-page .brand { color: #edf4ff; }
+.schedule-live-page .brand small { color: #38bdf8; }
+.schedule-live-page .brand-mark { color: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 18px #38bdf844; }
+.schedule-live-page .outline-button { color: #c8edff; background: transparent; border-color: #38bdf8; }
+.schedule-live-page .outline-button:hover, .schedule-live-page .outline-button:focus-visible { background: #123b55; }
+.schedule-live-page .schedule-hero h1 { color: #f5f7fb; }
+.schedule-live-page .schedule-hero p { color: #a5bad1; }

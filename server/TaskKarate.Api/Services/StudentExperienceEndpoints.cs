@@ -24,6 +24,14 @@ public static class StudentExperienceEndpoints
         publicApi.MapGet("/schedule", async (StudentExperienceService service, DateTime? from, DateTime? to, CancellationToken ct) => Results.Ok(await service.GetScheduleAsync((from ?? DateTime.UtcNow.Date).Date, (to ?? DateTime.UtcNow.Date.AddDays(30)).Date.AddDays(1), ct)));
         publicApi.MapGet("/news", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetNewsAsync(ct)));
         publicApi.MapGet("/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetStudentDirectoryAsync(ct)));
+        publicApi.MapPost("/schedule/{sessionId:int}/check-in", async (int sessionId, PublicCheckInRequest request, StudentExperienceService service, CancellationToken ct) =>
+        {
+            if (!request.Confirmed) return Results.BadRequest(new { title = "Confirmation required", detail = "Confirm that the selected student is present before recording attendance." });
+            var result = await service.CheckInAsync(request.StudentId, sessionId, ct);
+            if (result.Duplicate) return Results.Conflict(new { title = "Already checked in", detail = "This student is already checked in for this class." });
+            if (!result.Success) return Results.NotFound(new { title = "Class unavailable", detail = "Only an active class happening today can accept a public check-in." });
+            return Results.Ok(new { checkedIn = true });
+        });
 
         var auth = app.MapGroup("/api/student/auth");
         auth.MapPost("/login", async (StudentLoginRequest request, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
@@ -153,6 +161,7 @@ public sealed record StudentGate(int? Id, IResult? Result);
 
 public sealed record StudentLoginRequest(string? Username, string Password, bool RememberMe = false, int? StudentId = null);
 public sealed record DisclaimerRequest(bool Accepted);
+public sealed record PublicCheckInRequest(int StudentId, bool Confirmed);
 public sealed record FriendResponseRequest(bool Accept);
 public sealed record MessageRequest(int RecipientId, string Message);
 public sealed record PostRequest(string Text);

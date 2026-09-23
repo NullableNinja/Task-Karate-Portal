@@ -9,7 +9,8 @@ Install Node.js 20+ and the .NET 8 SDK. If the SDK is not installed system-wide,
 Do not put credentials in Git. For one local run:
 
 ```powershell
-$env:TASK_KARATE_ADMIN_EMAIL = "admin@example.test"
+$env:TASK_KARATE_ADMIN_USERNAME = "Admin"
+$env:TASK_KARATE_ADMIN_EMAIL = "admin@example.test" # optional fallback identifier
 $env:TASK_KARATE_ADMIN_PASSWORD = "Use-a-local-password-with-12-or-more-chars!"
 ```
 
@@ -17,11 +18,14 @@ For a persistent local secret, use user secrets from `server\TaskKarate.Api`:
 
 ```powershell
 dotnet user-secrets init
+dotnet user-secrets set "BootstrapAdmin:Username" "Admin"
 dotnet user-secrets set "BootstrapAdmin:Email" "admin@example.test"
 dotnet user-secrets set "BootstrapAdmin:Password" "Use-a-local-password-with-12-or-more-chars!"
 ```
 
-The API creates roles and the administrator on startup. Remove the environment variables after the first successful bootstrap if user secrets are used. Identity enforces a strong password and locks out repeated failures.
+The API creates roles and the administrator on startup. Staff can sign in with the configured username or email. If no username is supplied, the email becomes the username. Remove the environment variables after the first successful bootstrap if user secrets are used. Identity enforces a strong password and locks out repeated failures.
+
+Staff sign-in includes a local-use acknowledgment because this workspace can display student, guardian, attendance, and community records. The acknowledgment is enforced by the API, not merely displayed by the browser.
 
 ## Migrations and database
 
@@ -61,6 +65,8 @@ $env:TASK_KARATE_STUDENT_PASSWORD = "Use-a-long-local-password-with-12-chars!"
 ```
 
 The bootstrap account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub. The student sign-in lists active, provisioned student accounts alphabetically; selecting a profile opens the server-verified PIN/password prompt, followed by the profile acknowledgment when required.
+
+`/schedule` is the supervised front-desk schedule. It prioritizes today's in-progress and upcoming classes, keeps future dates view-only, and uses the imported schedule database. A same-origin check-in requires a searched student selection and an explicit confirmation; it does not require the student to enter a password at the desk. Keep this page on the local dojo computer or a deliberately supervised LAN only. Do not expose it to the public internet.
 
 ## Student password changes
 

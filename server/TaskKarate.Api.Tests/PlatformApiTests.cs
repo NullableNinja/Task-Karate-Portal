@@ -28,7 +28,7 @@ public sealed class PlatformApiTests : IClassFixture<PlatformFactory>
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
         await CsrfAsync(client);
-        var login = await client.PostAsJsonAsync("/api/auth/login", new { email = PlatformFactory.Email, password = PlatformFactory.Password, rememberMe = true });
+        var login = await client.PostAsJsonAsync("/api/auth/login", new { email = PlatformFactory.Email, password = PlatformFactory.Password, rememberMe = true, disclaimerAccepted = true });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
 
         using var scope = factory.Services.CreateScope();

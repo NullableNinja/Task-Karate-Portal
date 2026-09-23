@@ -46,6 +46,24 @@ public static class PortalAdminEndpoints
             await audit.RecordAsync(context, "CheckIn", "PortalAttendance", Guid.Empty, new { request.StudentId, request.SessionId });
             return Results.Created($"/api/portal-admin/attendance?sessionId={request.SessionId}", new { checkedIn = true });
         });
+        admin.MapGet("/social/feed", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetStaffSocialFeedAsync(ct)));
+        admin.MapPut("/social/posts/{postId:long}", async (long postId, StaffSocialPostRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.Text) || request.Text.Trim().Length > 2000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["text"] = ["Post text is required and must be 2,000 characters or fewer."] });
+            if (!await service.UpdateStaffSocialPostAsync(postId, request.Text, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, "Update", "SocialPost", Guid.Empty, new { postId }); return Results.NoContent();
+        });
+        admin.MapPost("/social/posts/{postId:long}/visibility", async (long postId, PortalActiveRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.SetStaffSocialPostVisibilityAsync(postId, request.Active, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, request.Active ? "Restore" : "Remove", "SocialPost", Guid.Empty, new { postId }); return Results.NoContent();
+        });
+        admin.MapGet("/social/posts/{postId:long}/comments", async (long postId, StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetStaffSocialCommentsAsync(postId, ct)));
+        admin.MapPost("/social/comments/{commentId:long}/visibility", async (long commentId, PortalActiveRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (!await service.SetStaffSocialCommentVisibilityAsync(commentId, request.Active, ct)) return Results.NotFound();
+            await audit.RecordAsync(context, request.Active ? "Restore" : "Remove", "SocialComment", Guid.Empty, new { commentId }); return Results.NoContent();
+        });
         admin.MapGet("/guardians", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGuardiansAsync(ct)));
         admin.MapGet("/guardian-students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGuardianStudentsAsync(ct)));
         admin.MapPost("/guardians", async (PortalGuardianWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
@@ -99,3 +117,4 @@ public sealed record PortalActiveRequest(bool Active);
 public sealed record PortalAwardRequest(int StudentId, string? Note);
 public sealed record PortalStudentPasswordRequest(string Password, string ConfirmPassword);
 public sealed record PortalAttendanceRequest(int StudentId, int SessionId);
+public sealed record StaffSocialPostRequest(string Text);

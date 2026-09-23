@@ -22,17 +22,26 @@ public static class BootstrapService
             if (!await db.BeltRanks.AnyAsync(x => x.Name == name)) db.BeltRanks.Add(new BeltRank { Name = name, SortOrder = order });
         await db.SaveChangesAsync();
 
+        var configuredUsername = configuration["BootstrapAdmin:Username"] ?? Environment.GetEnvironmentVariable("TASK_KARATE_ADMIN_USERNAME");
         var email = configuration["BootstrapAdmin:Email"] ?? Environment.GetEnvironmentVariable("TASK_KARATE_ADMIN_EMAIL");
         var password = configuration["BootstrapAdmin:Password"] ?? Environment.GetEnvironmentVariable("TASK_KARATE_ADMIN_PASSWORD");
-        if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
+        var username = string.IsNullOrWhiteSpace(configuredUsername) ? email?.Trim() : configuredUsername.Trim();
+        if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
         {
             var users = services.GetRequiredService<UserManager<AppUser>>();
-            var user = await users.FindByEmailAsync(email);
+            var loginEmail = string.IsNullOrWhiteSpace(email) ? $"{username}@local.taskkarate.invalid" : email.Trim().ToLowerInvariant();
+            var user = await users.FindByNameAsync(username) ?? await users.FindByEmailAsync(loginEmail);
             if (user is null)
             {
-                user = new AppUser { UserName = email.Trim().ToLowerInvariant(), Email = email.Trim().ToLowerInvariant(), EmailConfirmed = true };
+                user = new AppUser { UserName = username.Trim(), Email = loginEmail, EmailConfirmed = true };
                 var result = await users.CreateAsync(user, password);
                 if (!result.Succeeded) throw new InvalidOperationException($"Bootstrap admin could not be created: {string.Join("; ", result.Errors.Select(x => x.Description))}");
+            }
+            else if (!string.Equals(user.UserName, username.Trim(), StringComparison.Ordinal))
+            {
+                user.UserName = username.Trim();
+                var result = await users.UpdateAsync(user);
+                if (!result.Succeeded) throw new InvalidOperationException($"Bootstrap admin username could not be updated: {string.Join("; ", result.Errors.Select(x => x.Description))}");
             }
             if (!await users.IsInRoleAsync(user, "Administrator")) await users.AddToRoleAsync(user, "Administrator");
         }

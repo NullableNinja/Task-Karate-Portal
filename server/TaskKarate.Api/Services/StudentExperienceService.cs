@@ -35,6 +35,8 @@ public sealed record NewsItem(long Id, string Title, string Body, DateTime Publi
 public sealed record ReactionSummary(string Code, string Label, string Icon, int Count, bool Selected);
 public sealed record FeedItem(long PostId, int AuthorId, string AuthorName, string? RankName, string Text, string PostType, DateTime CreatedAt, IReadOnlyList<ReactionSummary> Reactions, int CommentCount);
 public sealed record CommentItem(long CommentId, int AuthorId, string AuthorName, string Text, DateTime CreatedAt);
+public sealed record StaffSocialPost(long PostId, int AuthorId, string AuthorName, string Text, string PostType, string ModerationStatus, bool Visible, DateTime CreatedAt, DateTime UpdatedAt, int CommentCount);
+public sealed record StaffSocialComment(long CommentId, long PostId, int AuthorId, string AuthorName, string Text, bool Visible, string ModerationStatus, DateTime CreatedAt);
 public sealed record TrainingMissionItem(long MissionId, string Title, string Description, string Category, bool Completed, DateTime? CompletedAt);
 public sealed record DailyMissionItem(long DailyMissionId, string MissionKey, string Title, string Description, string Category, DateTime MissionDate, bool Completed, DateTime? CompletedAt);
 public sealed record DailyMissionSeed(string MissionKey, string Title, string Description, string Category);
@@ -911,6 +913,52 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
         var list = new List<FeedItem>();
         foreach (var row in rows) list.Add(new(row.Id, row.AuthorId, row.AuthorName, row.RankName, row.Text, row.Type, row.CreatedAt, await GetReactionSummaryAsync(connection, row.Id, studentId, cancellationToken), row.CommentCount));
         return list;
+    }
+
+    public async Task<IReadOnlyList<StaffSocialPost>> GetStaffSocialFeedAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"SELECT p.post_id, COALESCE(p.student_id, 0), COALESCE(sp.display_name, TRIM(s.first_name || ' ' || s.last_name), 'Task Karate'), p.post_text, p.post_type, p.moderation_status, p.visible, p.created_at, p.updated_at,
+  (SELECT COUNT(1) FROM post_comments c WHERE c.post_id = p.post_id)
+FROM posts p
+LEFT JOIN students s ON s.student_id = p.student_id
+LEFT JOIN student_profiles sp ON sp.student_id = p.student_id
+ORDER BY p.created_at DESC LIMIT 200";
+        var list = new List<StaffSocialPost>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetInt32(1), reader.GetString(2), reader.GetString(3), reader.GetString(4), reader.GetString(5), reader.GetInt32(6) != 0, DateTime.Parse(reader.GetString(7), CultureInfo.InvariantCulture), DateTime.Parse(reader.GetString(8), CultureInfo.InvariantCulture), reader.GetInt32(9)));
+        return list;
+    }
+
+    public async Task<bool> UpdateStaffSocialPostAsync(long postId, string text, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE posts SET post_text = $text, updated_at = $now WHERE post_id = $id"; command.Parameters.AddWithValue("$text", text.Trim()); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); command.Parameters.AddWithValue("$id", postId);
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
+    }
+
+    public async Task<bool> SetStaffSocialPostVisibilityAsync(long postId, bool visible, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE posts SET visible = $visible, moderation_status = $status, updated_at = $now WHERE post_id = $id"; command.Parameters.AddWithValue("$visible", visible ? 1 : 0); command.Parameters.AddWithValue("$status", visible ? "approved" : "removed"); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); command.Parameters.AddWithValue("$id", postId);
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
+    }
+
+    public async Task<IReadOnlyList<StaffSocialComment>> GetStaffSocialCommentsAsync(long postId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT c.comment_id, c.post_id, c.student_id, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), c.comment_text, c.visible, c.moderation_status, c.created_at FROM post_comments c JOIN students s ON s.student_id = c.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id WHERE c.post_id = $post ORDER BY c.created_at"; command.Parameters.AddWithValue("$post", postId);
+        var list = new List<StaffSocialComment>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetInt64(1), reader.GetInt32(2), reader.GetString(3), reader.GetString(4), reader.GetInt32(5) != 0, reader.GetString(6), DateTime.Parse(reader.GetString(7), CultureInfo.InvariantCulture)));
+        return list;
+    }
+
+    public async Task<bool> SetStaffSocialCommentVisibilityAsync(long commentId, bool visible, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE post_comments SET visible = $visible, moderation_status = $status WHERE comment_id = $id"; command.Parameters.AddWithValue("$visible", visible ? 1 : 0); command.Parameters.AddWithValue("$status", visible ? "approved" : "removed"); command.Parameters.AddWithValue("$id", commentId);
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
     }
 
     private static async Task<IReadOnlyList<ReactionSummary>> GetReactionSummaryAsync(SqliteConnection connection, long postId, int studentId, CancellationToken cancellationToken)

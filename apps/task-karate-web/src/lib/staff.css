@@ -30,6 +30,10 @@
 .auth-shell .auth-card { width: min(440px, 100%); padding: 32px; border: 1px solid #40647e; border-radius: 16px; background: #10243b; color: #eef6fb; box-shadow: 0 20px 60px #0008; }
 .auth-shell input, .auth-shell select, .auth-shell textarea { box-sizing: border-box; width: 100%; color: #f5fbff; background: #081829; border: 1px solid #55758e; border-radius: 8px; }
 .auth-shell button.button { background: #1698d8; border-color: #54c8f2; color: white; box-shadow: 0 3px 0 #075985; }
+.auth-disclaimer { margin: 18px 0; padding: 14px; border: 1px solid #3d6079; border-left: 4px solid #d9a245; border-radius: 10px; background: #0b1b2d; }
+.auth-disclaimer strong { color: #f7fbff; }
+.auth-disclaimer p { margin: 7px 0 12px; color: #c6d9e5; font-size: .92rem; line-height: 1.5; }
+.auth-disclaimer .check-row { margin: 0; }
 .staff-header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .app-nav a { min-height: 42px; display: inline-flex; align-items: center; }
 .app-nav a:focus-visible, .staff-header-actions button:focus-visible, .staff-header-actions a:focus-visible { outline: 3px solid #3b756f; outline-offset: 2px; }
@@ -71,6 +75,14 @@ fieldset.full legend { font-weight: 700; margin-bottom: 6px; }
 .workflow-actions { display: flex; align-items: center; gap: 14px; }
 .attendance-submit { min-width: 190px; }
 .empty-state { border-left: 4px solid #d9a245 !important; }
+.staff-social-list { display: grid; gap: 18px; }
+.staff-social-card.removed { opacity: .78; border-color: #815269; }
+.staff-social-card textarea { width: 100%; box-sizing: border-box; margin: 10px 0; }
+.staff-comments { margin-top: 16px; padding-top: 14px; border-top: 1px solid #31506b; }
+.staff-comments h4 { margin: 0 0 10px; }
+.staff-comment { display: flex; justify-content: space-between; gap: 16px; align-items: start; padding: 12px 0; border-top: 1px solid #29445d; }
+.staff-comment.removed { opacity: .62; }
+.staff-comment p { margin: 6px 0 0; color: #d9e7ef; }
 @media (max-width: 700px) { .attendance-student-controls { grid-template-columns: 1fr; } .workflow-actions { align-items: stretch; flex-direction: column; } .attendance-submit { width: 100%; } }
 @media (max-width: 700px) {
   .staff-header-actions { margin-top: 16px; }

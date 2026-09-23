@@ -23,7 +23,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   try {
     const response = await fetch(`${API_BASE}${path}`, { ...init, method, headers, credentials: 'include', signal: init.signal ?? controller.signal });
     if (!response.ok) {
-      if (response.status === 401) {
+      if (response.status === 401 && path !== '/api/auth/login' && path !== '/api/student/auth/login') {
         resetCsrf();
         throw new Error(path.startsWith('/api/student') ? 'Your student session has expired. Please sign in again.' : 'Your staff session has expired. Please sign in again.');
       }

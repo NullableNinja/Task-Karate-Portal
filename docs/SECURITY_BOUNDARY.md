@@ -17,3 +17,4 @@
 The student milestone does not implement guardian login, consent signing, media uploads, rate limiting, email delivery, moderation tooling, or internet deployment. The friend/message feature is intentionally limited to authenticated students who have accepted a local profile acknowledgment and should receive a separate privacy/moderation review before use with real families.
 
 Never add a client-side PIN, hidden admin button, localStorage session, IndexedDB fallback, dynamic SQL, or a default password. The legacy portal and Python desk server remain prototype-only and must not be used for real student records.
+- Student passwords are managed through server-side account records: students can change their own password only after supplying the current password, while administrator resets require the Administrator role and are audited. Password hashes are produced by the ASP.NET password hasher; plaintext passwords are never stored or returned.

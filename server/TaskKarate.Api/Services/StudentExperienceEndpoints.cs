@@ -45,6 +45,15 @@ public static class StudentExperienceEndpoints
             return Results.Ok(new { authenticated = true, studentId = id, displayName = authResult.Principal?.FindFirstValue(ClaimTypes.Name), disclaimerRequired = authResult.Principal?.HasClaim(StudentAuth.DisclaimerClaim, "v1") != true });
         });
         auth.MapPost("/logout", async (HttpContext context) => { await context.SignOutAsync(StudentAuth.Scheme); return Results.NoContent(); });
+        auth.MapPost("/password", async (StudentPasswordChangeRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var gate = await RequireAcknowledgedStudent(service, context, ct); if (gate.Id is null) return gate.Result!;
+            var errors = StudentPasswordPolicy.Validate(request.NewPassword, request.ConfirmPassword);
+            if (errors.Count > 0) return Results.ValidationProblem(errors.ToDictionary(item => item.Key, item => item.Value));
+            if (!await service.ChangeStudentPasswordAsync(gate.Id.Value, request.CurrentPassword, request.NewPassword, ct)) return Results.BadRequest(new { title = "Current password not accepted", detail = "Enter the current password for this student account and try again." });
+            await audit.RecordAsync(context, "ChangePassword", "StudentAccount", Guid.Empty, new { legacyStudentId = gate.Id.Value, via = "student" });
+            return Results.NoContent();
+        });
 
         var student = app.MapGroup("/api/student");
         student.MapPost("/disclaimer", async (DisclaimerRequest request, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
@@ -152,3 +161,4 @@ public sealed record CommentRequest(string Text);
 public sealed record PracticeLogRequest(string Skill, int Minutes, string? Reflection);
 public sealed record GoalRequest(string Title, DateTime? TargetDate);
 public sealed record StudentProfileUpdateRequest(string? DisplayName, string? Bio, string? FavoriteTechnique, string? Email, string? Phone, string? UniformSize, string? BeltSize);
+public sealed record StudentPasswordChangeRequest(string CurrentPassword, string NewPassword, string ConfirmPassword);

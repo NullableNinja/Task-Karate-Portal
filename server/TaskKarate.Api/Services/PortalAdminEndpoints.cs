@@ -21,6 +21,31 @@ public static class PortalAdminEndpoints
         {
             if (!await service.SetPortalStudentActiveAsync(studentId, request.Active, ct)) return Results.NotFound(); await audit.RecordAsync(context, request.Active ? "Activate" : "Deactivate", "PortalStudent", Guid.Empty, new { legacyId = studentId }); return Results.NoContent();
         });
+        admin.MapPost("/students/{studentId:int}/password", async (int studentId, PortalStudentPasswordRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            var errors = StudentPasswordPolicy.Validate(request.Password, request.ConfirmPassword);
+            if (errors.Count > 0) return Results.ValidationProblem(errors.ToDictionary(item => item.Key, item => item.Value));
+            var result = await service.ResetStudentPasswordAsync(studentId, request.Password, ct);
+            if (result is null) return Results.NotFound(new { title = "Student account unavailable", detail = "The student must be active before a portal password can be assigned." });
+            await audit.RecordAsync(context, "ResetPassword", "StudentAccount", Guid.Empty, new { legacyStudentId = studentId, username = result.Username, via = "administrator" });
+            return Results.Ok(new { passwordChanged = true, username = result.Username });
+        }).RequireAuthorization(policy => policy.RequireRole("Administrator"));
+        admin.MapGet("/attendance/students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminStudentsAsync(ct)));
+        admin.MapGet("/attendance/sessions", async (DateTime? date, StudentExperienceService service, CancellationToken ct) =>
+        {
+            var day = (date ?? DateTime.UtcNow).Date;
+            return Results.Ok(await service.GetScheduleAsync(day, day.AddDays(1), ct));
+        });
+        admin.MapGet("/attendance", async (int sessionId, StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAttendanceAsync(sessionId, ct)));
+        admin.MapPost("/attendance", async (PortalAttendanceRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
+        {
+            if (request.StudentId <= 0 || request.SessionId <= 0) return Results.ValidationProblem(new Dictionary<string, string[]> { ["attendance"] = ["Choose a real student and class session first."] });
+            var result = await service.CheckInAsync(request.StudentId, request.SessionId, ct);
+            if (result.Duplicate) return Results.Conflict(new { title = "Already checked in", detail = "This student already has attendance recorded for this class session." });
+            if (!result.Success) return Results.ValidationProblem(new Dictionary<string, string[]> { ["attendance"] = ["Choose a current, non-cancelled session and an active student."] });
+            await audit.RecordAsync(context, "CheckIn", "PortalAttendance", Guid.Empty, new { request.StudentId, request.SessionId });
+            return Results.Created($"/api/portal-admin/attendance?sessionId={request.SessionId}", new { checkedIn = true });
+        });
         admin.MapGet("/guardians", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGuardiansAsync(ct)));
         admin.MapGet("/guardian-students", async (StudentExperienceService service, CancellationToken ct) => Results.Ok(await service.GetPortalAdminGuardianStudentsAsync(ct)));
         admin.MapPost("/guardians", async (PortalGuardianWriteRequest request, StudentExperienceService service, HttpContext context, AuditService audit, CancellationToken ct) =>
@@ -72,3 +97,5 @@ public static class PortalAdminEndpoints
 public sealed record PortalGoldStarEventRequest(string Name, string Description, DateTime? EventDate);
 public sealed record PortalActiveRequest(bool Active);
 public sealed record PortalAwardRequest(int StudentId, string? Note);
+public sealed record PortalStudentPasswordRequest(string Password, string ConfirmPassword);
+public sealed record PortalAttendanceRequest(int StudentId, int SessionId);

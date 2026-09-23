@@ -20,9 +20,11 @@ public sealed class StarterStudentAccount
 }
 
 public sealed record StudentAccount(int StudentId, string Username, string DisplayName, string? RankName);
+public sealed record StudentPasswordResetResult(string Username);
 public sealed record StudentSummary(int StudentId, string DisplayName, string? RankName, string? ProfileImagePath);
 public sealed record StudentDirectoryItem(int StudentId, string DisplayName, string? RankName, string? Is3LevelName, string? ProfileImagePath);
 public sealed record ScheduleItem(int SessionId, DateTime SessionDate, string? StartTime, string? EndTime, string ClassName, string? Description, string? Location, bool Cancelled);
+public sealed record PortalAttendanceItem(long AttendanceId, int StudentId, string StudentName, DateTime CheckedInAtUtc, string? Notes);
 public sealed record GuardianItem(string Name, string Relationship, string? Phone, string? Email);
 public sealed record ProgramMembershipItem(string ProgramName, string ProgramCode, string ProgressionType, string? LevelName, string? EnrolledDate);
 public sealed record StudentProfile(int StudentId, string DisplayName, string? Bio, string? FavoriteTechnique, string? ProfileImagePath, string? RankName, string? JoinDate, int TotalClasses, int ClassesThisMonth, int UnreadMessages, int AchievementCount, IReadOnlyList<string> AttendanceDates, int ClassesIntoStripe, int ClassesPerStripe, int ClassesToNextStripe, string NextMilestone, string? AgeGroup, DateTime? BirthDate, string? Email, string? Phone, string? UniformSize, string? BeltSize, IReadOnlyList<GuardianItem> Guardians, IReadOnlyList<ProgramMembershipItem> Programs);
@@ -126,7 +128,7 @@ CREATE INDEX IF NOT EXISTS ix_class_sessions_date ON class_sessions(session_date
 CREATE INDEX IF NOT EXISTS ix_attendance_student ON attendance(student_id, session_id);
 CREATE INDEX IF NOT EXISTS ix_messages_thread ON student_messages(sender_id, recipient_id, created_at);
 CREATE INDEX IF NOT EXISTS ix_posts_news ON posts(post_type, visible, moderation_status, created_at);
-CREATE INDEX IF NOT EXISTS ix_post_reactions_post ON post_reactions(post_id, reaction_code);
+CREATE INDEX IF NOT EXISTS ix_post_reactions_post ON post_reactions(post_id);
 CREATE INDEX IF NOT EXISTS ix_post_comments_post ON post_comments(post_id, created_at);
 CREATE INDEX IF NOT EXISTS ix_timeline_attendance ON attendance(student_id, check_in_time);
 CREATE INDEX IF NOT EXISTS ix_practice_logs_student ON student_practice_logs(student_id, logged_at);
@@ -136,6 +138,7 @@ CREATE INDEX IF NOT EXISTS ix_post_bookmarks_student ON post_bookmarks(student_i
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
         await EnsureLegacyStudentColumnsAsync(connection, cancellationToken);
+        await EnsureLegacyReactionSchemaAsync(connection, cancellationToken);
         await ImportDevelopmentDataAsync(connection, cancellationToken);
         await NormalizeLegacyDataAsync(connection, cancellationToken);
         await SeedDevelopmentGoldStarEventsAsync(connection, cancellationToken);
@@ -175,6 +178,35 @@ WHERE guardian_id IN (
 CREATE UNIQUE INDEX IF NOT EXISTS ux_guardians_identity ON guardians(first_name, last_name, email, phone);
 ";
         await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task EnsureLegacyReactionSchemaAsync(SqliteConnection connection, CancellationToken cancellationToken)
+    {
+        await using var columns = connection.CreateCommand();
+        columns.CommandText = "PRAGMA table_info(post_reactions)";
+        var hasReactionCode = false;
+        await using (var reader = await columns.ExecuteReaderAsync(cancellationToken))
+        {
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                if (string.Equals(reader.GetString(1), "reaction_code", StringComparison.OrdinalIgnoreCase)) hasReactionCode = true;
+            }
+        }
+        if (hasReactionCode) return;
+
+        await using var migrate = connection.CreateCommand();
+        migrate.CommandText = @"
+ALTER TABLE post_reactions RENAME TO post_reactions_legacy;
+CREATE TABLE post_reactions (post_id INTEGER NOT NULL, student_id INTEGER NOT NULL, reaction_code TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(post_id, student_id), CHECK(reaction_code IN ('fist_bump', 'respect', 'fire')), FOREIGN KEY(post_id) REFERENCES posts(post_id) ON DELETE CASCADE, FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE);
+INSERT OR IGNORE INTO post_reactions(post_id, student_id, reaction_code, created_at)
+SELECT post_id, student_id,
+       CASE lower(reaction) WHEN 'like' THEN 'fist_bump' WHEN 'fire' THEN 'fire' ELSE 'respect' END,
+       max(created_at)
+FROM post_reactions_legacy
+GROUP BY post_id, student_id;
+DROP TABLE post_reactions_legacy;
+CREATE INDEX IF NOT EXISTS ix_post_reactions_post ON post_reactions(post_id, reaction_code);";
+        await migrate.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private async Task SeedDevelopmentGoldStarEventsAsync(SqliteConnection connection, CancellationToken cancellationToken)
@@ -396,11 +428,11 @@ WHERE naomi.first_name = 'Naomi' AND naomi.last_name = 'Wu'
   AND NOT EXISTS (SELECT 1 FROM posts WHERE post_text = 'Purple Belt form practice after class today. Small improvements add up!');
 
 INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at)
-SELECT NULL, 'Torchlight Parade Gold Star Event — Students who attend the Task Karate parade appearance this Thursday will receive a Gold Star on their student profile.', 'news', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 day'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 day')
+SELECT (SELECT student_id FROM students ORDER BY student_id LIMIT 1), 'Torchlight Parade Gold Star Event — Students who attend the Task Karate parade appearance this Thursday will receive a Gold Star on their student profile.', 'news', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 day'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 day')
 WHERE NOT EXISTS (SELECT 1 FROM posts WHERE post_text = 'Torchlight Parade Gold Star Event — Students who attend the Task Karate parade appearance this Thursday will receive a Gold Star on their student profile.');
 
 INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at)
-SELECT NULL, 'Belt Testing Focus This Week — Open Training to review your next-rank requirements, stripe progress, and practice assignments before your next class.', 'news', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days')
+SELECT (SELECT student_id FROM students ORDER BY student_id LIMIT 1), 'Belt Testing Focus This Week — Open Training to review your next-rank requirements, stripe progress, and practice assignments before your next class.', 'news', 'approved', 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 days')
 WHERE NOT EXISTS (SELECT 1 FROM posts WHERE post_text = 'Belt Testing Focus This Week — Open Training to review your next-rank requirements, stripe progress, and practice assignments before your next class.');
 
 INSERT OR IGNORE INTO post_reactions(post_id, student_id, reaction_code)
@@ -598,6 +630,69 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         return result == PasswordVerificationResult.Failed ? null : new StudentAccount(reader.GetInt32(0), reader.GetString(1), reader.GetString(3), reader.IsDBNull(4) ? null : reader.GetString(4));
     }
 
+    public async Task<bool> ChangeStudentPasswordAsync(int studentId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT password_hash FROM student_accounts WHERE student_id = $id AND active = 1";
+        command.Parameters.AddWithValue("$id", studentId);
+        var storedHash = await command.ExecuteScalarAsync(cancellationToken) as string;
+        if (string.IsNullOrWhiteSpace(storedHash)) return false;
+
+        var account = new StarterStudentAccount { StudentId = studentId };
+        var verification = _passwordHasher.VerifyHashedPassword(account, storedHash, currentPassword);
+        if (verification == PasswordVerificationResult.Failed) return false;
+
+        var newHash = _passwordHasher.HashPassword(account, newPassword);
+        await using var update = connection.CreateCommand();
+        update.CommandText = "UPDATE student_accounts SET password_hash = $hash, updated_at = $now WHERE student_id = $id AND active = 1";
+        update.Parameters.AddWithValue("$hash", newHash);
+        update.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O"));
+        update.Parameters.AddWithValue("$id", studentId);
+        return await update.ExecuteNonQueryAsync(cancellationToken) == 1;
+    }
+
+    public async Task<StudentPasswordResetResult?> ResetStudentPasswordAsync(int studentId, string newPassword, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using var lookup = connection.CreateCommand();
+        lookup.Transaction = (SqliteTransaction)transaction;
+        lookup.CommandText = @"SELECT s.first_name, s.last_name, a.username
+FROM students s LEFT JOIN student_accounts a ON a.student_id = s.student_id
+WHERE s.student_id = $id AND s.active = 1";
+        lookup.Parameters.AddWithValue("$id", studentId);
+        await using var reader = await lookup.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken)) return null;
+        var firstName = reader.GetString(0);
+        var lastName = reader.GetString(1);
+        var username = reader.IsDBNull(2) ? BuildStudentUsername(firstName, lastName, studentId) : reader.GetString(2);
+        await reader.DisposeAsync();
+
+        var account = new StarterStudentAccount { StudentId = studentId };
+        var hash = _passwordHasher.HashPassword(account, newPassword);
+        await using var save = connection.CreateCommand();
+        save.Transaction = (SqliteTransaction)transaction;
+        save.CommandText = @"INSERT INTO student_accounts(student_id, username, password_hash, active, updated_at)
+VALUES ($id, $username, $hash, 1, $now)
+ON CONFLICT(student_id) DO UPDATE SET password_hash = excluded.password_hash, active = 1, updated_at = excluded.updated_at";
+        save.Parameters.AddWithValue("$id", studentId);
+        save.Parameters.AddWithValue("$username", username);
+        save.Parameters.AddWithValue("$hash", hash);
+        save.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O"));
+        await save.ExecuteNonQueryAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return new StudentPasswordResetResult(username);
+    }
+
+    private static string BuildStudentUsername(string firstName, string lastName, int studentId)
+    {
+        static string Clean(string value) => new(value.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant).ToArray());
+        var first = Clean(firstName);
+        var last = Clean(lastName);
+        return $"{(string.IsNullOrWhiteSpace(first) ? "student" : first)}.{(string.IsNullOrWhiteSpace(last) ? "account" : last)}.{studentId}";
+    }
+
     public async Task<IReadOnlyList<StudentDirectoryItem>> GetStudentDirectoryAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = await OpenAsync(cancellationToken);
@@ -635,6 +730,20 @@ INSERT INTO student_rank_history(student_id, rank_id, awarded_date) VALUES ((SEL
         await using var connection = await OpenAsync(cancellationToken); await using var command = connection.CreateCommand();
         command.CommandText = "SELECT s.session_id, s.session_date, s.start_time, s.end_time, c.class_name, c.description, s.location_name, s.cancelled FROM class_sessions s JOIN classes c ON c.class_id = s.class_id WHERE date(s.session_date) >= date($from) AND date(s.session_date) < date($to) AND c.active = 1 ORDER BY date(s.session_date), COALESCE(s.start_time, '')"; command.Parameters.AddWithValue("$from", from.ToString("yyyy-MM-dd")); command.Parameters.AddWithValue("$to", to.ToString("yyyy-MM-dd"));
         var list = new List<ScheduleItem>(); await using var reader = await command.ExecuteReaderAsync(cancellationToken); while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt32(0), DateTime.Parse(reader.GetString(1), CultureInfo.InvariantCulture), reader.IsDBNull(2) ? null : reader.GetString(2), reader.IsDBNull(3) ? null : reader.GetString(3), reader.GetString(4), reader.IsDBNull(5) ? null : reader.GetString(5), reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetInt32(7) != 0)); return list;
+    }
+
+    public async Task<IReadOnlyList<PortalAttendanceItem>> GetPortalAttendanceAsync(int sessionId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = @"SELECT a.attendance_id, a.student_id, COALESCE(p.display_name, TRIM(s.first_name || ' ' || s.last_name)), a.check_in_time, a.notes
+FROM attendance a JOIN students s ON s.student_id = a.student_id LEFT JOIN student_profiles p ON p.student_id = s.student_id
+WHERE a.session_id = $session AND a.status = 'present' ORDER BY s.last_name, s.first_name";
+        command.Parameters.AddWithValue("$session", sessionId);
+        var list = new List<PortalAttendanceItem>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken)) list.Add(new(reader.GetInt64(0), reader.GetInt32(1), reader.GetString(2), DateTime.Parse(reader.GetString(3), CultureInfo.InvariantCulture), reader.IsDBNull(4) ? null : reader.GetString(4)));
+        return list;
     }
 
     public async Task<IReadOnlyList<int>> GetAttendanceSessionIdsAsync(int studentId, DateTime from, DateTime to, CancellationToken cancellationToken = default)
@@ -764,13 +873,24 @@ WHERE student_id = $id;";
 
     private static async Task EnsureLegacyStudentColumnsAsync(SqliteConnection connection, CancellationToken cancellationToken)
     {
-        foreach (var column in new[] { (Name: "age_group", Definition: "TEXT"), (Name: "uniform_size", Definition: "TEXT"), (Name: "belt_size", Definition: "TEXT") })
+        foreach (var column in new[] { (Name: "age_group", Definition: "TEXT"), (Name: "uniform_size", Definition: "TEXT"), (Name: "belt_size", Definition: "TEXT"), (Name: "active", Definition: "INTEGER NOT NULL DEFAULT 1") })
         {
             await using var check = connection.CreateCommand(); check.CommandText = "SELECT COUNT(1) FROM pragma_table_info('students') WHERE name = $name"; check.Parameters.AddWithValue("$name", column.Name);
             if (Convert.ToInt32(await check.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0)
             {
                 await using var alter = connection.CreateCommand(); alter.CommandText = $"ALTER TABLE students ADD COLUMN {column.Name} {column.Definition}"; await alter.ExecuteNonQueryAsync(cancellationToken);
             }
+        }
+        await using var guardianCheck = connection.CreateCommand(); guardianCheck.CommandText = "SELECT COUNT(1) FROM pragma_table_info('guardians') WHERE name = 'active'";
+        if (Convert.ToInt32(await guardianCheck.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0)
+        {
+            await using var guardianAlter = connection.CreateCommand(); guardianAlter.CommandText = "ALTER TABLE guardians ADD COLUMN active INTEGER NOT NULL DEFAULT 1"; await guardianAlter.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await using var linkCheck = connection.CreateCommand(); linkCheck.CommandText = "SELECT COUNT(1) FROM pragma_table_info('student_guardians') WHERE name = 'is_primary'";
+        if (Convert.ToInt32(await linkCheck.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture) == 0)
+        {
+            await using var linkAlter = connection.CreateCommand(); linkAlter.CommandText = "ALTER TABLE student_guardians ADD COLUMN is_primary INTEGER NOT NULL DEFAULT 0"; await linkAlter.ExecuteNonQueryAsync(cancellationToken);
+            await using var linkCopy = connection.CreateCommand(); linkCopy.CommandText = "UPDATE student_guardians SET is_primary = is_primary_contact WHERE is_primary_contact IS NOT NULL"; await linkCopy.ExecuteNonQueryAsync(cancellationToken);
         }
     }
 
@@ -1166,6 +1286,6 @@ ORDER BY p.created_at DESC LIMIT 50"; command.Parameters.AddWithValue("$id", stu
 
     private static async Task AddNewsPostAsync(SqliteConnection connection, string title, string body, CancellationToken cancellationToken)
     {
-        await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at) VALUES (NULL, $text, 'news', 'approved', 1, $now, $now)"; command.Parameters.AddWithValue("$text", $"{title} — {body}"); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken);
+        await using var command = connection.CreateCommand(); command.CommandText = "INSERT INTO posts(student_id, post_text, post_type, moderation_status, visible, created_at, updated_at) SELECT (SELECT student_id FROM students ORDER BY student_id LIMIT 1), $text, 'news', 'approved', 1, $now, $now WHERE EXISTS (SELECT 1 FROM students)"; command.Parameters.AddWithValue("$text", $"{title} — {body}"); command.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("O")); await command.ExecuteNonQueryAsync(cancellationToken);
     }
 }

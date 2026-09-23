@@ -21,6 +21,7 @@
 .app-shell .button.secondary { background: #1b324c; border-color: #63829b; color: #eaf5fb; box-shadow: none; }
 .app-shell .status { background: #133c3a; color: #b9f5df; border-color: #3a9b86; }
 .app-shell .error { background: #4a2030; color: #ffd9df; border-color: #c65c73; }
+.app-shell .pill { background: #1b3853; color: #c7edff; border: 1px solid #4c7998; }
 .app-shell table th { color: #94dff7; border-color: #395772; }
 .app-shell table td { color: #e2edf4; border-color: #29465f; }
 .app-shell .content-preview { background: #0b1c30; border-color: #47708a; }
@@ -57,6 +58,20 @@
 .student-link-grid .check-row { min-height: 40px; }
 fieldset.full { border: 0; padding: 0; margin: 0; }
 fieldset.full legend { font-weight: 700; margin-bottom: 6px; }
+.attendance-workflow { display: grid; gap: 18px; }
+.workflow-step { display: grid; grid-template-columns: 42px 1fr; gap: 14px; align-items: start; padding: 4px 0 18px; border-bottom: 1px solid #29445d; }
+.workflow-step h3 { margin: 0 0 5px; }
+.workflow-step label { display: grid; gap: 6px; max-width: 320px; margin-top: 12px; }
+.workflow-grow { min-width: 0; }
+.workflow-grow > select { width: 100%; box-sizing: border-box; }
+.workflow-number { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #168fc9; border: 1px solid #70d9f7; color: #fff; font-weight: 900; }
+.attendance-student-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.empty-help { margin: 10px 0 0; color: #ffcbcf; }
+.empty-help a { color: #72d9fa; }
+.workflow-actions { display: flex; align-items: center; gap: 14px; }
+.attendance-submit { min-width: 190px; }
+.empty-state { border-left: 4px solid #d9a245 !important; }
+@media (max-width: 700px) { .attendance-student-controls { grid-template-columns: 1fr; } .workflow-actions { align-items: stretch; flex-direction: column; } .attendance-submit { width: 100%; } }
 @media (max-width: 700px) {
   .staff-header-actions { margin-top: 16px; }
   .staff-header-actions > * { flex: 1; text-align: center; }

@@ -62,6 +62,10 @@ $env:TASK_KARATE_STUDENT_PASSWORD = "Use-a-long-local-password-with-12-chars!"
 
 The bootstrap account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub. The student sign-in lists active, provisioned student accounts alphabetically; selecting a profile opens the server-verified PIN/password prompt, followed by the profile acknowledgment when required.
 
+## Student password changes
+
+An authenticated student can open `Student Hub > Profile > Account password` and change their own password. The current password is required, and the new password must be at least 12 characters with uppercase, lowercase, and a number. An Administrator can select a student in `Staff > Students`, choose `Edit profile`, and use `Reset student password`; the old password is never displayed or recoverable, and the reset is recorded in the audit log. Share an administrator-assigned password with the student through a supervised channel.
+
 ## Backup and restore
 
 Each day, while the API is stopped (or after a SQLite checkpoint), copy the database to a separate encrypted drive/location:

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TaskKarate.Api.Data;
 using TaskKarate.Api.Models;
+using TaskKarate.Api.Services;
 
 namespace TaskKarate.Api.Tests;
 
@@ -82,5 +83,25 @@ public sealed class PlatformFactory : WebApplicationFactory<Program>
     {
         base.Dispose(disposing);
         try { File.Delete(dbPath); } catch { }
+    }
+}
+
+public sealed class StudentPasswordPolicyTests
+{
+    [Fact]
+    public void Rejects_short_or_weak_passwords_and_mismatched_confirmation()
+    {
+        var errors = StudentPasswordPolicy.Validate("weak", "different");
+        Assert.True(errors.ContainsKey("password"));
+        Assert.Contains("Use at least 12 characters.", errors["password"]);
+        Assert.Contains("Include at least one uppercase letter.", errors["password"]);
+        Assert.Contains("Include at least one number.", errors["password"]);
+        Assert.Contains("Password confirmation does not match.", errors["password"]);
+    }
+
+    [Fact]
+    public void Accepts_a_strong_matching_password()
+    {
+        Assert.Empty(StudentPasswordPolicy.Validate("Better-password-123", "Better-password-123"));
     }
 }

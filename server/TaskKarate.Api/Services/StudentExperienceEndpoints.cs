@@ -27,10 +27,10 @@ public static class StudentExperienceEndpoints
         publicApi.MapPost("/schedule/{sessionId:int}/check-in", async (int sessionId, PublicCheckInRequest request, StudentExperienceService service, CancellationToken ct) =>
         {
             if (!request.Confirmed) return Results.BadRequest(new { title = "Confirmation required", detail = "Confirm that the selected student is present before recording attendance." });
-            var result = await service.CheckInAsync(request.StudentId, sessionId, ct);
+            var result = await service.CheckInAsync(request.StudentId, sessionId, request.Helper, ct);
             if (result.Duplicate) return Results.Conflict(new { title = "Already checked in", detail = "This student is already checked in for this class." });
-            if (!result.Success) return Results.NotFound(new { title = "Class unavailable", detail = "Only an active class happening today can accept a public check-in." });
-            return Results.Ok(new { checkedIn = true });
+            if (!result.Success) return Results.BadRequest(new { title = "Check-in not available", detail = result.Error ?? "Only an active class happening today can accept a public check-in." });
+            return Results.Ok(new { checkedIn = true, helper = result.HelperRecorded });
         });
 
         var auth = app.MapGroup("/api/student/auth");
@@ -98,10 +98,10 @@ public static class StudentExperienceEndpoints
             var profile = await service.GetProfileAsync(gate.Id.Value, ct);
             return Results.Ok(profile);
         });
-        student.MapPost("/schedule/{sessionId:int}/check-in", async (int sessionId, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
+        student.MapPost("/schedule/{sessionId:int}/check-in", async (int sessionId, StudentCheckInRequest request, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
         {
             var gate = await RequireAcknowledgedStudent(service, context, ct); if (gate.Id is null) return gate.Result!;
-            var result = await service.CheckInAsync(gate.Id.Value, sessionId, ct); if (result.Duplicate) return Results.Conflict(new { title = "Already checked in", detail = "This student already has attendance recorded for this class session." }); if (!result.Success) return Results.NotFound(new { title = "Class session unavailable" }); return Results.Ok(new { checkedIn = true });
+            var result = await service.CheckInAsync(gate.Id.Value, sessionId, request.Helper, ct); if (result.Duplicate) return Results.Conflict(new { title = "Already checked in", detail = result.Error ?? "This student already has attendance recorded for this class session." }); if (!result.Success) return Results.BadRequest(new { title = "Check-in not available", detail = result.Error ?? "This class session cannot accept a check-in." }); return Results.Ok(new { checkedIn = true, helper = result.HelperRecorded });
         });
         student.MapGet("/check-ins", async (DateTime? from, DateTime? to, StudentExperienceService service, HttpContext context, CancellationToken ct) =>
         {
@@ -161,7 +161,8 @@ public sealed record StudentGate(int? Id, IResult? Result);
 
 public sealed record StudentLoginRequest(string? Username, string Password, bool RememberMe = false, int? StudentId = null);
 public sealed record DisclaimerRequest(bool Accepted);
-public sealed record PublicCheckInRequest(int StudentId, bool Confirmed);
+public sealed record PublicCheckInRequest(int StudentId, bool Confirmed, bool Helper = false);
+public sealed record StudentCheckInRequest(bool Helper = false);
 public sealed record FriendResponseRequest(bool Accept);
 public sealed record MessageRequest(int RecipientId, string Message);
 public sealed record PostRequest(string Text);

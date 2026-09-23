@@ -35,6 +35,10 @@ Public news and announcements answer questions for prospective and current famil
 
 Training is split conceptually into two tracks. The Karate track shows the belt testing requirements from the school’s rank material, adapted for Kids or Teens/Adults. The IS3 track is available only when the student has an active IS3 program membership and uses level progression rather than belts. My Classes is the replacement for the portal News tab: it shows upcoming sessions, location/time, attendance context, and authenticated check-in.
 
+The public schedule groups same-day sessions that share a program, time, and dojo location into one physical class block. Belt tracks remain separate records for attendance and rank validation, but the front-end presents them as one class with selectable tracks so a single-dojo schedule does not imply simultaneous classes.
+
+Attendance supports `present` and `helper` records. Helper check-in is validated server-side: the student must have a current belt rank strictly higher than the highest belt named by the class track. IS3-only classes do not accept belt-helper check-ins.
+
 ## Legacy import boundary
 
 Development-only import flags can seed class templates from `data/schedules.json` and clearly marked demo students from `data/portal-students.json`. Social data, messages, consent records, and old news are never imported automatically. The importer is repeatable by unique names and runs only when explicitly enabled in Development configuration.

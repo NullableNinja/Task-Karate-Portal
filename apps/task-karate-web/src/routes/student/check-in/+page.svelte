@@ -3,6 +3,7 @@
   import { api } from '$lib/api';
   import StudentShell from '$lib/components/StudentShell.svelte';
   import { apiError, requireStudent, type StudentSession } from '$lib/student-session';
+  import { formatDojoRange } from '$lib/time';
 
   let session: StudentSession | null = null;
   let profile: any = null;
@@ -13,10 +14,11 @@
   let notice = '';
   let loading = true;
   let checkingIn = false;
+  let helperMode = false;
 
   function localDateKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
   function dateLabel(value: string) { return new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }); }
-  function timeLabel(item: any) { return `${item.startTime ?? 'Time to be announced'}${item.endTime ? ` – ${item.endTime}` : ''}`; }
+  function timeLabel(item: any) { return formatDojoRange(item.startTime, item.endTime); }
   function classIsForStudent(item: any) {
     const name = String(item.className ?? '').toLowerCase();
     const ageGroup = String(profile?.ageGroup ?? '').toLowerCase();
@@ -33,11 +35,11 @@
     return !rank || !name.includes('—') || name.includes(rank);
   }
   $: eligibleClasses = classes.filter(classIsForStudent).sort((a, b) => String(a.startTime ?? '').localeCompare(String(b.startTime ?? '')));
-  function choose(item: any) { if (!item.cancelled && !attended.has(item.sessionId)) { selected = item; error = ''; } }
+  function choose(item: any) { if (!item.cancelled && !attended.has(item.sessionId)) { selected = item; helperMode = false; error = ''; } }
   async function confirmCheckIn() {
     if (!selected) return;
     checkingIn = true; error = '';
-    try { await api(`/api/student/schedule/${selected.sessionId}/check-in`, { method: 'POST' }); attended = new Set([...attended, selected.sessionId]); notice = `${selected.className} check-in recorded.`; selected = null; }
+    try { await api(`/api/student/schedule/${selected.sessionId}/check-in`, { method: 'POST', body: JSON.stringify({ helper: helperMode }) }); attended = new Set([...attended, selected.sessionId]); notice = `${selected.className} ${helperMode ? 'helper ' : ''}check-in recorded.`; selected = null; }
     catch (e) { error = apiError(e); }
     finally { checkingIn = false; }
   }
@@ -71,7 +73,7 @@
           </article>
         {/each}
       </div>
-      {#if selected}<section class="student-panel check-in-confirm"><div><span class="student-eyebrow">READY TO RECORD</span><h2>{selected.className}</h2><p>{timeLabel(selected)} · {selected.location ?? 'Main dojo'}</p></div><div class="check-in-confirm-actions"><button class="outline-button" type="button" on:click={() => selected = null}>Choose another</button><button class="primary-button" type="button" disabled={checkingIn} on:click={confirmCheckIn}>{checkingIn ? 'Recording…' : 'Confirm check-in'}</button></div></section>{/if}
+      {#if selected}<section class="student-panel check-in-confirm"><div><span class="student-eyebrow">READY TO RECORD</span><h2>{selected.className}</h2><p>{timeLabel(selected)} · {selected.location ?? 'Main dojo'}</p><label class="helper-choice"><input type="checkbox" bind:checked={helperMode} /> Record me as a helper (only available when I outrank this class)</label></div><div class="check-in-confirm-actions"><button class="outline-button" type="button" on:click={() => selected = null}>Choose another</button><button class="primary-button" type="button" disabled={checkingIn} on:click={confirmCheckIn}>{checkingIn ? 'Recording…' : helperMode ? 'Confirm helper check-in' : 'Confirm check-in'}</button></div></section>{/if}
     {/if}
   </StudentShell>
 {/if}

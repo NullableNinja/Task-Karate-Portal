@@ -27,6 +27,12 @@ The API creates roles and the administrator on startup. Staff can sign in with t
 
 Staff sign-in includes a local-use acknowledgment because this workspace can display student, guardian, attendance, and community records. The acknowledgment is enforced by the API, not merely displayed by the browser.
 
+The staff sign-in form does not persist a “keep me signed in” choice. After credentials are submitted, the required staff-use acknowledgment appears in a confirmation dialog. The resulting cookie is a session-scoped local staff session.
+
+Class times are entered/imported in the database’s normal schedule format but are displayed to users in 12-hour local time. The public schedule collapses same-time, same-dojo belt tracks into one physical class block; the check-in dialog lets staff choose the appropriate underlying track.
+
+Students may choose regular attendance or helper check-in from a current class. Helper status is never trusted from the browser: the API checks the student’s current belt against the class threshold and rejects an under-ranked helper.
+
 ## Migrations and database
 
 ```powershell
@@ -65,6 +71,8 @@ $env:TASK_KARATE_STUDENT_PASSWORD = "Use-a-long-local-password-with-12-chars!"
 ```
 
 The bootstrap account is created once if that student is active and has no account. Credentials are hashed and never written to source control. Remove these variables after the account exists. Open `/schedule` for the live schedule and `/student/login` for the profile hub. The student sign-in lists active, provisioned student accounts alphabetically; selecting a profile opens the server-verified PIN/password prompt, followed by the profile acknowledgment when required.
+
+Do not use a short test phrase such as `8675309` or `Cobra Kai Never Dies!` as the administrator password. The configured Identity policy requires a long password with upper/lowercase characters, a number, and a non-alphanumeric character. For a temporary local test credential, use an environment-only value such as `Cobra Kai Never Dies!7` and remove it after bootstrapping; never commit it or use it for real student records.
 
 `/schedule` is the supervised front-desk schedule. It prioritizes today's in-progress and upcoming classes, keeps future dates view-only, and uses the imported schedule database. A same-origin check-in requires a searched student selection and an explicit confirmation; it does not require the student to enter a password at the desk. Keep this page on the local dojo computer or a deliberately supervised LAN only. Do not expose it to the public internet.
 

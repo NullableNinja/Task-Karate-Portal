@@ -7,6 +7,7 @@
 - Roles Guardian and Student are defined in the platform database. Student portal access is implemented separately against the supplied starter database with a protected `task_karate_student` cookie and strong password hashing; guardian login remains schema-ready only.
 - Cookie-authenticated mutations require a CSRF double-submit cookie/header token.
 - Input validation happens in the API; database uniqueness protects attendance and other relationships.
+- Attendance helper status is an API decision, not a client-side option: the server compares the student’s current belt order with the highest belt threshold in the selected class track before writing `helper` status.
 - Public content endpoints expose only published schedule/content fields. The deliberate local student-entry endpoint returns only display names and current rank labels for active, provisioned student accounts so the supervised dojo roster can be selected; it never returns usernames, passwords, guardians, attendance, or profile details.
 - Audit events record actor, action, entity, entity ID, UTC timestamp, and safe metadata. Passwords, PINs, consent signatures, and raw secrets are not custom fields.
 - Default hosting guidance is loopback-only and SQLite is server-side only.

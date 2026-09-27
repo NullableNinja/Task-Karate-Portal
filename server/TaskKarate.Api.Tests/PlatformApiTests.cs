@@ -20,6 +20,9 @@ public sealed class PlatformApiTests : IClassFixture<PlatformFactory>
     {
         using var client = factory.CreateClient();
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/students")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/portal-admin/reports/summary")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/portal-admin/documents")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/portal-admin/attendance/history")).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/public/announcements")).StatusCode);
     }
 

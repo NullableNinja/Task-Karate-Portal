@@ -39,7 +39,7 @@
       <p>Your student PIN is used for both the Student Hub and supervised class check-in.</p>
       <form class="profile-form password-form" on:submit|preventDefault={submit}>
         <label>Current PIN<input type="password" bind:value={form.currentPin} inputmode="numeric" minlength="4" maxlength="6" autocomplete="current-password" required /></label>
-        <label>New PIN<input type="password" bind:value={form.newPin} inputmode="numeric" minlength="4" maxlength="6" pattern="[0-9][0-9][0-9][0-9][0-9]?[0-9]?" autocomplete="new-password" required /><small class="muted">Use 4–6 digits.</small></label>
+        <label>New PIN<input type="password" bind:value={form.newPin} inputmode="numeric" minlength="4" maxlength="6" pattern="[0-9][0-9][0-9][0-9][0-9]?[0-9]?" autocomplete="new-password" required /><small class="pin-helper muted">Use 4–6 digits.</small></label>
         <label>Confirm new PIN<input type="password" bind:value={form.confirmPin} inputmode="numeric" minlength="4" maxlength="6" pattern="[0-9][0-9][0-9][0-9][0-9]?[0-9]?" autocomplete="new-password" required /></label>
         {#if error}<div class="error" role="alert">{error}</div>{/if}
         <div class="disclaimer-actions"><a class="outline-button" href="/student/profile">Cancel</a><button class="primary-button" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save PIN'}</button></div>

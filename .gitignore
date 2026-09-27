@@ -18,9 +18,15 @@ server/TaskKarate.Api/Properties/launchSettings.local.json
 .usersecrets/
 **/bin/
 **/obj/
+server/TaskKarate.Api/publish/
 node_modules/
 apps/task-karate-web/.svelte-kit/
 apps/task-karate-web/build/
 apps/task-karate-web/.env
 apps/task-karate-web/.env.*
 !apps/task-karate-web/.env.example
+
+# Local deployment data and browser audit artifacts
+App_Data/
+artifacts/
+docs/*-Local-Backup-and-Restore-Plan.docx

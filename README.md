@@ -20,7 +20,8 @@ $env:TASK_KARATE_ADMIN_PASSWORD = "Use-a-local-password-with-12-or-more-chars!"
 $sdk = "$env:LOCALAPPDATA\TaskKarate\dotnet8"
 $env:DOTNET_ROOT = $sdk
 & "$sdk\dotnet.exe" restore TaskKarate.sln
-& "$sdk\dotnet.exe" run --project server\TaskKarate.Api --urls http://127.0.0.1:5167
+Set-Location server\TaskKarate.Api
+& "$sdk\dotnet.exe" run --project TaskKarate.Api.csproj --urls http://127.0.0.1:5167
 ```
 
 In another PowerShell window:

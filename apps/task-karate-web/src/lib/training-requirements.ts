@@ -86,7 +86,7 @@ export const trainingPlans: Record<string, TrainingPlan> = {
     { category: 'Kick-Punch Combination', items: ['Double Round Kick, Double Punch, Back Leg Round Kick, Front Ridge, Rear Punch', 'Double Punch, Back Leg Round, Tornado, Spin'] },
     { category: 'Sparring', items: ['4 Rounds'] }
   ] },
-  'Black Belt': { rank: 'Black Belt', color: '#aeb8c5', promotionGuide: 'Black belt degrees are instructor tracked: 2 years for second degree, 3 years for third degree, 4 years for fourth degree, and one additional year for each later degree.', sections: [
+  'Black Belt': { rank: 'Black Belt', color: '#202a35', promotionGuide: 'Black belt degrees are instructor tracked: 2 years for second degree, 3 years for third degree, 4 years for fourth degree, and one additional year for each later degree.', sections: [
     { category: 'Punching', items: ['Rear hand punch', 'Double punch', 'The blitz (back-fist, stepping punch, rear hand punch)', 'Jab, uppercut, hook, punch'] },
     { category: 'Basic Kicking', items: ['Back leg snap kick · Back leg round kick (3 count)', 'Front leg round kick · Back leg side kick (3 count)', 'Step slide side kick · Back leg form (lock) front kick', 'Front leg hook kick', 'Back leg outside crescent kick (outside of foot)'] },
     { category: 'Combination Kicking', items: ['Front leg front, skipping front, flying front', 'Triple round kick (moving in, three heights)', 'Back leg side, turning side'] },
@@ -121,6 +121,14 @@ export const kidsTrainingPlans: Record<string, TrainingPlan> = {
 
 export function nextRank(current: string | null | undefined) {
   if (!current) return 'White Belt';
+  const degree = current.match(/^(\d+)(?:st|nd|rd|th)\s+degree\s+black belt$/i);
+  if (degree) {
+    const currentDegree = Number(degree[1]);
+    const nextDegree = currentDegree + 1;
+    const suffix = nextDegree % 100 >= 11 && nextDegree % 100 <= 13 ? 'th' : nextDegree % 10 === 1 ? 'st' : nextDegree % 10 === 2 ? 'nd' : nextDegree % 10 === 3 ? 'rd' : 'th';
+    return `${nextDegree}${suffix} Degree Black Belt`;
+  }
+  if (current.toLowerCase() === 'black belt') return '2nd Degree Black Belt';
   const index = beltOrder.findIndex((rank) => rank.toLowerCase() === current.toLowerCase());
   return index < 0 ? 'White Belt' : beltOrder[Math.min(index + 1, beltOrder.length - 1)];
 }

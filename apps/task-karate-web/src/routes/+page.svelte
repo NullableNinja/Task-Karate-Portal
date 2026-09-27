@@ -1,15 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { api } from '$lib/api';
-  import type { Content } from '$lib/types';
-  let schedule: any[] = []; let announcements: Content[] = []; let error = ''; let loading = true;
-  onMount(async () => { try { [schedule, announcements] = await Promise.all([api<any[]>('/api/student/public/schedule'), api<Content[]>('/api/public/announcements')]); } catch (e) { error = e instanceof Error ? e.message : 'The public API is unavailable.'; } finally { loading = false; } });
+  import PortalNav from '$lib/components/PortalNav.svelte';
 </script>
-<svelte:head><title>TASK Karate | Schedule and announcements</title></svelte:head>
+<svelte:head><title>TASK Karate | Dojo Portal</title><meta name="description" content="Choose the Task Karate Student Hub or Schedule and Check-in." /></svelte:head>
 <main class="public-shell">
-  <header class="public-header"><div><span class="eyebrow">TASK KARATE SCHOOL</span><h1>Train with intention.</h1><p>Public schedule and current dojo announcements.</p></div><a class="button secondary" href="/staff/signin">Staff sign-in</a></header>
-  {#if loading}<p class="status">Loading current information…</p>{:else if error}<div class="error"><strong>Live data unavailable.</strong><p>{error}</p></div>{:else}
-    <section class="card"><div class="section-heading"><div><span class="eyebrow">UPCOMING</span><h2>Class schedule</h2></div><a class="button" href="/schedule">Student schedule</a></div>{#if schedule.length === 0}<p class="muted">No published sessions are available yet.</p>{:else}<div class="schedule-grid">{#each schedule as item}<article class="schedule-item"><strong>{new Date(item.sessionDate).toLocaleDateString()}</strong><span>{item.startTime ?? 'Time to be announced'}</span><b>{item.className}</b><small>{item.location ?? 'Task Karate dojo'}</small></article>{/each}</div>{/if}</section>
-    <section class="card"><div class="section-heading"><div><span class="eyebrow">DOJO NEWS</span><h2>Announcements</h2></div></div>{#if announcements.length === 0}<p class="muted">No published announcements.</p>{:else}{#each announcements as item}<article class="announcement"><h3>{item.title}</h3><p>{item.body}</p><small>{item.publishedAtUtc ? new Date(item.publishedAtUtc).toLocaleDateString() : ''}</small></article>{/each}{/if}</section>
-  {/if}
+  <PortalNav current="home" />
+  <section class="landing-hero"><div><span class="eyebrow">TASK KARATE SCHOOL · DOJO PORTAL</span><h1>Choose your dojo door.</h1><p>Pick the place you need and get moving.</p></div><div class="landing-choice-grid"><a class="landing-choice" href="/student/login"><span class="landing-choice-icon" aria-hidden="true">◉</span><span><strong>Student Hub</strong><span>Training, Social, Achievements, and Profile</span></span><span class="landing-choice-arrow" aria-hidden="true">→</span></a><a class="landing-choice" href="/schedule"><span class="landing-choice-icon" aria-hidden="true">◷</span><span><strong>Schedule / Check-in</strong><span>Today’s classes and front-desk check-in</span></span><span class="landing-choice-arrow" aria-hidden="true">→</span></a></div></section>
+  <section class="landing-staff-callout"><div><span class="eyebrow">STAFF ACCESS</span><h2>Run the dojo.</h2><p>Open the protected operations workspace for students, attendance, guardians, classes, and news.</p></div><a class="button secondary" href="/staff/signin">Staff Login</a></section>
 </main>

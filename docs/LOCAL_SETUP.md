@@ -27,13 +27,17 @@ The API creates roles and the administrator on startup. Staff can sign in with t
 
 If the Admin account already exists and its local test password must be changed, set the development-only reset value for one startup, then remove it before restarting:
 
+The Social page's GIF picker uses GifSnap through the API, so the browser never talks directly to the provider and no API key is required. The picker starts with GifSnap trending results, supports targeted search, and filters out empty, tiny, and clearly unsafe results before they reach the student UI. GifSnap is a free, best-effort public service; the backend adapter is intentionally isolated so it can be cached or swapped for a higher-volume provider later.
+
+Student post and message reports are persisted as open staff moderation alerts. To email the school as well, configure `TASK_KARATE_SMTP_HOST`, `TASK_KARATE_SCHOOL_REPORT_EMAIL`, and optionally `TASK_KARATE_SMTP_USER`, `TASK_KARATE_SMTP_PASSWORD`, `Notifications:Smtp:Port`, and `Notifications:Smtp:From`. The admin alert is retained if SMTP is not configured or temporarily unavailable.
+
 ```powershell
-$env:BootstrapAdmin__ResetPassword = "Cobra Kai Never Dies!7"
+$env:BootstrapAdmin__ResetPassword = "Cobra Kai Never Dies!"
 dotnet run --project server/TaskKarate.Api
 Remove-Item Env:BootstrapAdmin__ResetPassword
 ```
 
-The reset value is development-only and is validated by Identity. Do not use the shorter phrase without the final digit, and do not leave the reset variable set for routine launches.
+The reset value is development-only and is validated by Identity. The local password policy requires a long password with mixed case and a symbol, but does not require a digit. Do not leave the reset variable set for routine launches.
 
 Staff sign-in includes a local-use acknowledgment because this workspace can display student, guardian, attendance, and community records. The acknowledgment is enforced by the API, not merely displayed by the browser.
 
@@ -47,8 +51,13 @@ Students may choose regular attendance or helper check-in from a current class. 
 
 ```powershell
 dotnet ef database update --project server\TaskKarate.Api --startup-project server\TaskKarate.Api
-dotnet run --project server\TaskKarate.Api --urls http://127.0.0.1:5167
+Set-Location server\TaskKarate.Api
+dotnet run --project TaskKarate.Api.csproj --urls http://127.0.0.1:5167
 ```
+
+Run the API from its project directory so the relative `App_Data/task-karate.db`
+connection string resolves to the canonical runtime database instead of creating
+an empty database in the repository root.
 
 The runtime database is `server\TaskKarate.Api\App_Data\task-karate.db`; SQLite may also create `-wal` and `-shm` files. All are ignored. Both the EF/Identity platform tables and the portal/student tables live in this one file. The EF tables use a `platform_*` namespace during the transition so the two historical schemas do not collide.
 

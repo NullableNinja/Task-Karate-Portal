@@ -81,6 +81,7 @@
       <section class:print-target={printDate === day.date} class="helper-day-group" data-print-day={day.date}>
         <div class="helper-print-heading">TASK KARATE · HELPER ROSTER · {dateLabel(day.date)}</div>
         <div class="helper-day-heading"><div><span class="eyebrow">{isToday(day.date) ? 'TODAY' : 'UPCOMING'}</span><h3>{dateLabel(day.date)}</h3></div><div class="helper-day-actions"><span class="pill">{day.sessions.length} session{day.sessions.length === 1 ? '' : 's'}</span><button class="button secondary small-button print-day-button" type="button" on:click={() => printDay(day.date)}>Print this day</button></div></div>
+        <div class="helper-print-list" aria-label="Printable helper list">{#each day.sessions as session}<div class="helper-print-row"><span>{formatDojoRange(session.startTime, session.endTime)}</span><strong>{session.className}</strong><span>{[...session.staffHelpers.map((helper) => helper.displayName), ...session.studentHelpers.map((helper) => helper.studentName)].join(', ') || 'No helpers signed up'}</span></div>{/each}</div>
         <div class="helper-session-list">
           {#each day.sessions as session}
             {@const coverage = sessionCoverage(session)}

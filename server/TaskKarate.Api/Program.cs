@@ -19,7 +19,7 @@ builder.Services.AddIdentityCore<AppUser>(options =>
 {
     options.User.RequireUniqueEmail = true;
     options.Password.RequiredLength = 12;
-    options.Password.RequireDigit = true;
+    options.Password.RequireDigit = false;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -35,8 +35,8 @@ builder.Services.AddAuthentication().AddCookie(StudentAuth.Scheme, options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.ExpireTimeSpan = TimeSpan.FromHours(8);
-    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.SlidingExpiration = false;
     options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
     options.Events.OnRedirectToAccessDenied = context => { context.Response.StatusCode = 403; return Task.CompletedTask; };
 });
@@ -68,6 +68,11 @@ builder.Services.Configure<StarterDatabaseOptions>(options =>
 });
 builder.Services.AddSingleton<IPasswordHasher<StarterStudentAccount>, PasswordHasher<StarterStudentAccount>>();
 builder.Services.AddSingleton<StudentExperienceService>();
+builder.Services.AddHttpClient("gif-search", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(5);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("TaskKarateStudentHub/1.0");
+});
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();

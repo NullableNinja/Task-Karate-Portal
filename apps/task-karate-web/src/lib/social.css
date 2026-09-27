@@ -114,6 +114,10 @@
 .social-tool-toggle, .social-secondary { min-height: 38px; padding: 0 13px; color: var(--social-text); background: transparent; }
 .social-primary { min-height: 42px; padding: 0 18px; color: #06192a; background: var(--social-accent); }
 .social-primary:disabled { cursor: not-allowed; opacity: .45; }
+.social-compose-toolbar { flex-wrap: wrap; }
+.social-compose-toolbar .social-composer-tool-group { min-width: 0; }
+.social-compose-toolbar .social-primary { flex: 0 0 auto; }
+.tool-toggle-short { display: none; }
 .social-composer-tools { margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--social-border); }
 .social-markdown-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
 .social-markdown-tools button { min-width: 31px; height: 31px; border: 1px solid var(--social-border); border-radius: 6px; color: var(--social-text); background: var(--social-bg); cursor: pointer; }
@@ -580,8 +584,13 @@
   .social-message-view-tabs { margin-left: 0; }
   .social-conversation > header { grid-template-columns: 1fr auto; }
   .social-conversation > header > .social-message-count { grid-column: 1 / -1; min-width: 0; margin-top: 6px; text-align: left; }
-  .social-hero-checkin { width: 100%; height: auto; min-width: 0; }
-  .social-checkin-stat-tiles span { letter-spacing: .04em; }
+  .social-hero-checkin { width: 100%; height: auto; min-width: 0; min-height: 0; padding: 11px 12px 12px; gap: 9px; }
+  .social-checkin-stat-tiles span { letter-spacing: .04em; white-space: normal; line-height: 1.1; }
+  .social-checkin-stat-tiles > div { min-height: 72px; padding: 8px 7px; }
+  .social-checkin-goal { align-items: flex-start; flex-direction: column; gap: 3px; padding: 7px 8px; }
+  .social-checkin-goal strong { overflow: visible; font-size: .68rem; text-align: left; text-overflow: clip; white-space: normal; }
+  .social-hiyah-hero { position: static; width: 100%; margin-top: 1px; padding: 12px 14px; }
+  .social-checkin-notice { display: block; }
   .social-load-more { align-items: stretch; flex-direction: column; }
   .social-hero-checkin.leaderboard-view { grid-template-columns: 1fr; height: auto; min-height: 0; }
   .social-hero-checkin.leaderboard-view .social-leaderboard-heading,
@@ -590,6 +599,20 @@
   .social-hero-checkin.leaderboard-view > .social-muted { grid-column: 1; }
   .social-hero-checkin.leaderboard-view > .social-leaderboard-tabs { width: 100%; min-width: 0; }
   .social-hero-checkin .social-leaderboard-list { max-height: 160px; }
+  .social-compose-toolbar { align-items: center; flex-direction: row; }
+  .social-compose-toolbar .social-composer-tool-group { flex: 1 1 auto; }
+  .social-compose-toolbar .social-primary { width: auto; }
+  .tool-toggle-long { display: none; }
+  .tool-toggle-short { display: inline; }
+  .social-composer .emoji-panel { position: absolute; right: auto; bottom: calc(100% + 8px); left: 0; width: min(360px, calc(100vw - 28px)); }
+}
+
+@media (max-width: 380px) {
+  .social-checkin-stat-tiles { grid-template-columns: 1fr; }
+  .social-checkin-stat-tiles > div { min-height: 0; }
+  .social-compose-toolbar { align-items: stretch; flex-direction: column; }
+  .social-compose-toolbar .social-composer-tool-group { width: 100%; }
+  .social-compose-toolbar .social-primary { width: 100%; }
 }
 /* Public student profiles */
 .social-author-link { color: inherit; text-decoration: none; font-weight: 800; }
